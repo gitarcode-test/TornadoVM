@@ -18,16 +18,17 @@
 
 package uk.ac.manchester.tornado.unittests.virtualization;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.fail;
 
 import java.util.stream.IntStream;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoBackend;
@@ -42,361 +43,373 @@ import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 import uk.ac.manchester.tornado.unittests.common.TornadoVMMultiDeviceNotSupported;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.virtualization.TestsVirtualLayer
  * </code>
  */
 public class TestsVirtualLayer extends TornadoTestBase {
-    // CHECKSTYLE:OFF
+  // CHECKSTYLE:OFF
 
-    public static void accumulator(IntArray a, int value) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            a.set(i, a.get(i) + value);
-        }
+  public static void accumulator(IntArray a, int value) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      a.set(i, a.get(i) + value);
+    }
+  }
+
+  public static void saxpy(float alpha, FloatArray x, FloatArray y) {
+    for (@Parallel int i = 0; i < y.getSize(); i++) {
+      y.set(i, alpha * x.get(i));
+    }
+  }
+
+  public static void testA(IntArray a, int value) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      a.set(i, a.get(i) + value);
+    }
+  }
+
+  public static void testB(IntArray a, int value) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      a.set(i, a.get(i) * value);
+    }
+  }
+
+  /** Check if enough devices are available */
+  @BeforeEach
+  public void enoughDevices() {
+    super.before();
+    TornadoBackend driver = getTornadoRuntime().getBackend(0);
+    if (driver.getNumDevices() < 2) {
+      throw new TornadoVMMultiDeviceNotSupported("Not enough devices to run tests");
+    }
+  }
+
+  /** Test there are at least two OpenCL devices available. */
+  @Test
+  public void testDevices() {
+    TornadoBackend driver = getTornadoRuntime().getBackend(0);
+    assertThat(driver.getDevice(0), not(nullValue()));
+    assertThat(driver.getDevice(1), not(nullValue()));
+  }
+
+  @Test
+  public void testDriverAndDevices() {
+    int numDrivers = getTornadoRuntime().getNumBackends();
+    for (int i = 0; i < numDrivers; i++) {
+      TornadoBackend driver = getTornadoRuntime().getBackend(i);
+      assertThat(driver, not(nullValue()));
+      int numDevices = driver.getNumDevices();
+      for (int j = 0; j < numDevices; j++) {
+        assertThat(driver.getDevice(j), not(nullValue()));
+      }
+    }
+  }
+
+  /** Test to change execution from one device to another (migration). */
+  @Test
+  public void testArrayMigration() throws TornadoExecutionPlanException {
+
+    final int numElements = 8;
+    final int numKernels = 1;
+
+    IntArray data = new IntArray(numElements);
+
+    int initValue = 0;
+
+    TaskGraph taskGraph = new TaskGraph("s0");
+    for (int i = 0; i < numKernels; i++) {
+      taskGraph.task("t" + i, TestsVirtualLayer::accumulator, data, 1);
+    }
+    taskGraph.transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+    TornadoBackend driver = getTornadoRuntime().getBackend(0);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+
+      executionPlan.withDevice(driver.getDevice(0));
+      executionPlan.execute();
+
+      for (int i = 0; i < numElements; i++) {
+        assertThat((initValue + numKernels), equalTo(data.get(i)));
+      }
+
+      initValue += numKernels;
+
+      // Reuse the immutable graph and the executionPlan to change the device for the
+      // new
+      // execution.
+      executionPlan.withDevice(driver.getDevice(1));
+      executionPlan.execute();
     }
 
-    public static void saxpy(float alpha, FloatArray x, FloatArray y) {
-        for (@Parallel int i = 0; i < y.getSize(); i++) {
-            y.set(i, alpha * x.get(i));
-        }
+    for (int i = 0; i < numElements; i++) {
+      assertThat((initValue + numKernels), equalTo(data.get(i)));
     }
+  }
 
-    public static void testA(IntArray a, int value) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            a.set(i, a.get(i) + value);
-        }
+  @Test
+  public void testTaskMigration() throws TornadoExecutionPlanException {
+
+    TornadoBackend driver = getTornadoRuntime().getBackend(0);
+
+    final int numElements = 512;
+    final float alpha = 2f;
+
+    final FloatArray x = new FloatArray(numElements);
+    final FloatArray y = new FloatArray(numElements);
+
+    IntStream.range(0, numElements).parallel().forEach(i -> x.set(i, 450));
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, x) //
+            .task("t0", TestsVirtualLayer::saxpy, alpha, x, y)
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, y) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, y);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withDevice(driver.getDevice(0)) //
+          .execute(); //
+
+      for (int i = 0; i < numElements; i++) {
+        assertThat((alpha * 450), closeTo(y.get(i), 0.001f));
+      }
+
+      executionPlan
+          .withDevice(driver.getDevice(1)) //
+          .execute(); //
     }
-
-    public static void testB(IntArray a, int value) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            a.set(i, a.get(i) * value);
-        }
+    for (int i = 0; i < numElements; i++) {
+      assertThat((alpha * 450), closeTo(y.get(i), 0.001f));
     }
+  }
 
-    /**
-     * Check if enough devices are available
+  @Disabled
+  public void testVirtualLayer01() throws TornadoExecutionPlanException {
+
+    TornadoBackend driver = getTornadoRuntime().getBackend(0);
+    /*
+     * The following expression is not correct for Tornado to execute on different
+     * devices.
      */
-    @Before
-    public void enoughDevices() {
-        super.before();
-        TornadoBackend driver = getTornadoRuntime().getBackend(0);
-        if (driver.getNumDevices() < 2) {
-            throw new TornadoVMMultiDeviceNotSupported("Not enough devices to run tests");
-        }
+    final int N = 128;
+    IntArray data = new IntArray(N);
+    data.init(100);
+
+    // This test only is executed once (the first task)
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+            .task("t0", TestsVirtualLayer::testA, data, 1) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+    // Assign Immutable Task Graph to device 0
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withDevice(driver.getDevice(0)) //
+          .execute();
+
+      // Assign executionPlan to device 1
+      executionPlan
+          .withDevice(driver.getDevice(1)) //
+          .execute();
+
+      // The following task-graph mutation won't have any effect on the executionPlan
+      // because the executionPlan only dispatches immutable task-graphs
+      taskGraph
+          .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+          .task("t1", TestsVirtualLayer::testA, data, 10) //
+          .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+      executionPlan.execute();
+    }
+  }
+
+  /**
+   * This test is not legal in Tornado. This test executes everything on the same device, even if
+   * the user forces to change. A task schedule is always executed on the same device. Device can
+   * change once the task is executed.
+   */
+  @Disabled
+  public void testVirtualLayer02() throws TornadoExecutionPlanException {
+
+    TornadoBackend driver = getTornadoRuntime().getBackend(0);
+
+    final int N = 128;
+    IntArray data = new IntArray(N);
+    data.init(100);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+            .task("t0", TestsVirtualLayer::testA, data, 1);
+
+    // Assign Immutable Task Graph to device 0
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withDevice(driver.getDevice(0)) //
+          .execute();
+
+      executionPlan
+          .withDevice(driver.getDevice(1)) //
+          .execute();
+
+      taskGraph
+          .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+          .task("t1", TestsVirtualLayer::testA, data, 10) //
+          .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+      executionPlan
+          .withDevice(driver.getDevice(0)) //
+          .execute();
     }
 
-    /**
-     * Test there are at least two OpenCL devices available.
-     */
-    @Test
-    public void testDevices() {
-        TornadoBackend driver = getTornadoRuntime().getBackend(0);
-        assertNotNull(driver.getDevice(0));
-        assertNotNull(driver.getDevice(1));
+    for (int i = 0; i < N; i++) {
+      assertThat(111, equalTo(data.get(i)));
+    }
+  }
+
+  /**
+   * Tasks within the same task schedules are always executed on the same device. Currently, it is
+   * not possible to change device for a single tasks in a group of tasks.
+   */
+  @Test
+  public void testVirtualLayer03() throws TornadoExecutionPlanException {
+
+    final int N = 128;
+    IntArray dataA = new IntArray(N);
+    IntArray dataB = new IntArray(N);
+
+    dataA.init(100);
+    dataB.init(200);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, dataA, dataB) //
+            .task("t0", TestsVirtualLayer::testA, dataA, 1) //
+            .task("t1", TestsVirtualLayer::testA, dataB, 10) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, dataA) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, dataB);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testDriverAndDevices() {
-        int numDrivers = getTornadoRuntime().getNumBackends();
-        for (int i = 0; i < numDrivers; i++) {
-            TornadoBackend driver = getTornadoRuntime().getBackend(i);
-            assertNotNull(driver);
-            int numDevices = driver.getNumDevices();
-            for (int j = 0; j < numDevices; j++) {
-                assertNotNull(driver.getDevice(j));
-            }
+    for (int i = 0; i < N; i++) {
+      assertThat(101, equalTo(dataA.get(i)));
+      assertThat(210, equalTo(dataB.get(i)));
+    }
+  }
+
+  /**
+   * It creates one task graph with one task. Then, it executes the same task graph via an
+   * executionPlan on different devices.
+   *
+   * <p>The task is just one instance for all the devices. The loop iterates over the devices under
+   * the same Tornado Driver and executes the task.
+   */
+  @Test
+  public void testDynamicDeviceSwitch() throws TornadoExecutionPlanException {
+
+    final int N = 128;
+    IntArray data = new IntArray(N);
+
+    data.init(100);
+
+    int totalNumDevices = 0;
+
+    final int numDrivers = getTornadoRuntime().getNumBackends();
+    for (int driverIndex = 0; driverIndex < numDrivers; driverIndex++) {
+
+      String taskScheduleName = "s" + driverIndex;
+
+      TaskGraph taskGraph = new TaskGraph(taskScheduleName);
+      TornadoBackend driver = getTornadoRuntime().getBackend(driverIndex);
+
+      final int numDevices = driver.getNumDevices();
+      totalNumDevices += numDevices;
+
+      String taskName = "t0";
+
+      taskGraph
+          .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+          .task(taskName, TestsVirtualLayer::testA, data, 1) //
+          .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+      // Common immutable object for the graph
+      ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+
+      // Common executionPlan for all permutations of devices
+      try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+        for (int deviceIndex = 0; deviceIndex < numDevices; deviceIndex++) {
+          executionPlan
+              .withDevice(driver.getDevice(deviceIndex)) //
+              .execute();
         }
+      }
     }
 
-    /**
-     * Test to change execution from one device to another (migration).
-     */
-    @Test
-    public void testArrayMigration() throws TornadoExecutionPlanException {
+    for (int i = 0; i < N; i++) {
+      assertThat(100 + totalNumDevices, equalTo(data.get(i)));
+    }
+  }
 
-        final int numElements = 8;
-        final int numKernels = 1;
+  /**
+   * It creates two task graphs and two tasks and executes them on different devices using different
+   * executionPlans.
+   */
+  @Test
+  public void testSchedulerDevices() throws TornadoExecutionPlanException {
+    TornadoBackend tornadoDriver = getTornadoRuntime().getBackend(0);
 
-        IntArray data = new IntArray(numElements);
+    final int N = 128;
+    IntArray dataA = new IntArray(N);
+    IntArray dataB = new IntArray(N);
 
-        int initValue = 0;
+    dataA.init(100);
+    dataB.init(100);
 
-        TaskGraph taskGraph = new TaskGraph("s0");
-        for (int i = 0; i < numKernels; i++) {
-            taskGraph.task("t" + i, TestsVirtualLayer::accumulator, data, 1);
-        }
-        taskGraph.transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-        TornadoBackend driver = getTornadoRuntime().getBackend(0);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-
-            executionPlan.withDevice(driver.getDevice(0));
-            executionPlan.execute();
-
-            for (int i = 0; i < numElements; i++) {
-                assertEquals((initValue + numKernels), data.get(i));
-            }
-
-            initValue += numKernels;
-
-            // Reuse the immutable graph and the executionPlan to change the device for the
-            // new
-            // execution.
-            executionPlan.withDevice(driver.getDevice(1));
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < numElements; i++) {
-            assertEquals((initValue + numKernels), data.get(i));
-        }
+    if (tornadoDriver.getNumDevices() < 2) {
+      fail("The current driver has less than 2 devices");
     }
 
-    @Test
-    public void testTaskMigration() throws TornadoExecutionPlanException {
+    TornadoRuntimeProvider.setProperty("s0.t0.device", "0:0");
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, dataA, dataB) //
+            .task("t0", TestsVirtualLayer::testA, dataA, 1) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, dataA);
 
-        TornadoBackend driver = getTornadoRuntime().getBackend(0);
+    // Common immutable object for the graph
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
 
-        final int numElements = 512;
-        final float alpha = 2f;
-
-        final FloatArray x = new FloatArray(numElements);
-        final FloatArray y = new FloatArray(numElements);
-
-        IntStream.range(0, numElements).parallel().forEach(i -> x.set(i, 450));
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, x) //
-                .task("t0", TestsVirtualLayer::saxpy, alpha, x, y).transferToHost(DataTransferMode.EVERY_EXECUTION, y) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, y);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withDevice(driver.getDevice(0)) //
-                    .execute(); //
-
-            for (int i = 0; i < numElements; i++) {
-                assertEquals((alpha * 450), y.get(i), 0.001f);
-            }
-
-            executionPlan.withDevice(driver.getDevice(1)) //
-                    .execute(); //
-        }
-        for (int i = 0; i < numElements; i++) {
-            assertEquals((alpha * 450), y.get(i), 0.001f);
-        }
+    // Common executionPlan for all permutations of devices
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Ignore
-    public void testVirtualLayer01() throws TornadoExecutionPlanException {
+    TornadoRuntimeProvider.setProperty("s1.t1.device", "0:1");
+    TaskGraph taskGraph2 =
+        new TaskGraph("s1") //
+            .task("t1", TestsVirtualLayer::testA, dataB, 1) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, dataB);
 
-        TornadoBackend driver = getTornadoRuntime().getBackend(0);
-        /*
-         * The following expression is not correct for Tornado to execute on different
-         * devices.
-         */
-        final int N = 128;
-        IntArray data = new IntArray(N);
-        data.init(100);
+    ImmutableTaskGraph immutableTaskGraph2 = taskGraph2.snapshot();
 
-        // This test only is executed once (the first task)
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestsVirtualLayer::testA, data, 1) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-        // Assign Immutable Task Graph to device 0
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withDevice(driver.getDevice(0)) //
-                    .execute();
-
-            // Assign executionPlan to device 1
-            executionPlan.withDevice(driver.getDevice(1)) //
-                    .execute();
-
-            // The following task-graph mutation won't have any effect on the executionPlan
-            // because the executionPlan only dispatches immutable task-graphs
-            taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                    .task("t1", TestsVirtualLayer::testA, data, 10) //
-                    .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-            executionPlan.execute();
-        }
+    // Common executionPlan for all permutations of devices
+    try (TornadoExecutionPlan executionPlan2 = new TornadoExecutionPlan(immutableTaskGraph2)) {
+      executionPlan2.execute();
     }
 
-    /**
-     * This test is not legal in Tornado. This test executes everything on the same device, even if the user forces to change. A task schedule is always executed on the same device. Device can change
-     * once the task is executed.
-     */
-    @Ignore
-    public void testVirtualLayer02() throws TornadoExecutionPlanException {
-
-        TornadoBackend driver = getTornadoRuntime().getBackend(0);
-
-        final int N = 128;
-        IntArray data = new IntArray(N);
-        data.init(100);
-
-        TaskGraph taskGraph = new TaskGraph("s0")//
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestsVirtualLayer::testA, data, 1);
-
-        // Assign Immutable Task Graph to device 0
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withDevice(driver.getDevice(0)) //
-                    .execute();
-
-            executionPlan.withDevice(driver.getDevice(1)) //
-                    .execute();
-
-            taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                    .task("t1", TestsVirtualLayer::testA, data, 10) //
-                    .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-            executionPlan.withDevice(driver.getDevice(0)) //
-                    .execute();
-        }
-
-        for (int i = 0; i < N; i++) {
-            assertEquals(111, data.get(i));
-        }
+    for (int i = 0; i < N; i++) {
+      assertThat(dataA.get(i), equalTo(dataB.get(i)));
     }
-
-    /**
-     * Tasks within the same task schedules are always executed on the same device. Currently, it is not possible to change device for a single tasks in a group of tasks.
-     */
-    @Test
-    public void testVirtualLayer03() throws TornadoExecutionPlanException {
-
-        final int N = 128;
-        IntArray dataA = new IntArray(N);
-        IntArray dataB = new IntArray(N);
-
-        dataA.init(100);
-        dataB.init(200);
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, dataA, dataB)//
-                .task("t0", TestsVirtualLayer::testA, dataA, 1) //
-                .task("t1", TestsVirtualLayer::testA, dataB, 10) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, dataA) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, dataB);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < N; i++) {
-            assertEquals(101, dataA.get(i));
-            assertEquals(210, dataB.get(i));
-        }
-    }
-
-    /**
-     * It creates one task graph with one task. Then, it executes the same task graph via an executionPlan on different devices.
-     *
-     * <p>
-     * The task is just one instance for all the devices. The loop iterates over the devices under the same Tornado Driver and executes the task.
-     * </p>
-     */
-    @Test
-    public void testDynamicDeviceSwitch() throws TornadoExecutionPlanException {
-
-        final int N = 128;
-        IntArray data = new IntArray(N);
-
-        data.init(100);
-
-        int totalNumDevices = 0;
-
-        final int numDrivers = getTornadoRuntime().getNumBackends();
-        for (int driverIndex = 0; driverIndex < numDrivers; driverIndex++) {
-
-            String taskScheduleName = "s" + driverIndex;
-
-            TaskGraph taskGraph = new TaskGraph(taskScheduleName);
-            TornadoBackend driver = getTornadoRuntime().getBackend(driverIndex);
-
-            final int numDevices = driver.getNumDevices();
-            totalNumDevices += numDevices;
-
-            String taskName = "t0";
-
-            taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                    .task(taskName, TestsVirtualLayer::testA, data, 1) //
-                    .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-            // Common immutable object for the graph
-            ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-
-            // Common executionPlan for all permutations of devices
-            try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-                for (int deviceIndex = 0; deviceIndex < numDevices; deviceIndex++) {
-                    executionPlan.withDevice(driver.getDevice(deviceIndex)) //
-                            .execute();
-                }
-            }
-        }
-
-        for (int i = 0; i < N; i++) {
-            assertEquals(100 + totalNumDevices, data.get(i));
-        }
-    }
-
-    /**
-     * It creates two task graphs and two tasks and executes them on different devices using different executionPlans.
-     */
-    @Test
-    public void testSchedulerDevices() throws TornadoExecutionPlanException {
-        TornadoBackend tornadoDriver = getTornadoRuntime().getBackend(0);
-
-        final int N = 128;
-        IntArray dataA = new IntArray(N);
-        IntArray dataB = new IntArray(N);
-
-        dataA.init(100);
-        dataB.init(100);
-
-        if (tornadoDriver.getNumDevices() < 2) {
-            fail("The current driver has less than 2 devices");
-        }
-
-        TornadoRuntimeProvider.setProperty("s0.t0.device", "0:0");
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, dataA, dataB) //
-                .task("t0", TestsVirtualLayer::testA, dataA, 1) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, dataA);
-
-        // Common immutable object for the graph
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-
-        // Common executionPlan for all permutations of devices
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        TornadoRuntimeProvider.setProperty("s1.t1.device", "0:1");
-        TaskGraph taskGraph2 = new TaskGraph("s1") //
-                .task("t1", TestsVirtualLayer::testA, dataB, 1) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, dataB);
-
-        ImmutableTaskGraph immutableTaskGraph2 = taskGraph2.snapshot();
-
-        // Common executionPlan for all permutations of devices
-        try (TornadoExecutionPlan executionPlan2 = new TornadoExecutionPlan(immutableTaskGraph2)) {
-            executionPlan2.execute();
-        }
-
-        for (int i = 0; i < N; i++) {
-            assertEquals(dataA.get(i), dataB.get(i));
-        }
-    }
-    // CHECKSTYLE:ON
+  }
+  // CHECKSTYLE:ON
 }

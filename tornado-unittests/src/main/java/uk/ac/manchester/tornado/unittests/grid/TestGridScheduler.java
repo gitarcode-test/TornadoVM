@@ -20,9 +20,7 @@ package uk.ac.manchester.tornado.unittests.grid;
 import static org.junit.Assert.assertEquals;
 
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
@@ -35,117 +33,118 @@ import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
 import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V --debug uk.ac.manchester.tornado.unittests.grid.TestGridScheduler
  * </code>
- *
  */
 public class TestGridScheduler {
 
-    public static float computeSequential(FloatArray a, FloatArray b, FloatArray c) {
-        float acc = 0;
-        vectorAddFloat(a, b, c);
+  public static float computeSequential(FloatArray a, FloatArray b, FloatArray c) {
+    float acc = 0;
+    vectorAddFloat(a, b, c);
 
-        for (int i = 0; i < c.getSize(); i++) {
-            // for (float v : c) {
-            acc += c.get(i);
-        }
-        return acc;
+    for (int i = 0; i < c.getSize(); i++) {
+      // for (float v : c) {
+      acc += c.get(i);
+    }
+    return acc;
+  }
+
+  public static void vectorAddFloat(FloatArray a, FloatArray b, FloatArray c) {
+    for (@Parallel int i = 0; i < c.getSize(); i++) {
+      c.set(i, a.get(i) + b.get(i));
+    }
+  }
+
+  public static void reduceAdd(FloatArray array, final int size) {
+    float acc = array.get(0);
+    for (int i = 1; i < size; i++) {
+      acc += array.get(i);
+    }
+    array.set(0, acc);
+  }
+
+  @Test
+  public void testMultipleTasksWithinTaskGraph() throws TornadoExecutionPlanException {
+    final int size = 1024;
+    FloatArray a = new FloatArray(size);
+    FloatArray b = new FloatArray(size);
+    FloatArray sequentialC = new FloatArray(size);
+    FloatArray tornadoC = new FloatArray(size);
+    IntStream.range(0, a.getSize()).sequential().forEach(i -> a.set(i, i));
+    IntStream.range(0, b.getSize()).sequential().forEach(i -> b.set(i, 2));
+    float sequential = computeSequential(a, b, sequentialC);
+
+    WorkerGrid worker = new WorkerGrid1D(size);
+    GridScheduler gridScheduler = new GridScheduler("s0.t0", worker);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b, size) //
+            .task("t0", TestGridScheduler::vectorAddFloat, a, b, tornadoC) //
+            .task("t1", TestGridScheduler::reduceAdd, tornadoC, size) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, tornadoC);
+
+    // Change the Grid
+    worker.setGlobalWork(size, 1, 1);
+    worker.setLocalWork(1, 1, 1);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(gridScheduler) //
+          .execute();
     }
 
-    public static void vectorAddFloat(FloatArray a, FloatArray b, FloatArray c) {
-        for (@Parallel int i = 0; i < c.getSize(); i++) {
-            c.set(i, a.get(i) + b.get(i));
-        }
+    // Final SUM
+    float finalSum = tornadoC.get(0);
+    assertEquals(sequential, finalSum, 0);
+  }
+
+  @Test
+  public void testMultipleTasksSeparateTaskGraphs() throws TornadoExecutionPlanException {
+    final int size = 1024;
+    FloatArray a = new FloatArray(size);
+    FloatArray b = new FloatArray(size);
+    FloatArray sequentialC = new FloatArray(size);
+    FloatArray tornadoC = new FloatArray(size);
+    IntStream.range(0, a.getSize()).sequential().forEach(i -> a.set(i, i));
+    IntStream.range(0, b.getSize()).sequential().forEach(i -> b.set(i, 2));
+    float sequential = computeSequential(a, b, sequentialC);
+
+    WorkerGrid worker = new WorkerGrid1D(size);
+    GridScheduler gridScheduler = new GridScheduler("s0.t0", worker);
+
+    TaskGraph s0 =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b, size) //
+            .task("t0", TestGridScheduler::vectorAddFloat, a, b, tornadoC) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, tornadoC);
+
+    // Change the Grid
+    worker.setGlobalWork(size, 1, 1);
+    worker.setLocalWork(1, 1, 1);
+
+    ImmutableTaskGraph immutableTaskGraph = s0.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(gridScheduler) //
+          .execute();
     }
 
-    public static void reduceAdd(FloatArray array, final int size) {
-        float acc = array.get(0);
-        for (int i = 1; i < size; i++) {
-            acc += array.get(i);
-        }
-        array.set(0, acc);
+    TaskGraph s1 =
+        new TaskGraph("s1") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, tornadoC, size) //
+            .task("t0", TestGridScheduler::reduceAdd, tornadoC, size) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, tornadoC);
+
+    ImmutableTaskGraph immutableTaskGraph1 = s1.snapshot();
+    try (TornadoExecutionPlan executionPlan1 = new TornadoExecutionPlan(immutableTaskGraph1)) {
+      executionPlan1.execute();
     }
 
-    @Test
-    public void testMultipleTasksWithinTaskGraph() throws TornadoExecutionPlanException {
-        final int size = 1024;
-        FloatArray a = new FloatArray(size);
-        FloatArray b = new FloatArray(size);
-        FloatArray sequentialC = new FloatArray(size);
-        FloatArray tornadoC = new FloatArray(size);
-        IntStream.range(0, a.getSize()).sequential().forEach(i -> a.set(i, i));
-        IntStream.range(0, b.getSize()).sequential().forEach(i -> b.set(i, 2));
-        float sequential = computeSequential(a, b, sequentialC);
-
-        WorkerGrid worker = new WorkerGrid1D(size);
-        GridScheduler gridScheduler = new GridScheduler("s0.t0", worker);
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b, size) //
-                .task("t0", TestGridScheduler::vectorAddFloat, a, b, tornadoC) //
-                .task("t1", TestGridScheduler::reduceAdd, tornadoC, size) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, tornadoC);
-
-        // Change the Grid
-        worker.setGlobalWork(size, 1, 1);
-        worker.setLocalWork(1, 1, 1);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(gridScheduler) //
-                    .execute();
-        }
-
-        // Final SUM
-        float finalSum = tornadoC.get(0);
-        assertEquals(sequential, finalSum, 0);
-    }
-
-    @Test
-    public void testMultipleTasksSeparateTaskGraphs() throws TornadoExecutionPlanException {
-        final int size = 1024;
-        FloatArray a = new FloatArray(size);
-        FloatArray b = new FloatArray(size);
-        FloatArray sequentialC = new FloatArray(size);
-        FloatArray tornadoC = new FloatArray(size);
-        IntStream.range(0, a.getSize()).sequential().forEach(i -> a.set(i, i));
-        IntStream.range(0, b.getSize()).sequential().forEach(i -> b.set(i, 2));
-        float sequential = computeSequential(a, b, sequentialC);
-
-        WorkerGrid worker = new WorkerGrid1D(size);
-        GridScheduler gridScheduler = new GridScheduler("s0.t0", worker);
-
-        TaskGraph s0 = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b, size) //
-                .task("t0", TestGridScheduler::vectorAddFloat, a, b, tornadoC) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, tornadoC);
-
-        // Change the Grid
-        worker.setGlobalWork(size, 1, 1);
-        worker.setLocalWork(1, 1, 1);
-
-        ImmutableTaskGraph immutableTaskGraph = s0.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(gridScheduler) //
-                    .execute();
-        }
-
-        TaskGraph s1 = new TaskGraph("s1") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, tornadoC, size) //
-                .task("t0", TestGridScheduler::reduceAdd, tornadoC, size) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, tornadoC);
-
-        ImmutableTaskGraph immutableTaskGraph1 = s1.snapshot();
-        try (TornadoExecutionPlan executionPlan1 = new TornadoExecutionPlan(immutableTaskGraph1)) {
-            executionPlan1.execute();
-        }
-
-        // Final SUM
-        float finalSum = tornadoC.get(0);
-        assertEquals(sequential, finalSum, 0);
-    }
+    // Final SUM
+    float finalSum = tornadoC.get(0);
+    assertEquals(sequential, finalSum, 0);
+  }
 }
