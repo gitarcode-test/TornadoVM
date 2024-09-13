@@ -17,10 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.foundation;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -30,183 +30,184 @@ import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.foundation.TestIntegers
  * </code>
  */
 public class TestIntegers extends TornadoTestBase {
 
-    @Test
-    public void test01() throws TornadoExecutionPlanException {
-        final int numElements = 256;
-        IntArray a = new IntArray(numElements);
+  @Test
+  public void test01() throws TornadoExecutionPlanException {
+    final int numElements = 256;
+    IntArray a = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", TestKernels::copyTestZero, a) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", TestKernels::copyTestZero, a) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        assertEquals(50, a.get(0));
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void test02() throws TornadoExecutionPlanException {
-        final int numElements = 512;
-        IntArray a = new IntArray(numElements);
+    assertThat(50, equalTo(a.get(0)));
+  }
 
-        IntArray expectedResult = new IntArray(numElements);
-        expectedResult.init(50);
+  @Test
+  public void test02() throws TornadoExecutionPlanException {
+    final int numElements = 512;
+    IntArray a = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s1") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
-                .task("t1", TestKernels::copyTest, a) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+    IntArray expectedResult = new IntArray(numElements);
+    expectedResult.init(50);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s1") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
+            .task("t1", TestKernels::copyTest, a) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expectedResult.get(i), a.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void test03() throws TornadoExecutionPlanException {
-        final int numElements = 256;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
+    }
+  }
 
-        b.init(100);
+  @Test
+  public void test03() throws TornadoExecutionPlanException {
+    final int numElements = 256;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b) //
-                .task("t0", TestKernels::copyTest2, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+    b.init(100);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b) //
+            .task("t0", TestKernels::copyTest2, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(a.get(i), b.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void test04() throws TornadoExecutionPlanException {
-        final int numElements = 256;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      assertThat(a.get(i), equalTo(b.get(i)));
+    }
+  }
 
-        b.init(100);
+  @Test
+  public void test04() throws TornadoExecutionPlanException {
+    final int numElements = 256;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
 
-        IntArray expectedResult = new IntArray(numElements);
-        expectedResult.init(150);
+    b.init(100);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b) //
-                .task("t0", TestKernels::compute, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+    IntArray expectedResult = new IntArray(numElements);
+    expectedResult.init(150);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b) //
+            .task("t0", TestKernels::compute, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expectedResult.get(i), a.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void test05() throws TornadoExecutionPlanException {
-        final int numElements = 8192 * 16;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
+    }
+  }
 
-        IntArray expectedResultA = new IntArray(numElements);
-        IntArray expectedResultB = new IntArray(numElements);
-        expectedResultA.init(100);
-        expectedResultB.init(500);
+  @Test
+  public void test05() throws TornadoExecutionPlanException {
+    final int numElements = 8192 * 16;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", TestKernels::init, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b);
+    IntArray expectedResultA = new IntArray(numElements);
+    IntArray expectedResultB = new IntArray(numElements);
+    expectedResultA.init(100);
+    expectedResultB.init(500);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", TestKernels::init, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b);
 
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expectedResultA.get(i), a.get(i));
-            assertEquals(expectedResultB.get(i), b.get(i));
-        }
-
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void test06() throws TornadoExecutionPlanException {
-        final int numElements = 8192 * 16;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expectedResultA.get(i), equalTo(a.get(i)));
+      assertThat(expectedResultB.get(i), equalTo(b.get(i)));
+    }
+  }
 
-        IntArray expectedResultA = new IntArray(numElements);
-        IntArray expectedResultB = new IntArray(numElements);
-        expectedResultA.init(100);
-        expectedResultB.init(500);
+  @Test
+  public void test06() throws TornadoExecutionPlanException {
+    final int numElements = 8192 * 16;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", TestKernels::init, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b);
+    IntArray expectedResultA = new IntArray(numElements);
+    IntArray expectedResultB = new IntArray(numElements);
+    expectedResultA.init(100);
+    expectedResultB.init(500);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withPrintKernel().execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", TestKernels::init, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b);
 
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expectedResultA.get(i), a.get(i));
-            assertEquals(expectedResultB.get(i), b.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.withPrintKernel().execute();
     }
 
-    @Test
-    public void test07() throws TornadoExecutionPlanException {
-        final int numElements = 8192 * 16;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expectedResultA.get(i), equalTo(a.get(i)));
+      assertThat(expectedResultB.get(i), equalTo(b.get(i)));
+    }
+  }
 
-        IntArray expectedResultA = new IntArray(numElements);
-        IntArray expectedResultB = new IntArray(numElements);
-        expectedResultA.init(100);
-        expectedResultB.init(500);
+  @Test
+  public void test07() throws TornadoExecutionPlanException {
+    final int numElements = 8192 * 16;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", TestKernels::init, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b);
+    IntArray expectedResultA = new IntArray(numElements);
+    IntArray expectedResultB = new IntArray(numElements);
+    expectedResultA.init(100);
+    expectedResultB.init(500);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withThreadInfo().execute();
-            executionPlan.withoutThreadInfo().execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", TestKernels::init, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b);
 
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expectedResultA.get(i), a.get(i));
-            assertEquals(expectedResultB.get(i), b.get(i));
-        }
-
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.withThreadInfo().execute();
+      executionPlan.withoutThreadInfo().execute();
     }
 
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expectedResultA.get(i), equalTo(a.get(i)));
+      assertThat(expectedResultB.get(i), equalTo(b.get(i)));
+    }
+  }
 }
