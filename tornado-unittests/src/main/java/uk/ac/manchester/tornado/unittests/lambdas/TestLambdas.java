@@ -17,13 +17,12 @@
  */
 package uk.ac.manchester.tornado.unittests.lambdas;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -34,41 +33,44 @@ import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.lambdas.TestLambdas
  * </code>
  */
 public class TestLambdas extends TornadoTestBase {
 
-    @Test
-    public void testLambda01() throws TornadoExecutionPlanException {
+  @Test
+  public void testLambda01() throws TornadoExecutionPlanException {
 
-        final int numElements = 256;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    final int numElements = 256;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
 
-        Random r = new Random();
+    Random r = new Random();
 
-        IntStream.range(0, a.getSize()).forEach(i -> a.set(i, r.nextInt(100)));
+    IntStream.range(0, a.getSize()).forEach(i -> a.set(i, r.nextInt(100)));
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b) //
-                .task("t0", (x, y) -> {
-                    for (@Parallel int i = 0; i < x.getSize(); i++) {
-                        x.set(i, y.get(i) * y.get(i));
-                    }
-                }, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b) //
+            .task(
+                "t0",
+                (x, y) -> {
+                  for (@Parallel int i = 0; i < x.getSize(); i++) {
+                    x.set(i, y.get(i) * y.get(i));
+                  }
+                },
+                a,
+                b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals(b.get(i) * b.get(i), a.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
+
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat(b.get(i) * b.get(i), equalTo(a.get(i)));
+    }
+  }
 }
