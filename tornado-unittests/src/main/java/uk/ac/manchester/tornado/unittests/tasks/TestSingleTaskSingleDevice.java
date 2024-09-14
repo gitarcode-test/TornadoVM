@@ -18,12 +18,11 @@
 
 package uk.ac.manchester.tornado.unittests.tasks;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoBackend;
@@ -36,116 +35,125 @@ import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * Testing the TornadoVM API with one task in the same device. The
- * {@link TaskGraph} contains a single task. This task is executed on either on
- * the default device of the one selected.
- * <p>
- * How to run?
- * </p>
- * <code>
+ * Testing the TornadoVM API with one task in the same device. The {@link TaskGraph} contains a
+ * single task. This task is executed on either on the default device of the one selected.
+ *
+ * <p>How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.tasks.TestSingleTaskSingleDevice
  * </code>
- *
  */
 public class TestSingleTaskSingleDevice extends TornadoTestBase {
 
-    public static void simpleTask(FloatArray a, FloatArray b, FloatArray c) {
-        for (@Parallel int i = 0; i < c.getSize(); i++) {
-            c.set(i, a.get(i) + b.get(i));
-        }
+  public static void simpleTask(FloatArray a, FloatArray b, FloatArray c) {
+    for (@Parallel int i = 0; i < c.getSize(); i++) {
+      c.set(i, a.get(i) + b.get(i));
+    }
+  }
+
+  @Test
+  public void testSimpleTask() throws TornadoExecutionPlanException {
+    final int numElements = 4096;
+    FloatArray a = new FloatArray(numElements);
+    FloatArray b = new FloatArray(numElements);
+    FloatArray c = new FloatArray(numElements);
+
+    IntStream.range(0, numElements)
+        .sequential()
+        .forEach(
+            i -> {
+              a.set(i, (float) Math.random());
+              b.set(i, (float) Math.random());
+            });
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestSingleTaskSingleDevice::simpleTask, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testSimpleTask() throws TornadoExecutionPlanException {
-        final int numElements = 4096;
-        FloatArray a = new FloatArray(numElements);
-        FloatArray b = new FloatArray(numElements);
-        FloatArray c = new FloatArray(numElements);
+    for (int i = 0; i < c.getSize(); i++) {
+      assertThat(a.get(i) + b.get(i), closeTo(c.get(i), 0.001));
+    }
+  }
 
-        IntStream.range(0, numElements).sequential().forEach(i -> {
-            a.set(i, (float) Math.random());
-            b.set(i, (float) Math.random());
-        });
+  @Test
+  public void testSimpleTaskOnDevice0() throws TornadoExecutionPlanException {
+    final int numElements = 4096;
+    FloatArray a = new FloatArray(numElements);
+    FloatArray b = new FloatArray(numElements);
+    FloatArray c = new FloatArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0")//
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b)//
-                .task("t0", TestSingleTaskSingleDevice::simpleTask, a, b, c)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+    IntStream.range(0, numElements)
+        .sequential()
+        .forEach(
+            i -> {
+              a.set(i, (float) Math.random());
+              b.set(i, (float) Math.random());
+            });
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+    TornadoBackend driver = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0);
+    final int deviceNumber = 0;
 
-        for (int i = 0; i < c.getSize(); i++) {
-            assertEquals(a.get(i) + b.get(i), c.get(i), 0.001);
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestSingleTaskSingleDevice::simpleTask, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withDevice(driver.getDevice(deviceNumber)) //
+          .execute();
+    }
+    for (int i = 0; i < c.getSize(); i++) {
+      assertThat(a.get(i) + b.get(i), closeTo(c.get(i), 0.001));
+    }
+  }
+
+  @Test
+  public void testSimpleTaskOnDevice1() throws TornadoExecutionPlanException {
+    final int numElements = 4096;
+    FloatArray a = new FloatArray(numElements);
+    FloatArray b = new FloatArray(numElements);
+    FloatArray c = new FloatArray(numElements);
+
+    IntStream.range(0, numElements)
+        .sequential()
+        .forEach(
+            i -> {
+              a.set(i, (float) Math.random());
+              b.set(i, (float) Math.random());
+            });
+
+    TornadoBackend driver = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0);
+
+    // select device 1 it is available
+    int deviceNumber = 0;
+    if (driver.getNumDevices() > 1) {
+      deviceNumber = 1;
     }
 
-    @Test
-    public void testSimpleTaskOnDevice0() throws TornadoExecutionPlanException {
-        final int numElements = 4096;
-        FloatArray a = new FloatArray(numElements);
-        FloatArray b = new FloatArray(numElements);
-        FloatArray c = new FloatArray(numElements);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestSingleTaskSingleDevice::simpleTask, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
 
-        IntStream.range(0, numElements).sequential().forEach(i -> {
-            a.set(i, (float) Math.random());
-            b.set(i, (float) Math.random());
-        });
-
-        TornadoBackend driver = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0);
-        final int deviceNumber = 0;
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b)//
-                .task("t0", TestSingleTaskSingleDevice::simpleTask, a, b, c)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withDevice(driver.getDevice(deviceNumber)) //
-                    .execute();
-        }
-        for (int i = 0; i < c.getSize(); i++) {
-            assertEquals(a.get(i) + b.get(i), c.get(i), 0.001);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withDevice(driver.getDevice(deviceNumber)) //
+          .execute();
     }
 
-    @Test
-    public void testSimpleTaskOnDevice1() throws TornadoExecutionPlanException {
-        final int numElements = 4096;
-        FloatArray a = new FloatArray(numElements);
-        FloatArray b = new FloatArray(numElements);
-        FloatArray c = new FloatArray(numElements);
-
-        IntStream.range(0, numElements).sequential().forEach(i -> {
-            a.set(i, (float) Math.random());
-            b.set(i, (float) Math.random());
-        });
-
-        TornadoBackend driver = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0);
-
-        // select device 1 it is available
-        int deviceNumber = 0;
-        if (driver.getNumDevices() > 1) {
-            deviceNumber = 1;
-        }
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b)//
-                .task("t0", TestSingleTaskSingleDevice::simpleTask, a, b, c)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withDevice(driver.getDevice(deviceNumber)) //
-                    .execute();
-        }
-
-        for (int i = 0; i < c.getSize(); i++) {
-            assertEquals(a.get(i) + b.get(i), c.get(i), 0.001);
-        }
+    for (int i = 0; i < c.getSize(); i++) {
+      assertThat(a.get(i) + b.get(i), closeTo(c.get(i), 0.001));
     }
-
+  }
 }
