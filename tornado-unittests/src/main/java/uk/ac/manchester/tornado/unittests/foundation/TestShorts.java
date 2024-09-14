@@ -17,10 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.foundation;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -30,41 +30,38 @@ import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.foundation.TestShorts
  * </code>
  */
 public class TestShorts extends TornadoTestBase {
 
-    @Test
-    public void testShortAdd() throws TornadoExecutionPlanException {
-        final int numElements = 256;
-        ShortArray a = new ShortArray(numElements);
-        ShortArray b = new ShortArray(numElements);
-        ShortArray c = new ShortArray(numElements);
+  @Test
+  public void testShortAdd() throws TornadoExecutionPlanException {
+    final int numElements = 256;
+    ShortArray a = new ShortArray(numElements);
+    ShortArray b = new ShortArray(numElements);
+    ShortArray c = new ShortArray(numElements);
 
-        b.init((short) 1);
-        c.init((short) 3);
+    b.init((short) 1);
+    c.init((short) 3);
 
-        ShortArray expectedResult = new ShortArray(numElements);
-        expectedResult.init((short) 4);
+    ShortArray expectedResult = new ShortArray(numElements);
+    expectedResult.init((short) 4);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
-                .task("t0", TestKernels::vectorSumShortCompute, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
+            .task("t0", TestKernels::vectorSumShortCompute, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expectedResult.get(i), a.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
+    }
+  }
 }
