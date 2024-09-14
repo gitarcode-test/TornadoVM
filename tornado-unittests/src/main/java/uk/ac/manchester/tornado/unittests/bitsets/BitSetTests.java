@@ -18,13 +18,12 @@
 
 package uk.ac.manchester.tornado.unittests.bitsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
-
 import org.apache.lucene.util.LongBitSet;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -37,55 +36,53 @@ import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 /**
  * Test accelerating the Lucene library.
  *
- * How to test?
- *
- * <code>
+ * <p>How to test? <code>
  * tornado-test -V --fast uk.ac.manchester.tornado.unittests.bitsets.BitSetTests
  * </code>
  */
 public class BitSetTests extends TornadoTestBase {
 
-    public static void intersectionCount(int numWords, LongBitSet a, LongBitSet b, LongArray result) {
-        final long[] aBits = a.getBits();
-        final long[] bBits = b.getBits();
-        for (@Parallel int i = 0; i < numWords; i++) {
-            result.set(i, Long.bitCount(aBits[i] & bBits[i]));
-        }
+  public static void intersectionCount(int numWords, LongBitSet a, LongBitSet b, LongArray result) {
+    final long[] aBits = a.getBits();
+    final long[] bBits = b.getBits();
+    for (@Parallel int i = 0; i < numWords; i++) {
+      result.set(i, Long.bitCount(aBits[i] & bBits[i]));
+    }
+  }
+
+  @Test
+  public void test01() throws TornadoExecutionPlanException {
+
+    final int numWords = 8192;
+    final Random rand = new Random(7);
+    final long[] aBits = new long[numWords];
+    final long[] bBits = new long[numWords];
+
+    final LongBitSet a = new LongBitSet(aBits, numWords * 8);
+    final LongBitSet b = new LongBitSet(bBits, numWords * 8);
+    LongArray result = new LongArray(numWords);
+    LongArray seq = new LongArray(numWords);
+
+    for (int i = 0; i < aBits.length; i++) {
+      aBits[i] = rand.nextLong();
+      bBits[i] = rand.nextLong();
     }
 
-    @Test
-    public void test01() throws TornadoExecutionPlanException {
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task("t0", BitSetTests::intersectionCount, numWords, a, b, result) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, result);
 
-        final int numWords = 8192;
-        final Random rand = new Random(7);
-        final long[] aBits = new long[numWords];
-        final long[] bBits = new long[numWords];
-
-        final LongBitSet a = new LongBitSet(aBits, numWords * 8);
-        final LongBitSet b = new LongBitSet(bBits, numWords * 8);
-        LongArray result = new LongArray(numWords);
-        LongArray seq = new LongArray(numWords);
-
-        for (int i = 0; i < aBits.length; i++) {
-            aBits[i] = rand.nextLong();
-            bBits[i] = rand.nextLong();
-        }
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("t0", BitSetTests::intersectionCount, numWords, a, b, result) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, result);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        intersectionCount(numWords, a, b, seq);
-
-        for (int i = 0; i < numWords; i++) {
-            assertEquals(seq.get(i), result.get(i), 0.1f);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
+    intersectionCount(numWords, a, b, seq);
+
+    for (int i = 0; i < numWords; i++) {
+      assertThat(seq.get(i), closeTo(result.get(i), 0.1f));
+    }
+  }
 }
