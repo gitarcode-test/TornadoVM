@@ -17,10 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.memory;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -32,66 +32,68 @@ import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
 /**
  * How to test?
  *
- * <p>
- * <code>
+ * <p><code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.memory.MemoryConsumptionTest
  * </code>
- * </p>
  */
 public class MemoryConsumptionTest extends TestMemoryCommon {
 
-    @Test
-    public void testMemoryTransferBytes() throws TornadoExecutionPlanException {
+  @Test
+  public void testMemoryTransferBytes() throws TornadoExecutionPlanException {
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("t0", TestMemoryLimit::add, a, b, c, value) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task("t0", TestMemoryLimit::add, a, b, c, value) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            TornadoExecutionResult executionResult = executionPlan.withProfiler(ProfilerMode.SILENT).execute();
-            long totalBytesTransferred = executionResult.getProfilerResult().getTotalBytesTransferred();
-            long copyInBytes = executionResult.getProfilerResult().getTotalBytesCopyIn();
-            long copyOutBytes = executionResult.getProfilerResult().getTotalBytesCopyOut();
-            assertEquals(copyInBytes + copyOutBytes, totalBytesTransferred);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      TornadoExecutionResult executionResult =
+          executionPlan.withProfiler(ProfilerMode.SILENT).execute();
+      long totalBytesTransferred = executionResult.getProfilerResult().getTotalBytesTransferred();
+      long copyInBytes = executionResult.getProfilerResult().getTotalBytesCopyIn();
+      long copyOutBytes = executionResult.getProfilerResult().getTotalBytesCopyOut();
+      assertThat(copyInBytes + copyOutBytes, equalTo(totalBytesTransferred));
     }
+  }
 
-    @Test
-    public void testTotalMemoryUsage() throws TornadoExecutionPlanException {
+  @Test
+  public void testTotalMemoryUsage() throws TornadoExecutionPlanException {
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("t0", TestMemoryLimit::add, a, b, c, value) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task("t0", TestMemoryLimit::add, a, b, c, value) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            TornadoExecutionResult executionResult = executionPlan.withProfiler(ProfilerMode.SILENT).execute();
-            long totalMemoryUsedInBytes = executionResult.getProfilerResult().getTotalDeviceMemoryUsage();
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      TornadoExecutionResult executionResult =
+          executionPlan.withProfiler(ProfilerMode.SILENT).execute();
+      long totalMemoryUsedInBytes = executionResult.getProfilerResult().getTotalDeviceMemoryUsage();
 
-            // 3 Arrays
-            final long sizeAllocated = a.getNumBytesOfSegmentWithHeader() * 3;
-            assertEquals(sizeAllocated, totalMemoryUsedInBytes);
-
-        }
+      // 3 Arrays
+      final long sizeAllocated = a.getNumBytesOfSegmentWithHeader() * 3;
+      assertThat(sizeAllocated, equalTo(totalMemoryUsedInBytes));
     }
+  }
 
-    @Test
-    public void testCurrentMemoryUsage() throws TornadoExecutionPlanException {
+  @Test
+  public void testCurrentMemoryUsage() throws TornadoExecutionPlanException {
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("t0", TestMemoryLimit::add, a, b, c, value) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task("t0", TestMemoryLimit::add, a, b, c, value) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withProfiler(ProfilerMode.SILENT).execute();
-            long currentMemoryUsageInBytes = executionPlan.getCurrentDeviceMemoryUsage();
-            final long sizeAllocated = a.getNumBytesOfSegmentWithHeader() * 3;
-            assertEquals(sizeAllocated, currentMemoryUsageInBytes);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.withProfiler(ProfilerMode.SILENT).execute();
+      long currentMemoryUsageInBytes = executionPlan.getCurrentDeviceMemoryUsage();
+      final long sizeAllocated = a.getNumBytesOfSegmentWithHeader() * 3;
+      assertThat(sizeAllocated, equalTo(currentMemoryUsageInBytes));
     }
+  }
 }
