@@ -17,10 +17,11 @@
  */
 package uk.ac.manchester.tornado.unittests.dynamic;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.DRMode;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.Policy;
@@ -35,217 +36,228 @@ import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
  * How to run?
- * <p>
- * <code>
+ *
+ * <p><code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.dynamic.TestDynamic
  * </code>
- * </p>
  */
 public class TestDynamic extends TornadoTestBase {
 
-    public static void compute(IntArray a, IntArray b) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            b.set(i, a.get(i) * 2);
-        }
+  public static void compute(IntArray a, IntArray b) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      b.set(i, a.get(i) * 2);
+    }
+  }
+
+  public static void compute2(IntArray a, IntArray b) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      b.set(i, a.get(i) * 10);
+    }
+  }
+
+  public static void saxpy(float alpha, FloatArray x, FloatArray y) {
+    for (@Parallel int i = 0; i < y.getSize(); i++) {
+      y.set(i, alpha * x.get(i));
+    }
+  }
+
+  @Test
+  public void testDynamicWithProfiler() {
+    int numElements = 256;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+
+    a.init(10);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a) //
+            .task("t0", TestDynamic::compute, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, b); //
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph);
+
+    // Run first time to obtain the best performance device
+    executionPlan
+        .withDynamicReconfiguration(Policy.PERFORMANCE, DRMode.SERIAL) //
+        .execute();
+
+    // Run a few iterations to get the device.
+    for (int i = 0; i < 10; i++) {
+      executionPlan.execute();
     }
 
-    public static void compute2(IntArray a, IntArray b) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            b.set(i, a.get(i) * 10);
-        }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat(a.get(i) * 2, equalTo(b.get(i)));
+    }
+  }
+
+  @Test
+  public void testDynamicWithProfilerE2E() throws TornadoExecutionPlanException {
+    int numElements = 16000;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+
+    a.init(10);
+
+    TaskGraph taskGraph =
+        new TaskGraph("ss0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a) //
+            .task("tt0", TestDynamic::compute, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, b); //
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+
+      // Run first time to obtain the best performance device
+      executionPlan
+          .withDynamicReconfiguration(Policy.END_2_END, DRMode.PARALLEL) //
+          .execute();
+
+      // Run a few iterations to get the device.
+      for (int i = 0; i < 10; i++) {
+        executionPlan.execute();
+      }
     }
 
-    public static void saxpy(float alpha, FloatArray x, FloatArray y) {
-        for (@Parallel int i = 0; i < y.getSize(); i++) {
-            y.set(i, alpha * x.get(i));
-        }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat(a.get(i) * 2, equalTo(b.get(i)));
+    }
+  }
+
+  @Test
+  public void testDynamicWithProfiler2() throws TornadoExecutionPlanException {
+    int numElements = 4194304;
+    FloatArray a = new FloatArray(numElements);
+    FloatArray b = new FloatArray(numElements);
+
+    a.init(10);
+    b.init(0);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
+            .task("t0", TestDynamic::saxpy, 2.0f, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, b); //
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+
+      // Run first time to obtain the best performance device
+      executionPlan
+          .withDynamicReconfiguration(Policy.PERFORMANCE, DRMode.SERIAL) //
+          .execute();
     }
 
-    @Test
-    public void testDynamicWithProfiler() {
-        int numElements = 256;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat(a.get(i) * 2.0f, closeTo(b.get(i), 0.01f));
+    }
+  }
 
-        a.init(10);
+  @Test
+  public void testDynamicWithProfiler3() throws TornadoExecutionPlanException {
+    int numElements = 4096;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+    IntArray seq = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a) //
-                .task("t0", TestDynamic::compute, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, b); //
+    a.init(10);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph);
+    compute2(a, seq);
 
-        // Run first time to obtain the best performance device
-        executionPlan.withDynamicReconfiguration(Policy.PERFORMANCE, DRMode.SERIAL) //
-                .execute();
+    TaskGraph taskGraph =
+        new TaskGraph("ts") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
+            .task("task", TestDynamic::compute2, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, b);
 
-        // Run a few iterations to get the device.
-        for (int i = 0; i < 10; i++) {
-            executionPlan.execute();
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
 
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals(a.get(i) * 2, b.get(i));
-        }
+      // Run first time to obtain the best performance device
+      executionPlan
+          .withDynamicReconfiguration(Policy.PERFORMANCE, DRMode.SERIAL) //
+          .execute();
+
+      // Run a few iterations to get the device.
+      for (int i = 0; i < 10; i++) {
+        executionPlan.execute();
+      }
     }
 
-    @Test
-    public void testDynamicWithProfilerE2E() throws TornadoExecutionPlanException {
-        int numElements = 16000;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat(seq.get(i), equalTo(b.get(i)));
+    }
+  }
 
-        a.init(10);
+  @Test
+  public void testDynamicWithProfiler4() throws TornadoExecutionPlanException {
+    int numElements = 256;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+    IntArray seq = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("ss0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a) //
-                .task("tt0", TestDynamic::compute, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, b); //
+    a.init(10);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+    compute(a, seq);
+    compute2(seq, seq);
 
-            // Run first time to obtain the best performance device
-            executionPlan.withDynamicReconfiguration(Policy.END_2_END, DRMode.PARALLEL) //
-                    .execute();
+    TaskGraph taskGraph =
+        new TaskGraph("pp") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
+            .task("t0", TestDynamic::compute, a, b) //
+            .task("t1", TestDynamic::compute2, b, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, b);
 
-            // Run a few iterations to get the device.
-            for (int i = 0; i < 10; i++) {
-                executionPlan.execute();
-            }
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
 
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals(a.get(i) * 2, b.get(i));
-        }
+      // Run first time to obtain the best performance device
+      executionPlan
+          .withDynamicReconfiguration(Policy.PERFORMANCE, DRMode.SERIAL) //
+          .execute();
+
+      // Run a few iterations to get the device.
+      for (int i = 0; i < 10; i++) {
+        executionPlan.execute();
+      }
     }
 
-    @Test
-    public void testDynamicWithProfiler2() throws TornadoExecutionPlanException {
-        int numElements = 4194304;
-        FloatArray a = new FloatArray(numElements);
-        FloatArray b = new FloatArray(numElements);
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat(seq.get(i), equalTo(b.get(i)));
+    }
+  }
 
-        a.init(10);
-        b.init(0);
+  @Test
+  public void testDynamicWinner() throws TornadoExecutionPlanException {
+    int numElements = 16000;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
-                .task("t0", TestDynamic::saxpy, 2.0f, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, b); //
+    a.init(10);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a) //
+            .task("t0", TestDynamic::compute, a, b) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, b);
 
-            // Run first time to obtain the best performance device
-            executionPlan.withDynamicReconfiguration(Policy.PERFORMANCE, DRMode.SERIAL) //
-                    .execute();
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
 
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals(a.get(i) * 2.0f, b.get(i), 0.01f);
-        }
+      // Run first time to obtain the best performance device
+      executionPlan
+          .withDynamicReconfiguration(Policy.LATENCY, DRMode.PARALLEL) //
+          .execute();
+      // Run a few iterations to get the device.
+      for (int i = 0; i < 10; i++) {
+        executionPlan.execute();
+      }
     }
 
-    @Test
-    public void testDynamicWithProfiler3() throws TornadoExecutionPlanException {
-        int numElements = 4096;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
-        IntArray seq = new IntArray(numElements);
-
-        a.init(10);
-
-        compute2(a, seq);
-
-        TaskGraph taskGraph = new TaskGraph("ts") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
-                .task("task", TestDynamic::compute2, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, b);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-
-            // Run first time to obtain the best performance device
-            executionPlan.withDynamicReconfiguration(Policy.PERFORMANCE, DRMode.SERIAL) //
-                    .execute();
-
-            // Run a few iterations to get the device.
-            for (int i = 0; i < 10; i++) {
-                executionPlan.execute();
-            }
-        }
-
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals(seq.get(i), b.get(i));
-        }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat(a.get(i) * 2, equalTo(b.get(i)));
     }
-
-    @Test
-    public void testDynamicWithProfiler4() throws TornadoExecutionPlanException {
-        int numElements = 256;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
-        IntArray seq = new IntArray(numElements);
-
-        a.init(10);
-
-        compute(a, seq);
-        compute2(seq, seq);
-
-        TaskGraph taskGraph = new TaskGraph("pp") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
-                .task("t0", TestDynamic::compute, a, b) //
-                .task("t1", TestDynamic::compute2, b, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, b);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-
-            // Run first time to obtain the best performance device
-            executionPlan.withDynamicReconfiguration(Policy.PERFORMANCE, DRMode.SERIAL) //
-                    .execute();
-
-            // Run a few iterations to get the device.
-            for (int i = 0; i < 10; i++) {
-                executionPlan.execute();
-            }
-        }
-
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals(seq.get(i), b.get(i));
-        }
-    }
-
-    @Test
-    public void testDynamicWinner() throws TornadoExecutionPlanException {
-        int numElements = 16000;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
-
-        a.init(10);
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a) //
-                .task("t0", TestDynamic::compute, a, b) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, b);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-
-            // Run first time to obtain the best performance device
-            executionPlan.withDynamicReconfiguration(Policy.LATENCY, DRMode.PARALLEL) //
-                    .execute();
-            // Run a few iterations to get the device.
-            for (int i = 0; i < 10; i++) {
-                executionPlan.execute();
-            }
-        }
-
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals(a.get(i) * 2, b.get(i));
-        }
-    }
+  }
 }
