@@ -18,14 +18,13 @@
 
 package uk.ac.manchester.tornado.unittests.functional;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -38,137 +37,167 @@ import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.functional.TestLambdas
  * </code>
  */
 public class TestLambdas extends TornadoTestBase {
 
-    @Test
-    public void testVectorFunctionLambda() throws TornadoExecutionPlanException {
-        final int numElements = 4096;
-        DoubleArray a = new DoubleArray(numElements);
-        DoubleArray b = new DoubleArray(numElements);
-        DoubleArray c = new DoubleArray(numElements);
+  @Test
+  public void testVectorFunctionLambda() throws TornadoExecutionPlanException {
+    final int numElements = 4096;
+    DoubleArray a = new DoubleArray(numElements);
+    DoubleArray b = new DoubleArray(numElements);
+    DoubleArray c = new DoubleArray(numElements);
 
-        IntStream.range(0, numElements).sequential().forEach(i -> {
-            a.set(i, Math.random());
-            b.set(i, Math.random());
-        });
+    IntStream.range(0, numElements)
+        .sequential()
+        .forEach(
+            i -> {
+              a.set(i, Math.random());
+              b.set(i, Math.random());
+            });
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("t0", (x, y, z) -> {
-                    // Computation in a lambda expression
-                    for (@Parallel int i = 0; i < z.getSize(); i++) {
-                        z.set(i, x.get(i) + y.get(i));
-                    }
-                }, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task(
+                "t0",
+                (x, y, z) -> {
+                  // Computation in a lambda expression
+                  for (@Parallel int i = 0; i < z.getSize(); i++) {
+                    z.set(i, x.get(i) + y.get(i));
+                  }
+                },
+                a,
+                b,
+                c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < c.getSize(); i++) {
-            assertEquals(a.get(i) + b.get(i), c.get(i), 0.001);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testVectorFunctionLambda02() throws TornadoExecutionPlanException {
-        final int numElements = 4096;
-        DoubleArray a = new DoubleArray(numElements);
-        DoubleArray b = new DoubleArray(numElements);
-        DoubleArray c = new DoubleArray(numElements);
+    for (int i = 0; i < c.getSize(); i++) {
+      assertThat(a.get(i) + b.get(i), closeTo(c.get(i), 0.001));
+    }
+  }
 
-        Random r = new Random();
+  @Test
+  public void testVectorFunctionLambda02() throws TornadoExecutionPlanException {
+    final int numElements = 4096;
+    DoubleArray a = new DoubleArray(numElements);
+    DoubleArray b = new DoubleArray(numElements);
+    DoubleArray c = new DoubleArray(numElements);
 
-        IntStream.range(0, numElements).sequential().forEach(i -> {
-            a.set(i, r.nextDouble());
-            b.set(i, r.nextInt(1000));
-        });
+    Random r = new Random();
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("t0", (x, y, z) -> {
-                    // Computation in a lambda expression
-                    for (@Parallel int i = 0; i < z.getSize(); i++) {
-                        z.set(i, x.get(i) * y.get(i));
-                    }
-                }, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+    IntStream.range(0, numElements)
+        .sequential()
+        .forEach(
+            i -> {
+              a.set(i, r.nextDouble());
+              b.set(i, r.nextInt(1000));
+            });
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task(
+                "t0",
+                (x, y, z) -> {
+                  // Computation in a lambda expression
+                  for (@Parallel int i = 0; i < z.getSize(); i++) {
+                    z.set(i, x.get(i) * y.get(i));
+                  }
+                },
+                a,
+                b,
+                c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
 
-        for (int i = 0; i < c.getSize(); i++) {
-            assertEquals(a.get(i) * b.get(i), c.get(i), 0.001);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testVectorFunctionLambda03() throws TornadoExecutionPlanException {
-        final int numElements = 4096;
-        DoubleArray a = new DoubleArray(numElements);
-        IntArray b = new IntArray(numElements);
-        DoubleArray c = new DoubleArray(numElements);
+    for (int i = 0; i < c.getSize(); i++) {
+      assertThat(a.get(i) * b.get(i), closeTo(c.get(i), 0.001));
+    }
+  }
 
-        Random r = new Random();
+  @Test
+  public void testVectorFunctionLambda03() throws TornadoExecutionPlanException {
+    final int numElements = 4096;
+    DoubleArray a = new DoubleArray(numElements);
+    IntArray b = new IntArray(numElements);
+    DoubleArray c = new DoubleArray(numElements);
 
-        IntStream.range(0, numElements).sequential().forEach(i -> {
-            a.set(i, r.nextDouble());
-            b.set(i, r.nextInt(1000));
-        });
+    Random r = new Random();
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("t0", (x, y, z) -> {
-                    // Computation in a lambda expression
-                    for (@Parallel int i = 0; i < z.getSize(); i++) {
-                        z.set(i, x.get(i) * y.get(i));
-                    }
-                }, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+    IntStream.range(0, numElements)
+        .sequential()
+        .forEach(
+            i -> {
+              a.set(i, r.nextDouble());
+              b.set(i, r.nextInt(1000));
+            });
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task(
+                "t0",
+                (x, y, z) -> {
+                  // Computation in a lambda expression
+                  for (@Parallel int i = 0; i < z.getSize(); i++) {
+                    z.set(i, x.get(i) * y.get(i));
+                  }
+                },
+                a,
+                b,
+                c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
 
-        for (int i = 0; i < c.getSize(); i++) {
-            assertEquals(a.get(i) * b.get(i), c.get(i), 0.001);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testParameterUnboxing() throws TornadoExecutionPlanException {
-        var arrayToCopy = new float[] { 1.0f, 2.0f, 3.0f, 4.0f, 5.0f };
+    for (int i = 0; i < c.getSize(); i++) {
+      assertThat(a.get(i) * b.get(i), closeTo(c.get(i), 0.001));
+    }
+  }
 
-        var taskGraph = new TaskGraph("s0");
-        taskGraph.transferToDevice(DataTransferMode.EVERY_EXECUTION, arrayToCopy);
+  @Test
+  public void testParameterUnboxing() throws TornadoExecutionPlanException {
+    var arrayToCopy = new float[] {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
-        var resultArray = new FloatArray(arrayToCopy.length);
-        taskGraph.transferToHost(DataTransferMode.EVERY_EXECUTION, resultArray);
+    var taskGraph = new TaskGraph("s0");
+    taskGraph.transferToDevice(DataTransferMode.EVERY_EXECUTION, arrayToCopy);
 
-        taskGraph.task("t0", (source, sourceOffset, destination, destinationOffset, length) -> {
-            for (@Parallel int i = 0; i < length; i++) {
-                destination.set(destinationOffset + i, source[sourceOffset + i]);
-            }
-        }, arrayToCopy, 0, resultArray, 0, arrayToCopy.length);
+    var resultArray = new FloatArray(arrayToCopy.length);
+    taskGraph.transferToHost(DataTransferMode.EVERY_EXECUTION, resultArray);
 
-        var snapshot = taskGraph.snapshot();
-        try (var executionPlan = new TornadoExecutionPlan(snapshot)) {
-            executionPlan.execute();
-        }
+    taskGraph.task(
+        "t0",
+        (source, sourceOffset, destination, destinationOffset, length) -> {
+          for (@Parallel int i = 0; i < length; i++) {
+            destination.set(destinationOffset + i, source[sourceOffset + i]);
+          }
+        },
+        arrayToCopy,
+        0,
+        resultArray,
+        0,
+        arrayToCopy.length);
 
-        assertArrayEquals(arrayToCopy, resultArray.toHeapArray(), 0.001f);
+    var snapshot = taskGraph.snapshot();
+    try (var executionPlan = new TornadoExecutionPlan(snapshot)) {
+      executionPlan.execute();
     }
 
+    assertArrayEquals(arrayToCopy, resultArray.toHeapArray(), 0.001f);
+  }
 }
