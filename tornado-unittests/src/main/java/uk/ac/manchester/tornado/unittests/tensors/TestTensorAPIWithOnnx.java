@@ -17,6 +17,15 @@
  */
 package uk.ac.manchester.tornado.unittests.tensors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+
+import ai.onnxruntime.OnnxTensor;
+import ai.onnxruntime.OnnxValue;
+import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtException;
+import ai.onnxruntime.OrtSession;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,103 +36,94 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import ai.onnxruntime.OnnxTensor;
-import ai.onnxruntime.OnnxValue;
-import ai.onnxruntime.OrtEnvironment;
-import ai.onnxruntime.OrtException;
-import ai.onnxruntime.OrtSession;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.types.tensors.Shape;
 import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.tensors.TestTensorAPIWithOnnx
  * </code>
  */
 public class TestTensorAPIWithOnnx extends TornadoTestBase {
 
-    private final String INPUT_TENSOR_NAME = "data";
-    private final String OUTPUT_TENSOR_NAME = "mobilenetv20_output_flatten0_reshape0";
+  private final String INPUT_TENSOR_NAME = "data";
+  private final String OUTPUT_TENSOR_NAME = "mobilenetv20_output_flatten0_reshape0";
 
-    private final String MODEL_URL = "https://github.com/onnx/models/raw/main/validated/vision/classification/mobilenet/model/mobilenetv2-7.onnx";
+  private final String MODEL_URL =
+      "https://github.com/onnx/models/raw/main/validated/vision/classification/mobilenet/model/mobilenetv2-7.onnx";
 
-    /**
-     * Tests the compatibility and functionality of an ONNX model using the ONNX Runtime (ORT) in Java.
-     * This test verifies that the model, presumably MobileNet V2, can process a predefined Tornado tensor,
-     * perform inference, and produce an output tensor.
-     *
-     * <p>The test follows these steps:
-     * <ol>
-     * <li>Creates a {@link Shape} object to define the dimensions of the input tensor.</li>
-     * <li>Initializes a {@link TensorFP32} with the shape and sets all elements to a specific value.</li>
-     * <li>Obtains an {@link OrtEnvironment} instance for working with ONNX Runtime.</li>
-     * <li>Creates a session with the model specified by {@code MODEL_PATH} and session options.</li>
-     * <li>Prepares the input tensor and maps it to the expected input name of the model.</li>
-     * <li>Executes the model inference with the input map and captures the output.</li>
-     * <li>Verifies the existence of the output tensor and performs cleanup.</li>
-     * </ol>
-     * </p>
-     *
-     * @throws OrtException
-     *     If an error occurs in the ONNX Runtime environment, such as issues with creating the session or running the model.
-     */
-    @Test
-    public void testOnnxCompatibility() throws OrtException, IOException {
-        Shape shape = new Shape(1, 3, 224, 224);
-        TensorFP32 tornadoTensor = new TensorFP32(shape);
+  /**
+   * Tests the compatibility and functionality of an ONNX model using the ONNX Runtime (ORT) in
+   * Java. This test verifies that the model, presumably MobileNet V2, can process a predefined
+   * Tornado tensor, perform inference, and produce an output tensor.
+   *
+   * <p>The test follows these steps:
+   *
+   * <ol>
+   *   <li>Creates a {@link Shape} object to define the dimensions of the input tensor.
+   *   <li>Initializes a {@link TensorFP32} with the shape and sets all elements to a specific
+   *       value.
+   *   <li>Obtains an {@link OrtEnvironment} instance for working with ONNX Runtime.
+   *   <li>Creates a session with the model specified by {@code MODEL_PATH} and session options.
+   *   <li>Prepares the input tensor and maps it to the expected input name of the model.
+   *   <li>Executes the model inference with the input map and captures the output.
+   *   <li>Verifies the existence of the output tensor and performs cleanup.
+   * </ol>
+   *
+   * @throws OrtException If an error occurs in the ONNX Runtime environment, such as issues with
+   *     creating the session or running the model.
+   */
+  @Test
+  public void testOnnxCompatibility() throws OrtException, IOException {
+    Shape shape = new Shape(1, 3, 224, 224);
+    TensorFP32 tornadoTensor = new TensorFP32(shape);
 
-        tornadoTensor.init(2f);
+    tornadoTensor.init(2f);
 
-        OnnxTensor outputTensor = null;
+    OnnxTensor outputTensor = null;
 
-        String modelPath = downloadAndSetModelPath(MODEL_URL);
+    String modelPath = downloadAndSetModelPath(MODEL_URL);
 
-        try (OrtEnvironment env = OrtEnvironment.getEnvironment()) {
-            // Load the MobileNet V2 ONNX model
-            OrtSession session = env.createSession(modelPath, new OrtSession.SessionOptions());
+    try (OrtEnvironment env = OrtEnvironment.getEnvironment()) {
+      // Load the MobileNet V2 ONNX model
+      OrtSession session = env.createSession(modelPath, new OrtSession.SessionOptions());
 
-            OnnxTensor inputTensor = OnnxTensor.createTensor(env, tornadoTensor.getFloatBuffer(), shape.dimensions());
+      OnnxTensor inputTensor =
+          OnnxTensor.createTensor(env, tornadoTensor.getFloatBuffer(), shape.dimensions());
 
-            Map<String, OnnxTensor> inputMap = new HashMap<>();
-            inputMap.put(INPUT_TENSOR_NAME, inputTensor);
+      Map<String, OnnxTensor> inputMap = new HashMap<>();
+      inputMap.put(INPUT_TENSOR_NAME, inputTensor);
 
-            // Run the model inference
-            try (OrtSession.Result outputMap = session.run(inputMap)) {
-                Optional<OnnxValue> optionalOutputTensor = outputMap.get(OUTPUT_TENSOR_NAME);
-                if (optionalOutputTensor.isEmpty()) {
-                    throw new IllegalArgumentException("Output tensor not found in model output.");
-                }
-                outputTensor = (OnnxTensor) optionalOutputTensor.get();
-
-            }
-        } finally {
-            Assert.assertNotNull(outputTensor);
+      // Run the model inference
+      try (OrtSession.Result outputMap = session.run(inputMap)) {
+        Optional<OnnxValue> optionalOutputTensor = outputMap.get(OUTPUT_TENSOR_NAME);
+        if (optionalOutputTensor.isEmpty()) {
+          throw new IllegalArgumentException("Output tensor not found in model output.");
         }
+        outputTensor = (OnnxTensor) optionalOutputTensor.get();
+      }
+    } finally {
+      assertThat(outputTensor, not(nullValue()));
     }
+  }
 
-    private String downloadAndSetModelPath(String urlString) throws IOException {
-        String path;
-        URL url = new URL(urlString);
-        Path tempDir = Files.createTempDirectory("onnx_models");
-        Path modelPath = Paths.get(tempDir.toString(), "mobilenetv2-7.onnx");
-        path = modelPath.toString();
+  private String downloadAndSetModelPath(String urlString) throws IOException {
+    String path;
+    URL url = new URL(urlString);
+    Path tempDir = Files.createTempDirectory("onnx_models");
+    Path modelPath = Paths.get(tempDir.toString(), "mobilenetv2-7.onnx");
+    path = modelPath.toString();
 
-        try (BufferedInputStream in = new BufferedInputStream(url.openStream()); FileOutputStream fileOutputStream = new FileOutputStream(modelPath.toFile())) {
-            byte[] dataBuffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
-            }
-        }
-        return path;
+    try (BufferedInputStream in = new BufferedInputStream(url.openStream());
+        FileOutputStream fileOutputStream = new FileOutputStream(modelPath.toFile())) {
+      byte[] dataBuffer = new byte[1024];
+      int bytesRead;
+      while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+        fileOutputStream.write(dataBuffer, 0, bytesRead);
+      }
     }
-
+    return path;
+  }
 }
