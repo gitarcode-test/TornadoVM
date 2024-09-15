@@ -17,10 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.foundation;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -30,41 +30,39 @@ import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to test?
- * </p>
- * <code>
+ * How to test? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.foundation.MultipleRuns
  * </code>
  */
 public class MultipleRuns extends TornadoTestBase {
 
-    @Test
-    public void multipleRuns() throws TornadoExecutionPlanException {
+  @Test
+  public void multipleRuns() throws TornadoExecutionPlanException {
 
-        final int numElements = 512;
-        IntArray a = new IntArray(numElements);
+    final int numElements = 512;
+    IntArray a = new IntArray(numElements);
 
-        final int iterations = 50;
+    final int iterations = 50;
 
-        IntArray expectedResult = new IntArray(numElements);
-        expectedResult.init(iterations * 50);
-        // Arrays.fill(expectedResult, iterations * 50);
+    IntArray expectedResult = new IntArray(numElements);
+    expectedResult.init(iterations * 50);
+    // Arrays.fill(expectedResult, iterations * 50);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
-                .task("t0", TestKernels::addValue, a) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a) //
+            .task("t0", TestKernels::addValue, a) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            for (int i = 0; i < iterations; i++) {
-                executionPlan.execute();
-            }
-        }
-
-        for (int i = 0; i < expectedResult.getSize(); i++) {
-            assertEquals(expectedResult.get(i), a.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      for (int i = 0; i < iterations; i++) {
+        executionPlan.execute();
+      }
     }
+
+    for (int i = 0; i < expectedResult.getSize(); i++) {
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
+    }
+  }
 }
