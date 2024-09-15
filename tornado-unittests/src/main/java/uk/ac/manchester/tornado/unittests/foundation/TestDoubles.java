@@ -17,10 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.foundation;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -30,153 +30,154 @@ import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to test?
- * </p>
- * <code>
+ * How to test? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.foundation.TestDoubles
  * </code>
  */
 public class TestDoubles extends TornadoTestBase {
 
-    @Test
-    public void testDoublesCopy() throws TornadoExecutionPlanException {
-        final int numElements = 256;
-        DoubleArray a = new DoubleArray(numElements);
+  @Test
+  public void testDoublesCopy() throws TornadoExecutionPlanException {
+    final int numElements = 256;
+    DoubleArray a = new DoubleArray(numElements);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", TestKernels::testDoublesCopy, a) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", TestKernels::testDoublesCopy, a) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        assertEquals(a.get(0), 50.0, 0.01);
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testDoublesAdd() throws TornadoExecutionPlanException {
+    assertThat(a.get(0), closeTo(50.0, 0.01));
+  }
 
-        final int numElements = 256;
-        DoubleArray a = new DoubleArray(numElements);
-        DoubleArray b = new DoubleArray(numElements);
-        DoubleArray c = new DoubleArray(numElements);
+  @Test
+  public void testDoublesAdd() throws TornadoExecutionPlanException {
 
-        b.init(100);
-        c.init(200);
+    final int numElements = 256;
+    DoubleArray a = new DoubleArray(numElements);
+    DoubleArray b = new DoubleArray(numElements);
+    DoubleArray c = new DoubleArray(numElements);
 
-        DoubleArray expected = new DoubleArray(numElements);
-        for (int i = 0; i < numElements; i++) {
-            expected.set(i, b.get(i) + c.get(i));
-        }
+    b.init(100);
+    c.init(200);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
-                .task("t0", TestKernels::vectorAddDoubleCompute, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expected.get(i), a.get(i), 0.01f);
-        }
+    DoubleArray expected = new DoubleArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      expected.set(i, b.get(i) + c.get(i));
     }
 
-    @Test
-    public void testDoublesSub() throws TornadoExecutionPlanException {
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
+            .task("t0", TestKernels::vectorAddDoubleCompute, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        final int numElements = 256;
-        DoubleArray a = new DoubleArray(numElements);
-        DoubleArray b = new DoubleArray(numElements);
-        DoubleArray c = new DoubleArray(numElements);
-
-        b.init(2.2);
-        c.init(3.5);
-
-        DoubleArray expected = new DoubleArray(numElements);
-        for (int i = 0; i < numElements; i++) {
-            expected.set(i, b.get(i) - c.get(i));
-        }
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
-                .task("t0", TestKernels::vectorSubDoubleCompute, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expected.get(i), a.get(i), 0.01f);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testDoublesMul() throws TornadoExecutionPlanException {
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expected.get(i), closeTo(a.get(i), 0.01f));
+    }
+  }
 
-        final int numElements = 256;
-        DoubleArray a = new DoubleArray(numElements);
-        DoubleArray b = new DoubleArray(numElements);
-        DoubleArray c = new DoubleArray(numElements);
+  @Test
+  public void testDoublesSub() throws TornadoExecutionPlanException {
 
-        b.init(2.2);
-        c.init(3.5);
+    final int numElements = 256;
+    DoubleArray a = new DoubleArray(numElements);
+    DoubleArray b = new DoubleArray(numElements);
+    DoubleArray c = new DoubleArray(numElements);
 
-        DoubleArray expected = new DoubleArray(numElements);
-        for (int i = 0; i < numElements; i++) {
-            expected.set(i, b.get(i) * c.get(i));
-        }
+    b.init(2.2);
+    c.init(3.5);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
-                .task("t0", TestKernels::vectorMulDoubleCompute, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expected.get(i), a.get(i), 0.01f);
-        }
+    DoubleArray expected = new DoubleArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      expected.set(i, b.get(i) - c.get(i));
     }
 
-    @Test
-    public void testDoublesDiv() throws TornadoExecutionPlanException {
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
+            .task("t0", TestKernels::vectorSubDoubleCompute, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        final int numElements = 256;
-        DoubleArray a = new DoubleArray(numElements);
-        DoubleArray b = new DoubleArray(numElements);
-        DoubleArray c = new DoubleArray(numElements);
-
-        b.init(10.2);
-        c.init(2.0);
-
-        DoubleArray expected = new DoubleArray(numElements);
-        for (int i = 0; i < numElements; i++) {
-            expected.set(i, b.get(i) / c.get(i));
-        }
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
-                .task("t0", TestKernels::vectorDivDoubleCompute, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expected.get(i), a.get(i), 0.01f);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expected.get(i), closeTo(a.get(i), 0.01f));
+    }
+  }
+
+  @Test
+  public void testDoublesMul() throws TornadoExecutionPlanException {
+
+    final int numElements = 256;
+    DoubleArray a = new DoubleArray(numElements);
+    DoubleArray b = new DoubleArray(numElements);
+    DoubleArray c = new DoubleArray(numElements);
+
+    b.init(2.2);
+    c.init(3.5);
+
+    DoubleArray expected = new DoubleArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      expected.set(i, b.get(i) * c.get(i));
+    }
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
+            .task("t0", TestKernels::vectorMulDoubleCompute, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
+    }
+
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expected.get(i), closeTo(a.get(i), 0.01f));
+    }
+  }
+
+  @Test
+  public void testDoublesDiv() throws TornadoExecutionPlanException {
+
+    final int numElements = 256;
+    DoubleArray a = new DoubleArray(numElements);
+    DoubleArray b = new DoubleArray(numElements);
+    DoubleArray c = new DoubleArray(numElements);
+
+    b.init(10.2);
+    c.init(2.0);
+
+    DoubleArray expected = new DoubleArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      expected.set(i, b.get(i) / c.get(i));
+    }
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
+            .task("t0", TestKernels::vectorDivDoubleCompute, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
+    }
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expected.get(i), closeTo(a.get(i), 0.01f));
+    }
+  }
 }
