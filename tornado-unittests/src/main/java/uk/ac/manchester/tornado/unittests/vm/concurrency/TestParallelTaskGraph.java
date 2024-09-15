@@ -17,13 +17,12 @@
  */
 package uk.ac.manchester.tornado.unittests.vm.concurrency;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -37,303 +36,318 @@ import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
 
 /**
- *
- * <p>
  * How to test? This test requires at least two devices.
- * </p>
  *
- * <p>
- * <code>
+ * <p><code>
  * tornado-test -V --printBytecode --threadInfo uk.ac.manchester.tornado.unittests.vm.concurrency.TestParallelTaskGraph#testTwoBackendsSerial
  * </code>
- * </p>
  */
 public class TestParallelTaskGraph extends TornadoTestBase {
 
-    final int SIZE = 1024;
+  final int SIZE = 1024;
 
-    public static void init(FloatArray a) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            a.set(i, i);
-        }
+  public static void init(FloatArray a) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      a.set(i, i);
+    }
+  }
+
+  public static void multiply(FloatArray a, float alpha) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      float temp = (a.get(i) * i) + alpha;
+      a.set(i, temp);
+    }
+  }
+
+  @Test
+  public void testTwoDevicesSerial() throws TornadoExecutionPlanException {
+
+    FloatArray a = new FloatArray(SIZE);
+    FloatArray b = new FloatArray(SIZE);
+    FloatArray refB = new FloatArray(SIZE);
+    FloatArray refA = new FloatArray(SIZE);
+    float alpha = 0.12f;
+
+    Random r = new Random(31);
+    IntStream.range(0, SIZE)
+        .forEach(
+            i -> {
+              a.set(i, r.nextFloat());
+              b.set(i, r.nextFloat());
+              refA.set(i, a.get(i));
+              refB.set(i, b.get(i));
+            });
+
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task("task0", TestParallelTaskGraph::init, a) //
+            .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+
+      // Assume that the first drivers finds, at least two devices
+      int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
+      if (deviceCount < 2) {
+        throw new UnsupportedConfigurationException("Test requires at least two devices");
+      }
+
+      TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
+      TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
+
+      // Extension for multi-device: This will run one task after the other
+      // (sequentially)
+      executionPlan
+          .withDevice("graph.task0", device0) //
+          .withDevice("graph.task1", device1); //
+
+      executionPlan.execute();
     }
 
-    public static void multiply(FloatArray a, float alpha) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            float temp = (a.get(i) * i) + alpha;
-            a.set(i, temp);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(i, closeTo(a.get(i), DELTA));
+      assertThat((refB.get(i) * i) + alpha, closeTo(b.get(i), DELTA));
+    }
+  }
+
+  @Test
+  public void testTwoDevicesSerial1() throws TornadoExecutionPlanException {
+
+    FloatArray a = new FloatArray(SIZE);
+    FloatArray b = new FloatArray(SIZE);
+    FloatArray refB = new FloatArray(SIZE);
+    FloatArray refA = new FloatArray(SIZE);
+    float alpha = 0.12f;
+
+    Random r = new Random(31);
+    IntStream.range(0, SIZE)
+        .forEach(
+            i -> {
+              a.set(i, r.nextFloat());
+              b.set(i, r.nextFloat());
+              refA.set(i, a.get(i));
+              refB.set(i, b.get(i));
+            });
+
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task("task0", TestParallelTaskGraph::init, a) //
+            .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+
+      // Assume that the first drivers finds, at least two devices
+      int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
+      if (deviceCount < 3) {
+        throw new UnsupportedConfigurationException("Test requires at least three devices");
+      }
+
+      TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
+      TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
+      TornadoDevice device2 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(2);
+
+      // Extension for multi-device: This will run one task after the other
+      // (sequentially)
+      executionPlan
+          .withDevice("graph.task0", device0) //
+          .withDevice("graph.task1", device1);
+
+      executionPlan.execute();
+
+      executionPlan
+          .withDevice("graph.task0", device2) //
+          .withDevice("graph.task1", device2);
+
+      executionPlan.execute();
     }
 
-    @Test
-    public void testTwoDevicesSerial() throws TornadoExecutionPlanException {
+    multiply(refB, alpha);
+    multiply(refB, alpha);
 
-        FloatArray a = new FloatArray(SIZE);
-        FloatArray b = new FloatArray(SIZE);
-        FloatArray refB = new FloatArray(SIZE);
-        FloatArray refA = new FloatArray(SIZE);
-        float alpha = 0.12f;
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(i, closeTo(a.get(i), DELTA));
+      assertThat(refB.get(i), closeTo(b.get(i), DELTA_05));
+    }
+  }
 
-        Random r = new Random(31);
-        IntStream.range(0, SIZE).forEach(i -> {
-            a.set(i, r.nextFloat());
-            b.set(i, r.nextFloat());
-            refA.set(i, a.get(i));
-            refB.set(i, b.get(i));
-        });
+  @Test
+  public void testTwoDevicesSerial2() throws TornadoExecutionPlanException {
 
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("task0", TestParallelTaskGraph::init, a) //
-                .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
+    FloatArray a = new FloatArray(SIZE);
+    FloatArray b = new FloatArray(SIZE);
+    FloatArray refB = new FloatArray(SIZE);
+    FloatArray refA = new FloatArray(SIZE);
+    float alpha = 0.12f;
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+    Random r = new Random(31);
+    IntStream.range(0, SIZE)
+        .forEach(
+            i -> {
+              a.set(i, r.nextFloat());
+              b.set(i, r.nextFloat());
+              refA.set(i, a.get(i));
+              refB.set(i, b.get(i));
+            });
 
-            // Assume that the first drivers finds, at least two devices
-            int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
-            if (deviceCount < 2) {
-                throw new UnsupportedConfigurationException("Test requires at least two devices");
-            }
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("task0", TestParallelTaskGraph::init, a) //
+            .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
 
-            TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
-            TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
 
-            // Extension for multi-device: This will run one task after the other
-            // (sequentially)
-            executionPlan.withDevice("graph.task0", device0) //
-                    .withDevice("graph.task1", device1); //
+      // Assume that the first drivers finds, at least two devices
+      int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
+      if (deviceCount < 2) {
+        throw new UnsupportedConfigurationException("Test requires at least two devices");
+      }
 
-            executionPlan.execute();
-        }
+      TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
+      TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(i, a.get(i), DELTA);
-            assertEquals((refB.get(i) * i) + alpha, b.get(i), DELTA);
-        }
+      // Extension for multi-device: This will run one task after the other
+      // (sequentially)
+      executionPlan
+          .withDevice("graph.task0", device0) //
+          .withDevice("graph.task1", device1);
 
+      executionPlan.execute();
+
+      executionPlan
+          .withDevice("graph.task0", device1) //
+          .withDevice("graph.task1", device0);
+
+      executionPlan.execute();
+    }
+    multiply(refB, alpha);
+    multiply(refB, alpha);
+
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(i, closeTo(a.get(i), DELTA));
+      assertThat(refB.get(i), closeTo(b.get(i), DELTA_05));
+    }
+  }
+
+  @Test
+  public void testTwoDevicesConcurrent() throws TornadoExecutionPlanException {
+
+    FloatArray a = new FloatArray(SIZE);
+    FloatArray b = new FloatArray(SIZE);
+    FloatArray refB = new FloatArray(SIZE);
+    FloatArray refA = new FloatArray(SIZE);
+    float alpha = 0.12f;
+
+    Random r = new Random(31);
+    IntStream.range(0, SIZE)
+        .forEach(
+            i -> {
+              a.set(i, r.nextFloat());
+              b.set(i, r.nextFloat());
+              refA.set(i, a.get(i));
+              refB.set(i, b.get(i));
+            });
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task("task0", TestParallelTaskGraph::init, a) //
+            .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+
+      // Assume that the first drivers finds, at least two devices
+      int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
+      if (deviceCount < 2) {
+        throw new UnsupportedConfigurationException("Test requires at least two devices");
+      }
+
+      TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
+      TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
+
+      // Extension for multi-device: This will run one task after the other in
+      // parallel
+      executionPlan
+          .withConcurrentDevices() //
+          .withDevice("graph.task0", device0) //
+          .withDevice("graph.task1", device1);
+
+      executionPlan.execute();
     }
 
-    @Test
-    public void testTwoDevicesSerial1() throws TornadoExecutionPlanException {
-
-        FloatArray a = new FloatArray(SIZE);
-        FloatArray b = new FloatArray(SIZE);
-        FloatArray refB = new FloatArray(SIZE);
-        FloatArray refA = new FloatArray(SIZE);
-        float alpha = 0.12f;
-
-        Random r = new Random(31);
-        IntStream.range(0, SIZE).forEach(i -> {
-            a.set(i, r.nextFloat());
-            b.set(i, r.nextFloat());
-            refA.set(i, a.get(i));
-            refB.set(i, b.get(i));
-        });
-
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("task0", TestParallelTaskGraph::init, a) //
-                .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-
-            // Assume that the first drivers finds, at least two devices
-            int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
-            if (deviceCount < 3) {
-                throw new UnsupportedConfigurationException("Test requires at least three devices");
-            }
-
-            TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
-            TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
-            TornadoDevice device2 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(2);
-
-            // Extension for multi-device: This will run one task after the other
-            // (sequentially)
-            executionPlan.withDevice("graph.task0", device0) //
-                    .withDevice("graph.task1", device1);
-
-            executionPlan.execute();
-
-            executionPlan.withDevice("graph.task0", device2) //
-                    .withDevice("graph.task1", device2);
-
-            executionPlan.execute();
-        }
-
-        multiply(refB, alpha);
-        multiply(refB, alpha);
-
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(i, a.get(i), DELTA);
-            assertEquals(refB.get(i), b.get(i), DELTA_05);
-        }
-
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(i, closeTo(a.get(i), DELTA));
+      assertThat((refB.get(i) * i) + alpha, closeTo(b.get(i), DELTA));
     }
+  }
 
-    @Test
-    public void testTwoDevicesSerial2() throws TornadoExecutionPlanException {
+  @Test
+  public void testTwoDevicesConcurrentOnAndOff() throws TornadoExecutionPlanException {
 
-        FloatArray a = new FloatArray(SIZE);
-        FloatArray b = new FloatArray(SIZE);
-        FloatArray refB = new FloatArray(SIZE);
-        FloatArray refA = new FloatArray(SIZE);
-        float alpha = 0.12f;
+    FloatArray a = new FloatArray(SIZE);
+    FloatArray b = new FloatArray(SIZE);
+    FloatArray refB = new FloatArray(SIZE);
+    FloatArray refA = new FloatArray(SIZE);
+    float alpha = 0.12f;
 
-        Random r = new Random(31);
-        IntStream.range(0, SIZE).forEach(i -> {
-            a.set(i, r.nextFloat());
-            b.set(i, r.nextFloat());
-            refA.set(i, a.get(i));
-            refB.set(i, b.get(i));
-        });
+    Random r = new Random(31);
+    IntStream.range(0, SIZE)
+        .forEach(
+            i -> {
+              a.set(i, r.nextFloat());
+              b.set(i, r.nextFloat());
+              refA.set(i, a.get(i));
+              refB.set(i, b.get(i));
+            });
 
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
-                .task("task0", TestParallelTaskGraph::init, a) //
-                .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
+            .task("task0", TestParallelTaskGraph::init, a) //
+            .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
 
-            // Assume that the first drivers finds, at least two devices
-            int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
-            if (deviceCount < 2) {
-                throw new UnsupportedConfigurationException("Test requires at least two devices");
-            }
+      // Assume that the first drivers finds, at least two devices
+      int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
+      if (deviceCount < 2) {
+        throw new UnsupportedConfigurationException("Test requires at least two devices");
+      }
 
-            TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
-            TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
+      TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
+      TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
 
-            // Extension for multi-device: This will run one task after the other
-            // (sequentially)
-            executionPlan.withDevice("graph.task0", device0) //
-                    .withDevice("graph.task1", device1);
+      // Extension for multi-device: This will run one task after the other in
+      // parallel
+      executionPlan
+          .withConcurrentDevices() //
+          .withDevice("graph.task0", device0) //
+          .withDevice("graph.task1", device1);
 
-            executionPlan.execute();
+      // Blocking call
+      executionPlan.execute();
 
-            executionPlan.withDevice("graph.task0", device1) //
-                    .withDevice("graph.task1", device0);
-
-            executionPlan.execute();
-        }
-        multiply(refB, alpha);
-        multiply(refB, alpha);
-
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(i, a.get(i), DELTA);
-            assertEquals(refB.get(i), b.get(i), DELTA_05);
-        }
-
+      // Disable concurrent devices
+      executionPlan
+          .withoutConcurrentDevices() //
+          .execute();
     }
+    multiply(refB, alpha);
+    multiply(refB, alpha);
 
-    @Test
-    public void testTwoDevicesConcurrent() throws TornadoExecutionPlanException {
-
-        FloatArray a = new FloatArray(SIZE);
-        FloatArray b = new FloatArray(SIZE);
-        FloatArray refB = new FloatArray(SIZE);
-        FloatArray refA = new FloatArray(SIZE);
-        float alpha = 0.12f;
-
-        Random r = new Random(31);
-        IntStream.range(0, SIZE).forEach(i -> {
-            a.set(i, r.nextFloat());
-            b.set(i, r.nextFloat());
-            refA.set(i, a.get(i));
-            refB.set(i, b.get(i));
-        });
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("task0", TestParallelTaskGraph::init, a) //
-                .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-
-            // Assume that the first drivers finds, at least two devices
-            int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
-            if (deviceCount < 2) {
-                throw new UnsupportedConfigurationException("Test requires at least two devices");
-            }
-
-            TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
-            TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
-
-            // Extension for multi-device: This will run one task after the other in
-            // parallel
-            executionPlan.withConcurrentDevices() //
-                    .withDevice("graph.task0", device0) //
-                    .withDevice("graph.task1", device1);
-
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(i, a.get(i), DELTA);
-            assertEquals((refB.get(i) * i) + alpha, b.get(i), DELTA);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(i, closeTo(a.get(i), DELTA));
+      assertThat(refB.get(i), closeTo(b.get(i), DELTA_05));
     }
-
-    @Test
-    public void testTwoDevicesConcurrentOnAndOff() throws TornadoExecutionPlanException {
-
-        FloatArray a = new FloatArray(SIZE);
-        FloatArray b = new FloatArray(SIZE);
-        FloatArray refB = new FloatArray(SIZE);
-        FloatArray refA = new FloatArray(SIZE);
-        float alpha = 0.12f;
-
-        Random r = new Random(31);
-        IntStream.range(0, SIZE).forEach(i -> {
-            a.set(i, r.nextFloat());
-            b.set(i, r.nextFloat());
-            refA.set(i, a.get(i));
-            refB.set(i, b.get(i));
-        });
-
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, a, b) //
-                .task("task0", TestParallelTaskGraph::init, a) //
-                .task("task1", TestParallelTaskGraph::multiply, b, alpha) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a, b); //
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-
-            // Assume that the first drivers finds, at least two devices
-            int deviceCount = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getNumDevices();
-            if (deviceCount < 2) {
-                throw new UnsupportedConfigurationException("Test requires at least two devices");
-            }
-
-            TornadoDevice device0 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
-            TornadoDevice device1 = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(1);
-
-            // Extension for multi-device: This will run one task after the other in
-            // parallel
-            executionPlan.withConcurrentDevices() //
-                    .withDevice("graph.task0", device0) //
-                    .withDevice("graph.task1", device1);
-
-            // Blocking call
-            executionPlan.execute();
-
-            // Disable concurrent devices
-            executionPlan.withoutConcurrentDevices() //
-                    .execute();
-        }
-        multiply(refB, alpha);
-        multiply(refB, alpha);
-
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(i, a.get(i), DELTA);
-            assertEquals(refB.get(i), b.get(i), DELTA_05);
-        }
-    }
+  }
 }
