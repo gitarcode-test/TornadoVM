@@ -18,16 +18,18 @@
 
 package uk.ac.manchester.tornado.unittests.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.DataRange;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
@@ -50,450 +52,457 @@ import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 /**
  * How to run?
  *
- * <p>
- * <code>
+ * <p><code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.api.TestAPI
  * </code>
- * </p>
  */
 public class TestAPI extends TornadoTestBase {
-    // CHECKSTYLE:OFF
+  // CHECKSTYLE:OFF
 
-    @Test
-    public void testSegmentsByte() {
-        ByteArray dataA = ByteArray.fromElements((byte) 0, (byte) 1, (byte) 2, (byte) 3);
-        ByteArray dataB = ByteArray.fromArray(new byte[] { 0, 1, 2, 3 });
+  @Test
+  public void testSegmentsByte() {
+    ByteArray dataA = ByteArray.fromElements((byte) 0, (byte) 1, (byte) 2, (byte) 3);
+    ByteArray dataB = ByteArray.fromArray(new byte[] {0, 1, 2, 3});
 
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(dataA.get(i), dataB.get(i));
-        }
-        byte[] fArray = dataA.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArray[i], dataA.get(i));
-        }
-
-        byte[] fArrayB = dataB.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArrayB[i], dataB.get(i));
-        }
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(dataA.get(i), equalTo(dataB.get(i)));
+    }
+    byte[] fArray = dataA.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArray[i], equalTo(dataA.get(i)));
     }
 
-    @Test
-    public void testSegmentsChar() {
-        CharArray dataA = CharArray.fromElements((char) 0, (char) 1, (char) 2, (char) 3);
-        CharArray dataB = CharArray.fromArray(new char[] { 0, 1, 2, 3 });
+    byte[] fArrayB = dataB.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArrayB[i], equalTo(dataB.get(i)));
+    }
+  }
 
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(dataA.get(i), dataB.get(i));
-        }
-        char[] fArray = dataA.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArray[i], dataA.get(i));
-        }
+  @Test
+  public void testSegmentsChar() {
+    CharArray dataA = CharArray.fromElements((char) 0, (char) 1, (char) 2, (char) 3);
+    CharArray dataB = CharArray.fromArray(new char[] {0, 1, 2, 3});
 
-        char[] fArrayB = dataB.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArrayB[i], dataB.get(i));
-        }
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(dataA.get(i), equalTo(dataB.get(i)));
+    }
+    char[] fArray = dataA.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArray[i], equalTo(dataA.get(i)));
     }
 
-    @Test
-    public void testSegmentsShort() {
-        ShortArray dataA = ShortArray.fromElements((short) 0, (short) 1, (short) 2, (short) 3);
-        ShortArray dataB = ShortArray.fromArray(new short[] { 0, 1, 2, 3 });
+    char[] fArrayB = dataB.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArrayB[i], equalTo(dataB.get(i)));
+    }
+  }
 
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(dataA.get(i), dataB.get(i));
-        }
-        short[] fArray = dataA.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArray[i], dataA.get(i));
-        }
+  @Test
+  public void testSegmentsShort() {
+    ShortArray dataA = ShortArray.fromElements((short) 0, (short) 1, (short) 2, (short) 3);
+    ShortArray dataB = ShortArray.fromArray(new short[] {0, 1, 2, 3});
 
-        short[] fArrayB = dataB.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArrayB[i], dataB.get(i));
-        }
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(dataA.get(i), equalTo(dataB.get(i)));
+    }
+    short[] fArray = dataA.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArray[i], equalTo(dataA.get(i)));
     }
 
-    @Test
-    public void testSegmentsIntegers() {
-        IntArray dataA = IntArray.fromElements(0, 1, 2, 3);
-        IntArray dataB = IntArray.fromArray(new int[] { 0, 1, 2, 3 });
+    short[] fArrayB = dataB.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArrayB[i], equalTo(dataB.get(i)));
+    }
+  }
 
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(dataA.get(i), dataB.get(i));
-        }
-        int[] fArray = dataA.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArray[i], dataA.get(i));
-        }
+  @Test
+  public void testSegmentsIntegers() {
+    IntArray dataA = IntArray.fromElements(0, 1, 2, 3);
+    IntArray dataB = IntArray.fromArray(new int[] {0, 1, 2, 3});
 
-        int[] fArrayB = dataB.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArrayB[i], dataB.get(i));
-        }
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(dataA.get(i), equalTo(dataB.get(i)));
+    }
+    int[] fArray = dataA.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArray[i], equalTo(dataA.get(i)));
     }
 
-    @Test
-    public void testSegmentsLong() {
-        LongArray dataA = LongArray.fromElements(0, 1, 2, 3);
-        LongArray dataB = LongArray.fromArray(new long[] { 0, 1, 2, 3 });
+    int[] fArrayB = dataB.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArrayB[i], equalTo(dataB.get(i)));
+    }
+  }
 
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(dataA.get(i), dataB.get(i));
-        }
-        long[] fArray = dataA.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArray[i], dataA.get(i));
-        }
+  @Test
+  public void testSegmentsLong() {
+    LongArray dataA = LongArray.fromElements(0, 1, 2, 3);
+    LongArray dataB = LongArray.fromArray(new long[] {0, 1, 2, 3});
 
-        long[] fArrayB = dataB.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArrayB[i], dataB.get(i));
-        }
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(dataA.get(i), equalTo(dataB.get(i)));
+    }
+    long[] fArray = dataA.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArray[i], equalTo(dataA.get(i)));
     }
 
-    @Test
-    public void testSegmentsFloats() {
-        FloatArray dataA = FloatArray.fromElements(0, 1, 2, 3);
-        FloatArray dataB = FloatArray.fromArray(new float[] { 0, 1, 2, 3 });
+    long[] fArrayB = dataB.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArrayB[i], equalTo(dataB.get(i)));
+    }
+  }
 
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(dataA.get(i), dataB.get(i), 0.01f);
-        }
-        float[] fArray = dataA.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArray[i], dataA.get(i), 0.01f);
-        }
+  @Test
+  public void testSegmentsFloats() {
+    FloatArray dataA = FloatArray.fromElements(0, 1, 2, 3);
+    FloatArray dataB = FloatArray.fromArray(new float[] {0, 1, 2, 3});
 
-        float[] fArrayB = dataB.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArrayB[i], dataB.get(i), 0.01f);
-        }
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(dataA.get(i), closeTo(dataB.get(i), 0.01f));
+    }
+    float[] fArray = dataA.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArray[i], closeTo(dataA.get(i), 0.01f));
     }
 
-    @Test
-    public void testSegmentsDouble() {
-        DoubleArray dataA = DoubleArray.fromElements(0, 1, 2, 3);
-        DoubleArray dataB = DoubleArray.fromArray(new double[] { 0, 1, 2, 3 });
+    float[] fArrayB = dataB.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArrayB[i], closeTo(dataB.get(i), 0.01f));
+    }
+  }
 
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(dataA.get(i), dataB.get(i), 0.001);
-        }
-        double[] fArray = dataA.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArray[i], dataA.get(i), 0.001);
-        }
+  @Test
+  public void testSegmentsDouble() {
+    DoubleArray dataA = DoubleArray.fromElements(0, 1, 2, 3);
+    DoubleArray dataB = DoubleArray.fromArray(new double[] {0, 1, 2, 3});
 
-        double[] fArrayB = dataB.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArrayB[i], dataB.get(i), 0.001);
-        }
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(dataA.get(i), closeTo(dataB.get(i), 0.001));
+    }
+    double[] fArray = dataA.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArray[i], closeTo(dataA.get(i), 0.001));
     }
 
-    /**
-     * Perform the copy out under demand. It performs a copy from the device to the host of the entire array via the execution result.
-     */
-    @Test
-    public void testSegmentsHalfFloats() {
-        HalfFloatArray dataA = HalfFloatArray.fromElements(new HalfFloat(0), new HalfFloat(1), new HalfFloat(2), new HalfFloat(3));
-        HalfFloatArray dataB = HalfFloatArray.fromArray(new HalfFloat[] { new HalfFloat(0), new HalfFloat(1), new HalfFloat(2), new HalfFloat(3) });
+    double[] fArrayB = dataB.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArrayB[i], closeTo(dataB.get(i), 0.001));
+    }
+  }
 
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(dataA.get(i).getFloat32(), dataB.get(i).getFloat32(), 0.01f);
-        }
-        HalfFloat[] fArray = dataA.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArray[i].getFloat32(), dataA.get(i).getFloat32(), 0.01f);
-        }
+  /**
+   * Perform the copy out under demand. It performs a copy from the device to the host of the entire
+   * array via the execution result.
+   */
+  @Test
+  public void testSegmentsHalfFloats() {
+    HalfFloatArray dataA =
+        HalfFloatArray.fromElements(
+            new HalfFloat(0), new HalfFloat(1), new HalfFloat(2), new HalfFloat(3));
+    HalfFloatArray dataB =
+        HalfFloatArray.fromArray(
+            new HalfFloat[] {
+              new HalfFloat(0), new HalfFloat(1), new HalfFloat(2), new HalfFloat(3)
+            });
 
-        HalfFloat[] fArrayB = dataB.toHeapArray();
-        for (int i = 0; i < dataA.getSize(); i++) {
-            assertEquals(fArrayB[i].getFloat32(), dataB.get(i).getFloat32(), 0.01f);
-        }
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(dataA.get(i).getFloat32(), closeTo(dataB.get(i).getFloat32(), 0.01f));
+    }
+    HalfFloat[] fArray = dataA.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArray[i].getFloat32(), closeTo(dataA.get(i).getFloat32(), 0.01f));
     }
 
-    @Test
-    public void testLazyCopyOut() throws TornadoExecutionPlanException {
-        final int N = 1024;
-        int size = 20;
-        IntArray data = new IntArray(N);
+    HalfFloat[] fArrayB = dataB.toHeapArray();
+    for (int i = 0; i < dataA.getSize(); i++) {
+      assertThat(fArrayB[i].getFloat32(), closeTo(dataB.get(i).getFloat32(), 0.01f));
+    }
+  }
 
-        data.init(size);
+  @Test
+  public void testLazyCopyOut() throws TornadoExecutionPlanException {
+    final int N = 1024;
+    int size = 20;
+    IntArray data = new IntArray(N);
 
-        TaskGraph taskGraph = new TaskGraph("s0");
-        assertNotNull(taskGraph);
+    data.init(size);
 
-        taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestArrays::addAccumulator, data, 1) //
-                .transferToHost(DataTransferMode.UNDER_DEMAND, data);
+    TaskGraph taskGraph = new TaskGraph("s0");
+    assertThat(taskGraph, not(nullValue()));
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+    taskGraph
+        .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+        .task("t0", TestArrays::addAccumulator, data, 1) //
+        .transferToHost(DataTransferMode.UNDER_DEMAND, data);
 
-            TornadoExecutionResult executionResult = executionPlan.execute();
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
 
-            // Force data transfers from D->H after the execution of a task-graph
-            executionResult.transferToHost(data);
-        }
+      TornadoExecutionResult executionResult = executionPlan.execute();
 
-        for (int i = 0; i < N; i++) {
-            assertEquals(21, data.get(i));
-        }
+      // Force data transfers from D->H after the execution of a task-graph
+      executionResult.transferToHost(data);
     }
 
-    /**
-     * Perform the copy out under demand. It performs a copy from the device to the host of the entire array via the execution result.
-     * In this test, input and output use the same array.
-     */
-    @Test
-    public void testLazyCopyOut2() throws TornadoExecutionPlanException {
-        final int N = 128;
-        int size = 20;
+    for (int i = 0; i < N; i++) {
+      assertThat(21, equalTo(data.get(i)));
+    }
+  }
 
-        IntArray data = new IntArray(N);
+  /**
+   * Perform the copy out under demand. It performs a copy from the device to the host of the entire
+   * array via the execution result. In this test, input and output use the same array.
+   */
+  @Test
+  public void testLazyCopyOut2() throws TornadoExecutionPlanException {
+    final int N = 128;
+    int size = 20;
 
-        IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
+    IntArray data = new IntArray(N);
 
-        TaskGraph taskGraph = new TaskGraph("s0");
-        assertNotNull(taskGraph);
+    IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
 
-        taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data);
-        taskGraph.task("t0", TestArrays::addAccumulator, data, 1);
-        taskGraph.transferToHost(DataTransferMode.UNDER_DEMAND, data);
+    TaskGraph taskGraph = new TaskGraph("s0");
+    assertThat(taskGraph, not(nullValue()));
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+    taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data);
+    taskGraph.task("t0", TestArrays::addAccumulator, data, 1);
+    taskGraph.transferToHost(DataTransferMode.UNDER_DEMAND, data);
 
-            TornadoExecutionResult executionResult = executionPlan.execute();
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
 
-            executionResult.transferToHost(data);
-        }
+      TornadoExecutionResult executionResult = executionPlan.execute();
 
-        for (int i = 0; i < N; i++) {
-            assertEquals(21, data.get(i));
-        }
+      executionResult.transferToHost(data);
     }
 
-    /**
-     * Perform the copy out under demand. It performs a copy of a subset of the output array.
-     */
-    @Test
-    public void testLazyPartialCopyOut() throws TornadoExecutionPlanException {
-        final int N = 1024;
-        int size = 20;
-        IntArray data = new IntArray(N);
+    for (int i = 0; i < N; i++) {
+      assertThat(21, equalTo(data.get(i)));
+    }
+  }
 
-        IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
+  /** Perform the copy out under demand. It performs a copy of a subset of the output array. */
+  @Test
+  public void testLazyPartialCopyOut() throws TornadoExecutionPlanException {
+    final int N = 1024;
+    int size = 20;
+    IntArray data = new IntArray(N);
 
-        TaskGraph taskGraph = new TaskGraph("s0");
-        assertNotNull(taskGraph);
+    IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
 
-        taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestArrays::addAccumulator, data, 1) //
-                .transferToHost(DataTransferMode.UNDER_DEMAND, data);
+    TaskGraph taskGraph = new TaskGraph("s0");
+    assertThat(taskGraph, not(nullValue()));
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            TornadoExecutionResult executionResult = executionPlan.execute();
+    taskGraph
+        .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+        .task("t0", TestArrays::addAccumulator, data, 1) //
+        .transferToHost(DataTransferMode.UNDER_DEMAND, data);
 
-            DataRange dataRange = new DataRange(data);
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      TornadoExecutionResult executionResult = executionPlan.execute();
 
-            executionResult.transferToHost(dataRange.withSize(N / 2));
+      DataRange dataRange = new DataRange(data);
 
-            executionResult.transferToHost(dataRange.withOffset(N / 2).withSize(N / 2));
-        }
+      executionResult.transferToHost(dataRange.withSize(N / 2));
 
-        for (int i = 0; i < N; i++) {
-            assertEquals(21, data.get(i));
-        }
+      executionResult.transferToHost(dataRange.withOffset(N / 2).withSize(N / 2));
     }
 
-    @Test
-    public void testWarmUp() throws TornadoExecutionPlanException {
-        final int N = 128;
-        int size = 20;
+    for (int i = 0; i < N; i++) {
+      assertThat(21, equalTo(data.get(i)));
+    }
+  }
 
-        IntArray data = new IntArray(N);
+  @Test
+  public void testWarmUp() throws TornadoExecutionPlanException {
+    final int N = 128;
+    int size = 20;
 
-        IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
+    IntArray data = new IntArray(N);
 
-        TaskGraph taskGraph = new TaskGraph("s0");
-        assertNotNull(taskGraph);
+    IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
 
-        taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestArrays::addAccumulator, data, 1) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+    TaskGraph taskGraph = new TaskGraph("s0");
+    assertThat(taskGraph, not(nullValue()));
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withWarmUp() //
-                    .execute();
-        }
+    taskGraph
+        .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+        .task("t0", TestArrays::addAccumulator, data, 1) //
+        .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
 
-        for (int i = 0; i < N; i++) {
-            assertEquals(21, data.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withWarmUp() //
+          .execute();
     }
 
-    @Test
-    public void testBuildWithSegmentsFloat() {
+    for (int i = 0; i < N; i++) {
+      assertThat(21, equalTo(data.get(i)));
+    }
+  }
 
-        final int n = 10;
-        // Allocate 10 elements
-        MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_FLOAT.byteSize() * n);
+  @Test
+  public void testBuildWithSegmentsFloat() {
 
-        // Set 10 elements
-        for (int i = 0; i < n; i++) {
-            m.setAtIndex(ValueLayout.JAVA_FLOAT, i, 10 + i);
-        }
+    final int n = 10;
+    // Allocate 10 elements
+    MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_FLOAT.byteSize() * n);
 
-        // Factory method to build a float array from a segment
-        FloatArray floatArray = FloatArray.fromSegment(m);
-
-        for (int i = 0; i < n; i++) {
-            assertEquals(10 + i, floatArray.get(i), 0.001f);
-        }
+    // Set 10 elements
+    for (int i = 0; i < n; i++) {
+      m.setAtIndex(ValueLayout.JAVA_FLOAT, i, 10 + i);
     }
 
-    @Test
-    public void testBuildWithSegmentsDouble() {
+    // Factory method to build a float array from a segment
+    FloatArray floatArray = FloatArray.fromSegment(m);
 
-        final int n = 10;
-        // Allocate 10 elements
-        MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_DOUBLE.byteSize() * n);
+    for (int i = 0; i < n; i++) {
+      assertThat(10 + i, closeTo(floatArray.get(i), 0.001f));
+    }
+  }
 
-        // Set 10 elements
-        for (int i = 0; i < n; i++) {
-            m.setAtIndex(ValueLayout.JAVA_DOUBLE, i, 10 + i);
-        }
+  @Test
+  public void testBuildWithSegmentsDouble() {
 
-        // Factory method to build a double array from a segment
-        DoubleArray doubleArray = DoubleArray.fromSegment(m);
+    final int n = 10;
+    // Allocate 10 elements
+    MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_DOUBLE.byteSize() * n);
 
-        for (int i = 0; i < n; i++) {
-            assertEquals(10 + i, doubleArray.get(i), 0.001);
-        }
+    // Set 10 elements
+    for (int i = 0; i < n; i++) {
+      m.setAtIndex(ValueLayout.JAVA_DOUBLE, i, 10 + i);
     }
 
-    @Test
-    public void testBuildWithSegmentsInt() {
+    // Factory method to build a double array from a segment
+    DoubleArray doubleArray = DoubleArray.fromSegment(m);
 
-        final int n = 10;
-        // Allocate 10 elements
-        MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_INT.byteSize() * n);
+    for (int i = 0; i < n; i++) {
+      assertThat(10 + i, closeTo(doubleArray.get(i), 0.001));
+    }
+  }
 
-        // Set 10 elements
-        for (int i = 0; i < n; i++) {
-            m.setAtIndex(ValueLayout.JAVA_INT, i, 10 + i);
-        }
+  @Test
+  public void testBuildWithSegmentsInt() {
 
-        // Factory method to build an integer array from a segment
-        IntArray intArray = IntArray.fromSegment(m);
+    final int n = 10;
+    // Allocate 10 elements
+    MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_INT.byteSize() * n);
 
-        for (int i = 0; i < n; i++) {
-            assertEquals(10 + i, intArray.get(i));
-        }
+    // Set 10 elements
+    for (int i = 0; i < n; i++) {
+      m.setAtIndex(ValueLayout.JAVA_INT, i, 10 + i);
     }
 
-    @Test
-    public void testBuildWithSegmentsLong() {
+    // Factory method to build an integer array from a segment
+    IntArray intArray = IntArray.fromSegment(m);
 
-        final int n = 10;
-        // Allocate 10 elements
-        MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_LONG.byteSize() * n);
+    for (int i = 0; i < n; i++) {
+      assertThat(10 + i, equalTo(intArray.get(i)));
+    }
+  }
 
-        // Set 10 elements
-        for (int i = 0; i < n; i++) {
-            m.setAtIndex(ValueLayout.JAVA_LONG, i, 10 + i);
-        }
+  @Test
+  public void testBuildWithSegmentsLong() {
 
-        // Factory method to build a long array from a segment
-        LongArray longArray = LongArray.fromSegment(m);
+    final int n = 10;
+    // Allocate 10 elements
+    MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_LONG.byteSize() * n);
 
-        for (int i = 0; i < n; i++) {
-            assertEquals(10 + i, longArray.get(i));
-        }
+    // Set 10 elements
+    for (int i = 0; i < n; i++) {
+      m.setAtIndex(ValueLayout.JAVA_LONG, i, 10 + i);
     }
 
-    @Test
-    public void testBuildWithSegmentsShort() {
+    // Factory method to build a long array from a segment
+    LongArray longArray = LongArray.fromSegment(m);
 
-        final int n = 10;
-        // Allocate 10 elements
-        MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_SHORT.byteSize() * n);
+    for (int i = 0; i < n; i++) {
+      assertThat(10 + i, equalTo(longArray.get(i)));
+    }
+  }
 
-        // Set 10 elements
-        for (int i = 0; i < n; i++) {
-            m.setAtIndex(ValueLayout.JAVA_SHORT, i, (short) (10 + i));
-        }
+  @Test
+  public void testBuildWithSegmentsShort() {
 
-        // Factory method to build a short array from a segment
-        ShortArray shortArray = ShortArray.fromSegment(m);
+    final int n = 10;
+    // Allocate 10 elements
+    MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_SHORT.byteSize() * n);
 
-        for (int i = 0; i < n; i++) {
-            assertEquals((short) 10 + i, shortArray.get(i));
-        }
+    // Set 10 elements
+    for (int i = 0; i < n; i++) {
+      m.setAtIndex(ValueLayout.JAVA_SHORT, i, (short) (10 + i));
     }
 
-    @Test
-    public void testBuildWithSegmentsByte() {
+    // Factory method to build a short array from a segment
+    ShortArray shortArray = ShortArray.fromSegment(m);
 
-        final int n = 10;
-        // Allocate 10 elements
-        MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_BYTE.byteSize() * n);
+    for (int i = 0; i < n; i++) {
+      assertThat((short) 10 + i, equalTo(shortArray.get(i)));
+    }
+  }
 
-        // Set 10 elements
-        for (int i = 0; i < n; i++) {
-            m.setAtIndex(ValueLayout.JAVA_BYTE, i, (byte) (10 + i));
-        }
+  @Test
+  public void testBuildWithSegmentsByte() {
 
-        ByteArray array = ByteArray.fromSegment(m);
+    final int n = 10;
+    // Allocate 10 elements
+    MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_BYTE.byteSize() * n);
 
-        for (int i = 0; i < n; i++) {
-            assertEquals((byte) 10 + i, array.get(i));
-        }
+    // Set 10 elements
+    for (int i = 0; i < n; i++) {
+      m.setAtIndex(ValueLayout.JAVA_BYTE, i, (byte) (10 + i));
     }
 
-    @Test
-    public void testBuildWithSegmentsChar() {
+    ByteArray array = ByteArray.fromSegment(m);
 
-        final int n = 10;
-        // Allocate 10 elements
-        MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_CHAR.byteSize() * n);
+    for (int i = 0; i < n; i++) {
+      assertThat((byte) 10 + i, equalTo(array.get(i)));
+    }
+  }
 
-        // Set 10 elements
-        for (int i = 0; i < n; i++) {
-            m.setAtIndex(ValueLayout.JAVA_CHAR, i, (char) (10 + i));
-        }
+  @Test
+  public void testBuildWithSegmentsChar() {
 
-        CharArray charArray = CharArray.fromSegment(m);
+    final int n = 10;
+    // Allocate 10 elements
+    MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_CHAR.byteSize() * n);
 
-        for (int i = 0; i < n; i++) {
-            assertEquals((char) 10 + i, charArray.get(i));
-        }
+    // Set 10 elements
+    for (int i = 0; i < n; i++) {
+      m.setAtIndex(ValueLayout.JAVA_CHAR, i, (char) (10 + i));
     }
 
-    @Test
-    public void testBuildWithSegmentsHalfFloat() {
+    CharArray charArray = CharArray.fromSegment(m);
 
-        final int n = 10;
-        // Allocate 10 elements
-        MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_SHORT.byteSize() * n);
+    for (int i = 0; i < n; i++) {
+      assertThat((char) 10 + i, equalTo(charArray.get(i)));
+    }
+  }
 
-        // Set 10 elements
-        for (int i = 0; i < n; i++) {
-            m.setAtIndex(ValueLayout.JAVA_SHORT, i, Float.floatToFloat16(10 + i));
-        }
+  @Test
+  public void testBuildWithSegmentsHalfFloat() {
 
-        // Factory method to build a float array from a segment
-        HalfFloatArray halfFloatArray = HalfFloatArray.fromSegment(m);
+    final int n = 10;
+    // Allocate 10 elements
+    MemorySegment m = Arena.ofAuto().allocate(ValueLayout.JAVA_SHORT.byteSize() * n);
 
-        for (int i = 0; i < n; i++) {
-            assertEquals(10 + i, halfFloatArray.get(i).getFloat32(), 0.001f);
-        }
+    // Set 10 elements
+    for (int i = 0; i < n; i++) {
+      m.setAtIndex(ValueLayout.JAVA_SHORT, i, Float.floatToFloat16(10 + i));
     }
 
-    // CHECKSTYLE:ON
+    // Factory method to build a float array from a segment
+    HalfFloatArray halfFloatArray = HalfFloatArray.fromSegment(m);
+
+    for (int i = 0; i < n; i++) {
+      assertThat(10 + i, closeTo(halfFloatArray.get(i).getFloat32(), 0.001f));
+    }
+  }
+
+  // CHECKSTYLE:ON
 }
