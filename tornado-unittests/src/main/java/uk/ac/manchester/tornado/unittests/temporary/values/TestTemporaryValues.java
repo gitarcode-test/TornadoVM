@@ -18,13 +18,12 @@
 
 package uk.ac.manchester.tornado.unittests.temporary.values;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -35,59 +34,64 @@ import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.temporary.values.TestTemporaryValues
  * </code>
  */
 public class TestTemporaryValues extends TornadoTestBase {
-    private static void computeWithTemporaryValues(FloatArray a, FloatArray b, FloatArray c) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            float valueA = a.get(i);
-            float valueB = b.get(i);
+  private static void computeWithTemporaryValues(FloatArray a, FloatArray b, FloatArray c) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      float valueA = a.get(i);
+      float valueB = b.get(i);
 
-            a.set(i, valueA + b.get(i));
-            b.set(i, valueA * 2);
-            c.set(i, valueA + valueB);
-        }
+      a.set(i, valueA + b.get(i));
+      b.set(i, valueA * 2);
+      c.set(i, valueA + valueB);
+    }
+  }
+
+  @Test
+  public void testTemporaryValues01() throws TornadoExecutionPlanException {
+    final int numElements = 8;
+    FloatArray aTornado = new FloatArray(numElements);
+    FloatArray bTornado = new FloatArray(numElements);
+    FloatArray cTornado = new FloatArray(numElements);
+    FloatArray aJava = new FloatArray(numElements);
+    FloatArray bJava = new FloatArray(numElements);
+    FloatArray cJava = new FloatArray(numElements);
+
+    Random r = new Random();
+    IntStream.range(0, aJava.getSize())
+        .forEach(
+            idx -> {
+              aTornado.set(idx, r.nextFloat());
+              aJava.set(idx, aTornado.get(idx));
+              bTornado.set(idx, r.nextFloat());
+              bJava.set(idx, bTornado.get(idx));
+            });
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, aTornado, bTornado) //
+            .task(
+                "t0",
+                TestTemporaryValues::computeWithTemporaryValues,
+                aTornado,
+                bTornado,
+                cTornado) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, aTornado, bTornado, cTornado);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testTemporaryValues01() throws TornadoExecutionPlanException {
-        final int numElements = 8;
-        FloatArray aTornado = new FloatArray(numElements);
-        FloatArray bTornado = new FloatArray(numElements);
-        FloatArray cTornado = new FloatArray(numElements);
-        FloatArray aJava = new FloatArray(numElements);
-        FloatArray bJava = new FloatArray(numElements);
-        FloatArray cJava = new FloatArray(numElements);
+    computeWithTemporaryValues(aJava, bJava, cJava);
 
-        Random r = new Random();
-        IntStream.range(0, aJava.getSize()).forEach(idx -> {
-            aTornado.set(idx, r.nextFloat());
-            aJava.set(idx, aTornado.get(idx));
-            bTornado.set(idx, r.nextFloat());
-            bJava.set(idx, bTornado.get(idx));
-        });
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, aTornado, bTornado) //
-                .task("t0", TestTemporaryValues::computeWithTemporaryValues, aTornado, bTornado, cTornado) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, aTornado, bTornado, cTornado);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        computeWithTemporaryValues(aJava, bJava, cJava);
-
-        for (int i = 0; i < aJava.getSize(); i++) {
-            assertEquals(aJava.get(i), aTornado.get(i), 0.001f);
-            assertEquals(bJava.get(i), bTornado.get(i), 0.001f);
-            assertEquals(cJava.get(i), cTornado.get(i), 0.001f);
-        }
+    for (int i = 0; i < aJava.getSize(); i++) {
+      assertThat(aJava.get(i), closeTo(aTornado.get(i), 0.001f));
+      assertThat(bJava.get(i), closeTo(bTornado.get(i), 0.001f));
+      assertThat(cJava.get(i), closeTo(cTornado.get(i), 0.001f));
     }
+  }
 }
