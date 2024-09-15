@@ -17,10 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.api;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -34,212 +34,220 @@ import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * The unit-tests in this class check that the {@link KernelContext} parameter
- * can be passed in any sequence.
- * <p>
- * How to run?
- * </p>
- * <code>
+ * The unit-tests in this class check that the {@link KernelContext} parameter can be passed in any
+ * sequence.
+ *
+ * <p>How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.kernelcontext.api.TestVectorAdditionKernelContext
  * </code>
  */
 public class TestVectorAdditionKernelContext extends TornadoTestBase {
-    public static void vectorAddJava(IntArray a, IntArray b, IntArray c) {
-        for (int i = 0; i < c.getSize(); i++) {
-            c.set(i, a.get(i) + b.get(i));
-        }
+  public static void vectorAddJava(IntArray a, IntArray b, IntArray c) {
+    for (int i = 0; i < c.getSize(); i++) {
+      c.set(i, a.get(i) + b.get(i));
+    }
+  }
+
+  public static void vectorAdd(KernelContext context, IntArray a, IntArray b, IntArray c) {
+    c.set(context.globalIdx, a.get(context.globalIdx) + b.get(context.globalIdx));
+  }
+
+  public static void vectorAdd(IntArray a, KernelContext context, IntArray b, IntArray c) {
+    c.set(context.globalIdx, a.get(context.globalIdx) + b.get(context.globalIdx));
+  }
+
+  public static void vectorAdd(IntArray a, IntArray b, KernelContext context, IntArray c) {
+    c.set(context.globalIdx, a.get(context.globalIdx) + b.get(context.globalIdx));
+  }
+
+  public static void vectorAdd(IntArray a, IntArray b, IntArray c, KernelContext context) {
+    c.set(context.globalIdx, a.get(context.globalIdx) + b.get(context.globalIdx));
+  }
+
+  @Test
+  public void vectorAddKernelContext01() throws TornadoExecutionPlanException {
+    final int size = 16;
+    IntArray a = new IntArray(size);
+    IntArray b = new IntArray(size);
+    IntArray cJava = new IntArray(size);
+    IntArray cTornado = new IntArray(size);
+
+    a.init(10);
+    b.init(20);
+
+    WorkerGrid worker = new WorkerGrid1D(size);
+    GridScheduler gridScheduler = new GridScheduler("s0.t0", worker);
+    KernelContext context = new KernelContext();
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestVectorAdditionKernelContext::vectorAdd, context, a, b, cTornado) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
+
+    // Change the Grid
+    worker.setGlobalWork(size, 1, 1);
+    worker.setLocalWorkToNull();
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(gridScheduler) //
+          .execute();
     }
 
-    public static void vectorAdd(KernelContext context, IntArray a, IntArray b, IntArray c) {
-        c.set(context.globalIdx, a.get(context.globalIdx) + b.get(context.globalIdx));
+    vectorAddJava(a, b, cJava);
+
+    for (int i = 0; i < size; i++) {
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
+    }
+  }
+
+  @Test
+  public void vectorAddKernelContext02() throws TornadoExecutionPlanException {
+    final int size = 16;
+    IntArray a = new IntArray(size);
+    IntArray b = new IntArray(size);
+    IntArray cJava = new IntArray(size);
+    IntArray cTornado = new IntArray(size);
+
+    a.init(10);
+    b.init(20);
+
+    WorkerGrid worker = new WorkerGrid1D(size);
+    GridScheduler gridScheduler = new GridScheduler();
+    gridScheduler.setWorkerGrid("s0.t0", worker);
+    KernelContext context = new KernelContext();
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestVectorAdditionKernelContext::vectorAdd, a, context, b, cTornado) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(gridScheduler) //
+          .execute();
     }
 
-    public static void vectorAdd(IntArray a, KernelContext context, IntArray b, IntArray c) {
-        c.set(context.globalIdx, a.get(context.globalIdx) + b.get(context.globalIdx));
+    vectorAddJava(a, b, cJava);
+
+    for (int i = 0; i < size; i++) {
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
+    }
+  }
+
+  @Test
+  public void vectorAddKernelContext03() throws TornadoExecutionPlanException {
+    final int size = 16;
+    IntArray a = new IntArray(size);
+    IntArray b = new IntArray(size);
+    IntArray cJava = new IntArray(size);
+    IntArray cTornado = new IntArray(size);
+
+    a.init(10);
+    b.init(20);
+
+    WorkerGrid worker = new WorkerGrid1D(size);
+    GridScheduler gridScheduler = new GridScheduler();
+    gridScheduler.setWorkerGrid("s0.t0", worker);
+    KernelContext context = new KernelContext();
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestVectorAdditionKernelContext::vectorAdd, a, b, context, cTornado) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(gridScheduler) //
+          .execute();
     }
 
-    public static void vectorAdd(IntArray a, IntArray b, KernelContext context, IntArray c) {
-        c.set(context.globalIdx, a.get(context.globalIdx) + b.get(context.globalIdx));
+    vectorAddJava(a, b, cJava);
+
+    for (int i = 0; i < size; i++) {
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
+    }
+  }
+
+  @Test
+  public void vectorAddKernelContext04() throws TornadoExecutionPlanException {
+    final int size = 16;
+    IntArray a = new IntArray(size);
+    IntArray b = new IntArray(size);
+    IntArray cJava = new IntArray(size);
+    IntArray cTornado = new IntArray(size);
+
+    a.init(10);
+    b.init(20);
+
+    WorkerGrid worker = new WorkerGrid1D(size);
+    GridScheduler gridScheduler = new GridScheduler();
+    gridScheduler.setWorkerGrid("s0.t0", worker);
+    KernelContext context = new KernelContext();
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestVectorAdditionKernelContext::vectorAdd, a, b, cTornado, context) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(gridScheduler) //
+          .execute();
     }
 
-    public static void vectorAdd(IntArray a, IntArray b, IntArray c, KernelContext context) {
-        c.set(context.globalIdx, a.get(context.globalIdx) + b.get(context.globalIdx));
+    vectorAddJava(a, b, cJava);
+
+    for (int i = 0; i < size; i++) {
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
+    }
+  }
+
+  @Test
+  public void vectorAddKernelContext05() throws TornadoExecutionPlanException {
+    final int size = 16;
+    IntArray a = new IntArray(size);
+    IntArray b = new IntArray(size);
+    IntArray cJava = new IntArray(size);
+    IntArray cTornado = new IntArray(size);
+
+    a.init(10);
+    b.init(20);
+
+    WorkerGrid worker = new WorkerGrid1D(size);
+    GridScheduler gridScheduler = new GridScheduler("s0.t0", worker);
+    KernelContext context = new KernelContext();
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestVectorAdditionKernelContext::vectorAdd, context, a, b, cTornado) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
+
+    // Change the Grid
+    worker.setGlobalWork(size, 1, 1);
+    worker.setLocalWorkToNull();
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withWarmUp() //
+          .withGridScheduler(gridScheduler) //
+          .execute();
     }
 
-    @Test
-    public void vectorAddKernelContext01() throws TornadoExecutionPlanException {
-        final int size = 16;
-        IntArray a = new IntArray(size);
-        IntArray b = new IntArray(size);
-        IntArray cJava = new IntArray(size);
-        IntArray cTornado = new IntArray(size);
+    vectorAddJava(a, b, cJava);
 
-        a.init(10);
-        b.init(20);
-
-        WorkerGrid worker = new WorkerGrid1D(size);
-        GridScheduler gridScheduler = new GridScheduler("s0.t0", worker);
-        KernelContext context = new KernelContext();
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
-                .task("t0", TestVectorAdditionKernelContext::vectorAdd, context, a, b, cTornado) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
-
-        // Change the Grid
-        worker.setGlobalWork(size, 1, 1);
-        worker.setLocalWorkToNull();
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(gridScheduler) //
-                    .execute();
-        }
-
-        vectorAddJava(a, b, cJava);
-
-        for (int i = 0; i < size; i++) {
-            assertEquals(cJava.get(i), cTornado.get(i));
-        }
+    for (int i = 0; i < size; i++) {
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
-
-    @Test
-    public void vectorAddKernelContext02() throws TornadoExecutionPlanException {
-        final int size = 16;
-        IntArray a = new IntArray(size);
-        IntArray b = new IntArray(size);
-        IntArray cJava = new IntArray(size);
-        IntArray cTornado = new IntArray(size);
-
-        a.init(10);
-        b.init(20);
-
-        WorkerGrid worker = new WorkerGrid1D(size);
-        GridScheduler gridScheduler = new GridScheduler();
-        gridScheduler.setWorkerGrid("s0.t0", worker);
-        KernelContext context = new KernelContext();
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
-                .task("t0", TestVectorAdditionKernelContext::vectorAdd, a, context, b, cTornado) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(gridScheduler) //
-                    .execute();
-        }
-
-        vectorAddJava(a, b, cJava);
-
-        for (int i = 0; i < size; i++) {
-            assertEquals(cJava.get(i), cTornado.get(i));
-        }
-    }
-
-    @Test
-    public void vectorAddKernelContext03() throws TornadoExecutionPlanException {
-        final int size = 16;
-        IntArray a = new IntArray(size);
-        IntArray b = new IntArray(size);
-        IntArray cJava = new IntArray(size);
-        IntArray cTornado = new IntArray(size);
-
-        a.init(10);
-        b.init(20);
-
-        WorkerGrid worker = new WorkerGrid1D(size);
-        GridScheduler gridScheduler = new GridScheduler();
-        gridScheduler.setWorkerGrid("s0.t0", worker);
-        KernelContext context = new KernelContext();
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
-                .task("t0", TestVectorAdditionKernelContext::vectorAdd, a, b, context, cTornado) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(gridScheduler) //
-                    .execute();
-        }
-
-        vectorAddJava(a, b, cJava);
-
-        for (int i = 0; i < size; i++) {
-            assertEquals(cJava.get(i), cTornado.get(i));
-        }
-    }
-
-    @Test
-    public void vectorAddKernelContext04() throws TornadoExecutionPlanException {
-        final int size = 16;
-        IntArray a = new IntArray(size);
-        IntArray b = new IntArray(size);
-        IntArray cJava = new IntArray(size);
-        IntArray cTornado = new IntArray(size);
-
-        a.init(10);
-        b.init(20);
-
-        WorkerGrid worker = new WorkerGrid1D(size);
-        GridScheduler gridScheduler = new GridScheduler();
-        gridScheduler.setWorkerGrid("s0.t0", worker);
-        KernelContext context = new KernelContext();
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
-                .task("t0", TestVectorAdditionKernelContext::vectorAdd, a, b, cTornado, context) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(gridScheduler) //
-                    .execute();
-        }
-
-        vectorAddJava(a, b, cJava);
-
-        for (int i = 0; i < size; i++) {
-            assertEquals(cJava.get(i), cTornado.get(i));
-        }
-    }
-
-    @Test
-    public void vectorAddKernelContext05() throws TornadoExecutionPlanException {
-        final int size = 16;
-        IntArray a = new IntArray(size);
-        IntArray b = new IntArray(size);
-        IntArray cJava = new IntArray(size);
-        IntArray cTornado = new IntArray(size);
-
-        a.init(10);
-        b.init(20);
-
-        WorkerGrid worker = new WorkerGrid1D(size);
-        GridScheduler gridScheduler = new GridScheduler("s0.t0", worker);
-        KernelContext context = new KernelContext();
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
-                .task("t0", TestVectorAdditionKernelContext::vectorAdd, context, a, b, cTornado) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, cTornado);
-
-        // Change the Grid
-        worker.setGlobalWork(size, 1, 1);
-        worker.setLocalWorkToNull();
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withWarmUp() //
-                    .withGridScheduler(gridScheduler) //
-                    .execute();
-        }
-
-        vectorAddJava(a, b, cJava);
-
-        for (int i = 0; i < size; i++) {
-            assertEquals(cJava.get(i), cTornado.get(i));
-        }
-    }
+  }
 }
