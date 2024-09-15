@@ -17,13 +17,12 @@
  */
 package uk.ac.manchester.tornado.unittests.reductions;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -35,54 +34,54 @@ import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.reductions.InstanceReduction
  * </code>
  */
 public class InstanceReduction extends TornadoTestBase {
 
-    public static final int N = 1024;
+  public static final int N = 1024;
 
-    public class ReduceTest {
-        public void reduce(FloatArray input, @Reduce FloatArray result) {
-            result.set(0, 0.0f);
-            for (@Parallel int i = 0; i < input.getSize(); i++) {
-                result.set(0, result.get(0) + input.get(i));
-            }
-        }
+  public class ReduceTest {
+    public void reduce(FloatArray input, @Reduce FloatArray result) {
+      result.set(0, 0.0f);
+      for (@Parallel int i = 0; i < input.getSize(); i++) {
+        result.set(0, result.get(0) + input.get(i));
+      }
+    }
+  }
+
+  @Test
+  public void testReductionInstanceClass() throws TornadoExecutionPlanException {
+
+    FloatArray input = new FloatArray(N);
+    FloatArray result = new FloatArray(1);
+    FloatArray expected = new FloatArray(1);
+
+    Random rand = new Random();
+    IntStream.range(0, N)
+        .forEach(
+            i -> {
+              input.set(i, rand.nextFloat());
+            });
+
+    for (int i = 0; i < N; i++) {
+      expected.set(0, expected.get(0) + input.get(i));
     }
 
-    @Test
-    public void testReductionInstanceClass() throws TornadoExecutionPlanException {
+    ReduceTest rd = new ReduceTest();
 
-        FloatArray input = new FloatArray(N);
-        FloatArray result = new FloatArray(1);
-        FloatArray expected = new FloatArray(1);
+    TaskGraph taskGraph =
+        new TaskGraph("ts") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, input) //
+            .task("reduce", rd::reduce, input, result) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, result);
 
-        Random rand = new Random();
-        IntStream.range(0, N).forEach(i -> {
-            input.set(i, rand.nextFloat());
-        });
-
-        for (int i = 0; i < N; i++) {
-            expected.set(0, expected.get(0) + input.get(i));
-        }
-
-        ReduceTest rd = new ReduceTest();
-
-        TaskGraph taskGraph = new TaskGraph("ts") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, input)//
-                .task("reduce", rd::reduce, input, result)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, result);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        assertEquals(expected.get(0), result.get(0), 0.1f);
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
+
+    assertThat(expected.get(0), closeTo(result.get(0), 0.1f));
+  }
 }
