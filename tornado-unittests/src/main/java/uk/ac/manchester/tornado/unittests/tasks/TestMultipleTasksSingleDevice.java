@@ -18,10 +18,10 @@
 
 package uk.ac.manchester.tornado.unittests.tasks;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -32,134 +32,134 @@ import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * Testing Tornado with multiple tasks at the same device. The {@link TaskGraph}
- * contains more than one task.
- * <p>
- * How to run?
- * </p>
- * <code>
+ * Testing Tornado with multiple tasks at the same device. The {@link TaskGraph} contains more than
+ * one task.
+ *
+ * <p>How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.tasks.TestMultipleTasksSingleDevice
  * </code>
- *
  */
 public class TestMultipleTasksSingleDevice extends TornadoTestBase {
 
-    public static void task0Initialization(IntArray a) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            a.set(i, 10);
-        }
+  public static void task0Initialization(IntArray a) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      a.set(i, 10);
+    }
+  }
+
+  public static void task1Multiplication(IntArray a, int alpha) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      a.set(i, a.get(i) * alpha);
+    }
+  }
+
+  public static void task2Saxpy(IntArray a, IntArray b, IntArray c, int alpha) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      c.set(i, alpha * a.get(i) + b.get(i));
+    }
+  }
+
+  @Test
+  public void testTwoTasks() throws TornadoExecutionPlanException {
+    final int numElements = 1024;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestMultipleTasksSingleDevice::task0Initialization, a) //
+            .task("t1", TestMultipleTasksSingleDevice::task1Multiplication, a, 12) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    public static void task1Multiplication(IntArray a, int alpha) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            a.set(i, a.get(i) * alpha);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(120, equalTo(a.get(i)));
+    }
+  }
+
+  @Test
+  public void testThreeTasks() throws TornadoExecutionPlanException {
+    final int numElements = 1024;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestMultipleTasksSingleDevice::task0Initialization, a) //
+            .task("t1", TestMultipleTasksSingleDevice::task1Multiplication, a, 12) //
+            .task("t3", TestMultipleTasksSingleDevice::task2Saxpy, a, a, b, 12) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, b);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    public static void task2Saxpy(IntArray a, IntArray b, IntArray c, int alpha) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            c.set(i, alpha * a.get(i) + b.get(i));
-        }
+    int val = (12 * 120) + 120;
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(val, equalTo(b.get(i)));
+    }
+  }
+
+  @Test
+  public void testFourTasks() throws TornadoExecutionPlanException {
+    final int numElements = 1024;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+    IntArray c = new IntArray(numElements);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestMultipleTasksSingleDevice::task0Initialization, a) //
+            .task("t1", TestMultipleTasksSingleDevice::task1Multiplication, a, 12) //
+            .task("t2", TestMultipleTasksSingleDevice::task0Initialization, b) //
+            .task("t3", TestMultipleTasksSingleDevice::task2Saxpy, a, b, c, 12) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testTwoTasks() throws TornadoExecutionPlanException {
-        final int numElements = 1024;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
+    int val = (12 * 120) + 10;
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(val, equalTo(c.get(i)));
+    }
+  }
 
-        TaskGraph taskGraph = new TaskGraph("s0")//
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b)//
-                .task("t0", TestMultipleTasksSingleDevice::task0Initialization, a)//
-                .task("t1", TestMultipleTasksSingleDevice::task1Multiplication, a, 12)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+  @Test
+  public void testFiveTasks() throws TornadoExecutionPlanException {
+    final int numElements = 1024;
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+    IntArray c = new IntArray(numElements);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b) //
+            .task("t0", TestMultipleTasksSingleDevice::task0Initialization, a) //
+            .task("t1", TestMultipleTasksSingleDevice::task1Multiplication, a, 12) //
+            .task("t2", TestMultipleTasksSingleDevice::task0Initialization, b) //
+            .task("t3", TestMultipleTasksSingleDevice::task2Saxpy, a, b, b, 12) //
+            .task("t4", TestMultipleTasksSingleDevice::task2Saxpy, b, a, c, 12) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(120, a.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testThreeTasks() throws TornadoExecutionPlanException {
-        final int numElements = 1024;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
-
-        TaskGraph taskGraph = new TaskGraph("s0")//
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b)//
-                .task("t0", TestMultipleTasksSingleDevice::task0Initialization, a)//
-                .task("t1", TestMultipleTasksSingleDevice::task1Multiplication, a, 12)//
-                .task("t3", TestMultipleTasksSingleDevice::task2Saxpy, a, a, b, 12)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, b);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        int val = (12 * 120) + 120;
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(val, b.get(i));
-        }
+    int val = (12 * 120) + 10;
+    val = (12 * val) + (120);
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat(val, equalTo(c.get(i)));
     }
-
-    @Test
-    public void testFourTasks() throws TornadoExecutionPlanException {
-        final int numElements = 1024;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
-        IntArray c = new IntArray(numElements);
-
-        TaskGraph taskGraph = new TaskGraph("s0")//
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b)//
-                .task("t0", TestMultipleTasksSingleDevice::task0Initialization, a)//
-                .task("t1", TestMultipleTasksSingleDevice::task1Multiplication, a, 12)//
-                .task("t2", TestMultipleTasksSingleDevice::task0Initialization, b)//
-                .task("t3", TestMultipleTasksSingleDevice::task2Saxpy, a, b, c, 12)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        int val = (12 * 120) + 10;
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(val, c.get(i));
-        }
-    }
-
-    @Test
-    public void testFiveTasks() throws TornadoExecutionPlanException {
-        final int numElements = 1024;
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
-        IntArray c = new IntArray(numElements);
-
-        TaskGraph taskGraph = new TaskGraph("s0")//
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, a, b)//
-                .task("t0", TestMultipleTasksSingleDevice::task0Initialization, a)//
-                .task("t1", TestMultipleTasksSingleDevice::task1Multiplication, a, 12)//
-                .task("t2", TestMultipleTasksSingleDevice::task0Initialization, b)//
-                .task("t3", TestMultipleTasksSingleDevice::task2Saxpy, a, b, b, 12)//
-                .task("t4", TestMultipleTasksSingleDevice::task2Saxpy, b, a, c, 12)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, c);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        int val = (12 * 120) + 10;
-        val = (12 * val) + (120);
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals(val, c.get(i));
-        }
-    }
-
+  }
 }
