@@ -17,10 +17,11 @@
  */
 package uk.ac.manchester.tornado.unittests.api;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -38,156 +39,162 @@ import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * How to run?
- *
- * <code>
+ * How to run? <code>
  * $ tornado-test -V --fast uk.ac.manchester.tornado.unittests.api.TestInitDataTypes
  * </code>
  */
 public class TestInitDataTypes extends TornadoTestBase {
 
-    @Test
-    public void testInitByteArray() throws TornadoExecutionPlanException {
-        ByteArray array = new ByteArray(1024 * 1024);
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
-                .task("init", ByteArray::initialize, array, (byte) 2) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+  @Test
+  public void testInitByteArray() throws TornadoExecutionPlanException {
+    ByteArray array = new ByteArray(1024 * 1024);
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
+            .task("init", ByteArray::initialize, array, (byte) 2) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals((byte) 2, array.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testInitCharArray() throws TornadoExecutionPlanException {
-        CharArray array = new CharArray(1024 * 1024);
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
-                .task("init", CharArray::initialize, array, 'a') //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat((byte) 2, equalTo(array.get(i)));
+    }
+  }
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+  @Test
+  public void testInitCharArray() throws TornadoExecutionPlanException {
+    CharArray array = new CharArray(1024 * 1024);
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
+            .task("init", CharArray::initialize, array, 'a') //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
 
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals('a', array.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testInitFloatArray() throws TornadoExecutionPlanException {
-        FloatArray array = new FloatArray(1024 * 1024);
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
-                .task("init", FloatArray::initialize, array, 2.0f) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat('a', equalTo(array.get(i)));
+    }
+  }
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+  @Test
+  public void testInitFloatArray() throws TornadoExecutionPlanException {
+    FloatArray array = new FloatArray(1024 * 1024);
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
+            .task("init", FloatArray::initialize, array, 2.0f) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
 
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals(2.0f, array.get(i), 0.001f);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testInitDoubleArray() throws TornadoExecutionPlanException {
-        DoubleArray array = new DoubleArray(1024 * 1024);
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
-                .task("init", DoubleArray::initialize, array, 2.0) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat(2.0f, closeTo(array.get(i), 0.001f));
+    }
+  }
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+  @Test
+  public void testInitDoubleArray() throws TornadoExecutionPlanException {
+    DoubleArray array = new DoubleArray(1024 * 1024);
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
+            .task("init", DoubleArray::initialize, array, 2.0) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
 
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals(2.0, array.get(i), 0.001f);
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testInitShortArray() throws TornadoExecutionPlanException {
-        ShortArray array = new ShortArray(1024 * 1024);
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
-                .task("init", ShortArray::initialize, array, (short) 2) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat(2.0, closeTo(array.get(i), 0.001f));
+    }
+  }
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+  @Test
+  public void testInitShortArray() throws TornadoExecutionPlanException {
+    ShortArray array = new ShortArray(1024 * 1024);
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
+            .task("init", ShortArray::initialize, array, (short) 2) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
 
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals((short) 2, array.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testInitIntArray() throws TornadoExecutionPlanException {
-        IntArray array = new IntArray(1024 * 1024);
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
-                .task("init", IntArray::initialize, array, 2) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat((short) 2, equalTo(array.get(i)));
+    }
+  }
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+  @Test
+  public void testInitIntArray() throws TornadoExecutionPlanException {
+    IntArray array = new IntArray(1024 * 1024);
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
+            .task("init", IntArray::initialize, array, 2) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
 
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals(2, array.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testInitLongArray() throws TornadoExecutionPlanException {
-        LongArray array = new LongArray(1024 * 1024);
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
-                .task("init", LongArray::initialize, array, (long) 2) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat(2, equalTo(array.get(i)));
+    }
+  }
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
+  @Test
+  public void testInitLongArray() throws TornadoExecutionPlanException {
+    LongArray array = new LongArray(1024 * 1024);
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
+            .task("init", LongArray::initialize, array, (long) 2) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
 
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals(2, array.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testInitHalfFloatArray() throws TornadoExecutionPlanException {
-        HalfFloatArray array = new HalfFloatArray(1024 * 1024);
-        TaskGraph taskGraph = new TaskGraph("graph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
-                .task("init", HalfFloatArray::initialize, array, new HalfFloat(2.0f)) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        float f = new HalfFloat(2.0f).getFloat32();
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals(f, array.get(i).getFloat32(), 0.001f);
-        }
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat(2, equalTo(array.get(i)));
     }
+  }
+
+  @Test
+  public void testInitHalfFloatArray() throws TornadoExecutionPlanException {
+    HalfFloatArray array = new HalfFloatArray(1024 * 1024);
+    TaskGraph taskGraph =
+        new TaskGraph("graph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, array) //
+            .task("init", HalfFloatArray::initialize, array, new HalfFloat(2.0f)) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
+    }
+
+    float f = new HalfFloat(2.0f).getFloat32();
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat(f, closeTo(array.get(i).getFloat32(), 0.001f));
+    }
+  }
 }
