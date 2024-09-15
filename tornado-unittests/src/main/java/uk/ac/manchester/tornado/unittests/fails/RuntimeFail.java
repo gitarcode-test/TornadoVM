@@ -17,68 +17,67 @@
  */
 package uk.ac.manchester.tornado.unittests.fails;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
 import uk.ac.manchester.tornado.api.annotations.Parallel;
-import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
 import uk.ac.manchester.tornado.api.enums.DataTransferMode;
 import uk.ac.manchester.tornado.api.exceptions.TornadoTaskRuntimeException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  *     tornado-test -V uk.ac.manchester.tornado.unittests.fails.RuntimeFail
  * </code>
  */
 public class RuntimeFail extends TornadoTestBase {
 
-    public static void vectorAdd(FloatArray a, FloatArray b, FloatArray c) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            c.set(i, a.get(i) * b.get(i));
-        }
+  public static void vectorAdd(FloatArray a, FloatArray b, FloatArray c) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      c.set(i, a.get(i) * b.get(i));
     }
+  }
 
-    public static void square(FloatArray a) {
-        for (@Parallel int i = 0; i < a.getSize(); i++) {
-            a.set(i, a.get(i) * a.get(i));
-        }
+  public static void square(FloatArray a) {
+    for (@Parallel int i = 0; i < a.getSize(); i++) {
+      a.set(i, a.get(i) * a.get(i));
     }
+  }
 
-    /**
-     * This test sets the same task-name for two different tasks. This triggers an
-     * error and TornadoVM exits execution.
-     *
-     * How to run?
-     *
-     * <code>
-     *     tornado-test -V -pk --debug uk.ac.manchester.tornado.unittests.fails.RuntimeFail#test01
-     * </code>
-     */
-    @Test(expected = TornadoTaskRuntimeException.class)
-    public void test01() {
-        FloatArray x = new FloatArray(8192);
-        FloatArray y = new FloatArray(8192);
-        FloatArray z = new FloatArray(8192);
+  /**
+   * This test sets the same task-name for two different tasks. This triggers an error and TornadoVM
+   * exits execution.
+   *
+   * <p>How to run? <code>
+   *     tornado-test -V -pk --debug uk.ac.manchester.tornado.unittests.fails.RuntimeFail#test01
+   * </code>
+   */
+  @Test
+  public void test01() {
+    assertThrows(
+        TornadoTaskRuntimeException.class,
+        () -> {
+          FloatArray x = new FloatArray(8192);
+          FloatArray y = new FloatArray(8192);
+          FloatArray z = new FloatArray(8192);
 
-        x.init(2.0f);
-        y.init(8.0f);
+          x.init(2.0f);
+          y.init(8.0f);
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, x, y) //
-                .task("t0", RuntimeFail::vectorAdd, x, y, z) //
-                .task("t0", RuntimeFail::square, z) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, z);
+          TaskGraph taskGraph =
+              new TaskGraph("s0") //
+                  .transferToDevice(DataTransferMode.FIRST_EXECUTION, x, y) //
+                  .task("t0", RuntimeFail::vectorAdd, x, y, z) //
+                  .task("t0", RuntimeFail::square, z) //
+                  .transferToHost(DataTransferMode.EVERY_EXECUTION, z);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        TornadoExecutionPlan executionPlanPlan = new TornadoExecutionPlan(immutableTaskGraph);
-        executionPlanPlan.execute();
-
-    }
-
+          ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+          TornadoExecutionPlan executionPlanPlan = new TornadoExecutionPlan(immutableTaskGraph);
+          executionPlanPlan.execute();
+        });
+  }
 }
