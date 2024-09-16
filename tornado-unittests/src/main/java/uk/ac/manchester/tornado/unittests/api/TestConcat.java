@@ -17,7 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.api;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.types.HalfFloat;
 import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
 import uk.ac.manchester.tornado.api.types.arrays.CharArray;
@@ -29,216 +32,222 @@ import uk.ac.manchester.tornado.api.types.arrays.LongArray;
 import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
-import static org.junit.Assert.assertEquals;
-
 /**
- * How to run?
- *
- * <code>
+ * How to run? <code>
  * $ tornado-test -V --fast uk.ac.manchester.tornado.unittests.api.TestConcat
  * </code>
  */
 public class TestConcat extends TornadoTestBase {
-    public final int numElements = 256;
+  public final int numElements = 256;
 
-    @Test
-    public void testFloatArrayConcat() {
+  @Test
+  public void testFloatArrayConcat() {
 
-        FloatArray a = new FloatArray(numElements);
-        FloatArray b = new FloatArray(numElements);
-        FloatArray e = new FloatArray(numElements);
+    FloatArray a = new FloatArray(numElements);
+    FloatArray b = new FloatArray(numElements);
+    FloatArray e = new FloatArray(numElements);
 
-        a.init(100.0f);
-        b.init(5.0f);
-        e.init(12f);
+    a.init(100.0f);
+    b.init(5.0f);
+    e.init(12f);
 
-        FloatArray c = FloatArray.concat(a, b, e);
+    FloatArray c = FloatArray.concat(a, b, e);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
-        }
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
-        }
-
-        for (int i = 0; i < e.getSize(); i++) {
-            assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat("Mismatch in first part of c", 100.0f, closeTo(c.get(i), 0.0f));
+    }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat("Mismatch in second part of c", 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
-    @Test
-    public void testDoubleArrayConcat() {
+    for (int i = 0; i < e.getSize(); i++) {
+      assertThat(
+          "Mismatch in third part of c", 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
+    }
+  }
 
-        DoubleArray a = new DoubleArray(numElements);
-        DoubleArray b = new DoubleArray(numElements);
-        DoubleArray e = new DoubleArray(numElements);
+  @Test
+  public void testDoubleArrayConcat() {
 
-        a.init(100.0d);
-        b.init(5d);
-        e.init(12d);
+    DoubleArray a = new DoubleArray(numElements);
+    DoubleArray b = new DoubleArray(numElements);
+    DoubleArray e = new DoubleArray(numElements);
 
-        DoubleArray c = DoubleArray.concat(a, b, e);
+    a.init(100.0d);
+    b.init(5d);
+    e.init(12d);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
-        }
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
-        }
+    DoubleArray c = DoubleArray.concat(a, b, e);
 
-        for (int i = 0; i < e.getSize(); i++) {
-            assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat("Mismatch in first part of c", 100.0f, closeTo(c.get(i), 0.0f));
+    }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat("Mismatch in second part of c", 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
-    @Test
-    public void testByteArrayConcat() {
+    for (int i = 0; i < e.getSize(); i++) {
+      assertThat(
+          "Mismatch in third part of c", 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
+    }
+  }
 
-        ByteArray a = new ByteArray(numElements);
-        ByteArray b = new ByteArray(numElements);
-        ByteArray e = new ByteArray(numElements);
+  @Test
+  public void testByteArrayConcat() {
 
-        a.init((byte) 100);
-        b.init((byte) 5);
-        e.init((byte) 12);
+    ByteArray a = new ByteArray(numElements);
+    ByteArray b = new ByteArray(numElements);
+    ByteArray e = new ByteArray(numElements);
 
-        ByteArray c = ByteArray.concat(a, b, e);
+    a.init((byte) 100);
+    b.init((byte) 5);
+    e.init((byte) 12);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals("Mismatch in first part of c", 100, c.get(i), 0.0f);
-        }
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals("Mismatch in second part of c", 5, c.get(a.getSize() + i), 0.0f);
-        }
+    ByteArray c = ByteArray.concat(a, b, e);
 
-        for (int i = 0; i < e.getSize(); i++) {
-            assertEquals("Mismatch in third part of c", 12, c.get(a.getSize() + b.getSize() + i), 0.0f);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat("Mismatch in first part of c", 100f, closeTo(c.get(i), 0.0f));
+    }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat("Mismatch in second part of c", 5f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
-    @Test
-    public void testLongArrayConcat() {
+    for (int i = 0; i < e.getSize(); i++) {
+      assertThat(
+          "Mismatch in third part of c", 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
+    }
+  }
 
-        LongArray a = new LongArray(numElements);
-        LongArray b = new LongArray(numElements);
-        LongArray e = new LongArray(numElements);
+  @Test
+  public void testLongArrayConcat() {
 
-        a.init(100L);
-        b.init(5L);
-        e.init(12L);
+    LongArray a = new LongArray(numElements);
+    LongArray b = new LongArray(numElements);
+    LongArray e = new LongArray(numElements);
 
-        LongArray c = LongArray.concat(a, b, e);
+    a.init(100L);
+    b.init(5L);
+    e.init(12L);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
-        }
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
-        }
+    LongArray c = LongArray.concat(a, b, e);
 
-        for (int i = 0; i < e.getSize(); i++) {
-            assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat("Mismatch in first part of c", 100.0f, closeTo(c.get(i), 0.0f));
+    }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat("Mismatch in second part of c", 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
-    @Test
-    public void testIntArrayConcat() {
+    for (int i = 0; i < e.getSize(); i++) {
+      assertThat(
+          "Mismatch in third part of c", 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
+    }
+  }
 
-        IntArray a = new IntArray(numElements);
-        IntArray b = new IntArray(numElements);
-        IntArray e = new IntArray(numElements);
+  @Test
+  public void testIntArrayConcat() {
 
-        a.init(100);
-        b.init(5);
-        e.init(12);
+    IntArray a = new IntArray(numElements);
+    IntArray b = new IntArray(numElements);
+    IntArray e = new IntArray(numElements);
 
-        IntArray c = IntArray.concat(a, b, e);
+    a.init(100);
+    b.init(5);
+    e.init(12);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
-        }
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
-        }
+    IntArray c = IntArray.concat(a, b, e);
 
-        for (int i = 0; i < e.getSize(); i++) {
-            assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat("Mismatch in first part of c", 100.0f, closeTo(c.get(i), 0.0f));
+    }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat("Mismatch in second part of c", 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
-    @Test
-    public void testShortArrayConcat() {
+    for (int i = 0; i < e.getSize(); i++) {
+      assertThat(
+          "Mismatch in third part of c", 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
+    }
+  }
 
-        ShortArray a = new ShortArray(numElements);
-        ShortArray b = new ShortArray(numElements);
-        ShortArray e = new ShortArray(numElements);
+  @Test
+  public void testShortArrayConcat() {
 
-        a.init((short) 100);
-        b.init((short) 5);
-        e.init((short) 12);
+    ShortArray a = new ShortArray(numElements);
+    ShortArray b = new ShortArray(numElements);
+    ShortArray e = new ShortArray(numElements);
 
-        ShortArray c = ShortArray.concat(a, b, e);
+    a.init((short) 100);
+    b.init((short) 5);
+    e.init((short) 12);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
-        }
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
-        }
+    ShortArray c = ShortArray.concat(a, b, e);
 
-        for (int i = 0; i < e.getSize(); i++) {
-            assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat("Mismatch in first part of c", 100.0f, closeTo(c.get(i), 0.0f));
+    }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat("Mismatch in second part of c", 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
-    @Test
-    public void testCharArrayConcat() {
+    for (int i = 0; i < e.getSize(); i++) {
+      assertThat(
+          "Mismatch in third part of c", 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
+    }
+  }
 
-        CharArray a = new CharArray(numElements);
-        CharArray b = new CharArray(numElements);
-        CharArray e = new CharArray(numElements);
+  @Test
+  public void testCharArrayConcat() {
 
-        a.init((char) 100);
-        b.init((char) 5);
-        e.init((char) 12);
+    CharArray a = new CharArray(numElements);
+    CharArray b = new CharArray(numElements);
+    CharArray e = new CharArray(numElements);
 
-        CharArray c = CharArray.concat(a, b, e);
+    a.init((char) 100);
+    b.init((char) 5);
+    e.init((char) 12);
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
-        }
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
-        }
+    CharArray c = CharArray.concat(a, b, e);
 
-        for (int i = 0; i < e.getSize(); i++) {
-            assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat("Mismatch in first part of c", 100.0f, closeTo(c.get(i), 0.0f));
+    }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat("Mismatch in second part of c", 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
-    @Test
-    public void testHalfFloatArrayConcat() {
+    for (int i = 0; i < e.getSize(); i++) {
+      assertThat(
+          "Mismatch in third part of c", 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
+    }
+  }
 
-        HalfFloatArray a = new HalfFloatArray(numElements);
-        HalfFloatArray b = new HalfFloatArray(numElements);
-        HalfFloatArray e = new HalfFloatArray(numElements);
+  @Test
+  public void testHalfFloatArrayConcat() {
 
-        a.init(new HalfFloat(100));
-        b.init(new HalfFloat(5));
-        e.init(new HalfFloat(12));
+    HalfFloatArray a = new HalfFloatArray(numElements);
+    HalfFloatArray b = new HalfFloatArray(numElements);
+    HalfFloatArray e = new HalfFloatArray(numElements);
 
-        HalfFloatArray c = HalfFloatArray.concat(a, b, e);
+    a.init(new HalfFloat(100));
+    b.init(new HalfFloat(5));
+    e.init(new HalfFloat(12));
 
-        for (int i = 0; i < a.getSize(); i++) {
-            assertEquals("Mismatch in first part of c", 100.0f, c.get(i).getFloat32(), 0.0f);
-        }
-        for (int i = 0; i < b.getSize(); i++) {
-            assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i).getFloat32(), 0.0f);
-        }
+    HalfFloatArray c = HalfFloatArray.concat(a, b, e);
 
-        for (int i = 0; i < e.getSize(); i++) {
-            assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i).getFloat32(), 0.0f);
-        }
+    for (int i = 0; i < a.getSize(); i++) {
+      assertThat("Mismatch in first part of c", 100.0f, closeTo(c.get(i).getFloat32(), 0.0f));
+    }
+    for (int i = 0; i < b.getSize(); i++) {
+      assertThat(
+          "Mismatch in second part of c", 5.0f, closeTo(c.get(a.getSize() + i).getFloat32(), 0.0f));
     }
 
+    for (int i = 0; i < e.getSize(); i++) {
+      assertThat(
+          "Mismatch in third part of c",
+          12f,
+          closeTo(c.get(a.getSize() + b.getSize() + i).getFloat32(), 0.0f));
+    }
+  }
 }
