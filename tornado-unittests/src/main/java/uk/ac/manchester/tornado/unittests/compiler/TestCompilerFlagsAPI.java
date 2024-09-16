@@ -17,8 +17,7 @@
  */
 package uk.ac.manchester.tornado.unittests.compiler;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
 import uk.ac.manchester.tornado.api.annotations.Parallel;
@@ -31,35 +30,34 @@ import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 /**
  * How to run?
  *
- * <p>
- * <code>
+ * <p><code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.compiler.TestCompilerFlagsAPI
  * </code>
- * </p>
  */
 public class TestCompilerFlagsAPI extends TornadoTestBase {
 
-    private static void foo(FloatArray data) {
-        for (@Parallel int i = 0; i < data.getSize(); i++) {
-            data.set(i, data.get(i) + 1);
-        }
+  private static void foo(FloatArray data) {
+    for (@Parallel int i = 0; i < data.getSize(); i++) {
+      data.set(i, data.get(i) + 1);
     }
+  }
 
-    @Test
-    public void test() throws TornadoExecutionPlanException {
-        FloatArray data = new FloatArray(512);
-        data.init(1.0f);
+  @Test
+  public void test() throws TornadoExecutionPlanException {
+    FloatArray data = new FloatArray(512);
+    data.init(1.0f);
 
-        TaskGraph taskGraph = new TaskGraph("init") //
-                .task("foo", TestCompilerFlagsAPI::foo, data) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+    TaskGraph taskGraph =
+        new TaskGraph("init") //
+            .task("foo", TestCompilerFlagsAPI::foo, data) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
 
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(taskGraph.snapshot())) {
-            executionPlan.withCompilerFlags(TornadoVMBackendType.OPENCL, "-cl-opt-disable") //
-                    .withCompilerFlags(TornadoVMBackendType.PTX, " ") //
-                    .withCompilerFlags(TornadoVMBackendType.SPIRV, "-ze-opt-level 1") //
-                    .execute();
-        }
-
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(taskGraph.snapshot())) {
+      executionPlan
+          .withCompilerFlags(TornadoVMBackendType.OPENCL, "-cl-opt-disable") //
+          .withCompilerFlags(TornadoVMBackendType.PTX, " ") //
+          .withCompilerFlags(TornadoVMBackendType.SPIRV, "-ze-opt-level 1") //
+          .execute();
     }
+  }
 }
