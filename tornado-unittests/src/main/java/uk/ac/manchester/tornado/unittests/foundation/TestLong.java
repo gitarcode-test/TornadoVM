@@ -17,10 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.foundation;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -30,67 +30,65 @@ import uk.ac.manchester.tornado.api.types.arrays.LongArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.foundation.TestLong
  * </code>
  */
 public class TestLong extends TornadoTestBase {
 
-    @Test
-    public void testLongsCopy() throws TornadoExecutionPlanException {
-        final int numElements = 256;
-        LongArray a = new LongArray(numElements);
+  @Test
+  public void testLongsCopy() throws TornadoExecutionPlanException {
+    final int numElements = 256;
+    LongArray a = new LongArray(numElements);
 
-        LongArray expected = new LongArray(numElements);
-        for (int i = 0; i < numElements; i++) {
-            expected.set(i, 50);
-        }
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", TestKernels::testLongsCopy, a) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expected.get(i), a.get(i));
-        }
+    LongArray expected = new LongArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      expected.set(i, 50);
     }
 
-    @Test
-    public void testLongsAdd() throws TornadoExecutionPlanException {
-        final int numElements = 256;
-        LongArray a = new LongArray(numElements);
-        LongArray b = new LongArray(numElements);
-        LongArray c = new LongArray(numElements);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", TestKernels::testLongsCopy, a) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
 
-        b.init(Integer.MAX_VALUE);
-        c.init(1);
-
-        LongArray expected = new LongArray(numElements);
-        for (int i = 0; i < numElements; i++) {
-            expected.set(i, b.get(i) + c.get(i));
-        }
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
-                .task("t0", TestKernels::vectorSumLongCompute, a, b, c) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < numElements; i++) {
-            assertEquals(expected.get(i), a.get(i));
-        }
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expected.get(i), equalTo(a.get(i)));
+    }
+  }
+
+  @Test
+  public void testLongsAdd() throws TornadoExecutionPlanException {
+    final int numElements = 256;
+    LongArray a = new LongArray(numElements);
+    LongArray b = new LongArray(numElements);
+    LongArray c = new LongArray(numElements);
+
+    b.init(Integer.MAX_VALUE);
+    c.init(1);
+
+    LongArray expected = new LongArray(numElements);
+    for (int i = 0; i < numElements; i++) {
+      expected.set(i, b.get(i) + c.get(i));
+    }
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, b, c) //
+            .task("t0", TestKernels::vectorSumLongCompute, a, b, c) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, a);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
+    }
+
+    for (int i = 0; i < numElements; i++) {
+      assertThat(expected.get(i), equalTo(a.get(i)));
+    }
+  }
 }
