@@ -17,11 +17,13 @@
  */
 package uk.ac.manchester.tornado.unittests.runtime;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.TornadoBackend;
 import uk.ac.manchester.tornado.api.TornadoRuntime;
 import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
@@ -30,31 +32,29 @@ import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 /**
  * How to run?
  *
- * <p>
- * <code>
+ * <p><code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.runtime.TestRuntimeAPI
  * </code>
- * </p>
  */
 public class TestRuntimeAPI extends TornadoTestBase {
 
-    @Test
-    public void test01() {
+  @Test
+  public void test01() {
 
-        TornadoRuntime runtime = TornadoRuntimeProvider.getTornadoRuntime();
+    TornadoRuntime runtime = TornadoRuntimeProvider.getTornadoRuntime();
 
-        // Obtain the first backend in the list
-        TornadoBackend backend = runtime.getBackend(0);
-        assertNotNull(backend);
+    // Obtain the first backend in the list
+    TornadoBackend backend = runtime.getBackend(0);
+    assertThat(backend, not(nullValue()));
 
-        // TornadoVM finds at least one backend
-        var numBackends = runtime.getNumBackends();
-        assertTrue(numBackends >= 1);
+    // TornadoVM finds at least one backend
+    var numBackends = runtime.getNumBackends();
+    assertThat(numBackends >= 1, is(true));
 
-        // At least one device should be available per backend.
-        for (int i = 0; i < numBackends; i++) {
-            backend = runtime.getBackend(i);
-            assertTrue(backend.getNumDevices() >= 1);
-        }
+    // At least one device should be available per backend.
+    for (int i = 0; i < numBackends; i++) {
+      backend = runtime.getBackend(i);
+      assertThat(backend.getNumDevices() >= 1, is(true));
     }
+  }
 }
