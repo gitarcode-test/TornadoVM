@@ -17,13 +17,12 @@
  */
 package uk.ac.manchester.tornado.unittests.flatmap;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -34,52 +33,51 @@ import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to test?
- * </p>
- * <code>
+ * How to test? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.flatmap.TestFlatMap
  * </code>
  */
 public class TestFlatMap extends TornadoTestBase {
 
-    private static final int SIZE = 256;
+  private static final int SIZE = 256;
 
-    private static void computeFlatMap(FloatArray input, FloatArray output, final int size) {
-        for (@Parallel int i = 0; i < size; i++) {
-            if (input.get(i) > 100) {
-                for (int j = 0; j < size; j++) {
-                    output.set(i * size + j, input.get(i) + j);
-                }
-            }
+  private static void computeFlatMap(FloatArray input, FloatArray output, final int size) {
+    for (@Parallel int i = 0; i < size; i++) {
+      if (input.get(i) > 100) {
+        for (int j = 0; j < size; j++) {
+          output.set(i * size + j, input.get(i) + j);
         }
+      }
     }
+  }
 
-    @Test
-    public void testFlatMap() throws TornadoExecutionPlanException {
-        FloatArray input = new FloatArray(SIZE * SIZE);
-        FloatArray output = new FloatArray(SIZE * SIZE);
-        FloatArray seq = new FloatArray(SIZE * SIZE);
+  @Test
+  public void testFlatMap() throws TornadoExecutionPlanException {
+    FloatArray input = new FloatArray(SIZE * SIZE);
+    FloatArray output = new FloatArray(SIZE * SIZE);
+    FloatArray seq = new FloatArray(SIZE * SIZE);
 
-        Random r = new Random();
-        IntStream.range(0, input.getSize()).forEach(i -> {
-            input.set(i, 50 + r.nextInt(100));
-        });
+    Random r = new Random();
+    IntStream.range(0, input.getSize())
+        .forEach(
+            i -> {
+              input.set(i, 50 + r.nextInt(100));
+            });
 
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, input) //
-                .task("t0", TestFlatMap::computeFlatMap, input, output, SIZE) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, input) //
+            .task("t0", TestFlatMap::computeFlatMap, input, output, SIZE) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
 
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-        computeFlatMap(input, seq, SIZE);
-
-        for (int i = 0; i < input.getSize(); i++) {
-            assertEquals(seq.get(i), output.get(i), 0.001f);
-        }
-
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
+    computeFlatMap(input, seq, SIZE);
+
+    for (int i = 0; i < input.getSize(); i++) {
+      assertThat(seq.get(i), closeTo(output.get(i), 0.001f));
+    }
+  }
 }
