@@ -17,10 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.api;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -36,161 +36,170 @@ import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run.
- * </p>
- * <code>
+ * How to run. <code>
  * tornado-test --threadInfo --printKernel --fast -V uk.ac.manchester.tornado.unittests.kernelcontext.api.KernelContextWorkGroupTests
  * </code>
  */
 public class KernelContextWorkGroupTests extends TornadoTestBase {
 
-    private static void apiTestGlobalGroupSizeX(KernelContext context, IntArray data) {
-        data.set(0, context.globalGroupSizeX);
+  private static void apiTestGlobalGroupSizeX(KernelContext context, IntArray data) {
+    data.set(0, context.globalGroupSizeX);
+  }
+
+  private static void apiTestGlobalGroupSizeY(KernelContext context, IntArray data) {
+    data.set(0, context.globalGroupSizeY);
+  }
+
+  private static void apiTestGlobalGroupSizeZ(KernelContext context, IntArray data) {
+    data.set(0, context.globalGroupSizeZ);
+  }
+
+  private static void apiTestLocalGroupSizeX(KernelContext context, IntArray data) {
+    data.set(0, context.localGroupSizeX);
+  }
+
+  private static void apiTestLocalGroupSizeY(KernelContext context, IntArray data) {
+    data.set(0, context.localGroupSizeY);
+  }
+
+  private static void apiTestLocalGroupSizeZ(KernelContext context, IntArray data) {
+    data.set(0, context.localGroupSizeZ);
+  }
+
+  @Test
+  public void test01() throws TornadoExecutionPlanException {
+    KernelContext context = new KernelContext();
+    GridScheduler grid = new GridScheduler();
+    WorkerGrid worker = new WorkerGrid1D(16);
+    grid.setWorkerGrid("s0.t0", worker);
+
+    IntArray data = new IntArray(16);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", KernelContextWorkGroupTests::apiTestGlobalGroupSizeX, context, data) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(grid) //
+          .execute();
     }
 
-    private static void apiTestGlobalGroupSizeY(KernelContext context, IntArray data) {
-        data.set(0, context.globalGroupSizeY);
+    assertThat(16, equalTo(data.get(0)));
+  }
+
+  @Test
+  public void test02() throws TornadoExecutionPlanException {
+    KernelContext context = new KernelContext();
+    GridScheduler grid = new GridScheduler();
+    WorkerGrid worker = new WorkerGrid2D(16, 8);
+    grid.setWorkerGrid("s0.t0", worker);
+
+    IntArray data = new IntArray(16);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", KernelContextWorkGroupTests::apiTestGlobalGroupSizeY, context, data) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(grid) //
+          .execute();
     }
 
-    private static void apiTestGlobalGroupSizeZ(KernelContext context, IntArray data) {
-        data.set(0, context.globalGroupSizeZ);
+    assertThat(8, equalTo(data.get(0)));
+  }
+
+  @Test
+  public void test03() throws TornadoExecutionPlanException {
+    KernelContext context = new KernelContext();
+    GridScheduler grid = new GridScheduler();
+    WorkerGrid worker = new WorkerGrid3D(16, 8, 4);
+    grid.setWorkerGrid("s0.t0", worker);
+
+    IntArray data = new IntArray(16);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", KernelContextWorkGroupTests::apiTestGlobalGroupSizeZ, context, data) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(grid) //
+          .execute();
     }
+    assertThat(4, equalTo(data.get(0)));
+  }
 
-    private static void apiTestLocalGroupSizeX(KernelContext context, IntArray data) {
-        data.set(0, context.localGroupSizeX);
+  @Test
+  public void test04() throws TornadoExecutionPlanException {
+    KernelContext context = new KernelContext();
+    GridScheduler grid = new GridScheduler();
+    WorkerGrid worker = new WorkerGrid1D(1024);
+    worker.setLocalWork(8, 1, 1);
+    grid.setWorkerGrid("s0.t0", worker);
+
+    IntArray data = new IntArray(1024);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", KernelContextWorkGroupTests::apiTestLocalGroupSizeX, context, data) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(grid) //
+          .execute();
     }
+    assertThat(worker.getLocalWork()[0], equalTo(data.get(0)));
+  }
 
-    private static void apiTestLocalGroupSizeY(KernelContext context, IntArray data) {
-        data.set(0, context.localGroupSizeY);
+  @Test
+  public void test05() throws TornadoExecutionPlanException {
+    KernelContext context = new KernelContext();
+    GridScheduler grid = new GridScheduler();
+    WorkerGrid worker = new WorkerGrid2D(1024, 512);
+    worker.setLocalWork(1, 8, 1);
+    grid.setWorkerGrid("s0.t0", worker);
+
+    IntArray data = new IntArray(1024);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", KernelContextWorkGroupTests::apiTestLocalGroupSizeY, context, data) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(grid) //
+          .execute();
     }
+    assertThat(worker.getLocalWork()[1], equalTo(data.get(0)));
+  }
 
-    private static void apiTestLocalGroupSizeZ(KernelContext context, IntArray data) {
-        data.set(0, context.localGroupSizeZ);
+  @Test
+  public void test06() throws TornadoExecutionPlanException {
+    KernelContext context = new KernelContext();
+    GridScheduler grid = new GridScheduler();
+    WorkerGrid worker = new WorkerGrid3D(1, 1, 1024);
+    worker.setLocalWork(1, 1, 8);
+    grid.setWorkerGrid("s0.t0", worker);
+
+    IntArray data = new IntArray(1024);
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", KernelContextWorkGroupTests::apiTestLocalGroupSizeZ, context, data) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan
+          .withGridScheduler(grid) //
+          .execute();
     }
-
-    @Test
-    public void test01() throws TornadoExecutionPlanException {
-        KernelContext context = new KernelContext();
-        GridScheduler grid = new GridScheduler();
-        WorkerGrid worker = new WorkerGrid1D(16);
-        grid.setWorkerGrid("s0.t0", worker);
-
-        IntArray data = new IntArray(16);
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", KernelContextWorkGroupTests::apiTestGlobalGroupSizeX, context, data) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(grid) //
-                    .execute();
-        }
-
-        assertEquals(16, data.get(0));
-    }
-
-    @Test
-    public void test02() throws TornadoExecutionPlanException {
-        KernelContext context = new KernelContext();
-        GridScheduler grid = new GridScheduler();
-        WorkerGrid worker = new WorkerGrid2D(16, 8);
-        grid.setWorkerGrid("s0.t0", worker);
-
-        IntArray data = new IntArray(16);
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", KernelContextWorkGroupTests::apiTestGlobalGroupSizeY, context, data) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(grid) //
-                    .execute();
-        }
-
-        assertEquals(8, data.get(0));
-    }
-
-    @Test
-    public void test03() throws TornadoExecutionPlanException {
-        KernelContext context = new KernelContext();
-        GridScheduler grid = new GridScheduler();
-        WorkerGrid worker = new WorkerGrid3D(16, 8, 4);
-        grid.setWorkerGrid("s0.t0", worker);
-
-        IntArray data = new IntArray(16);
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", KernelContextWorkGroupTests::apiTestGlobalGroupSizeZ, context, data)//
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(grid) //
-                    .execute();
-        }
-        assertEquals(4, data.get(0));
-    }
-
-    @Test
-    public void test04() throws TornadoExecutionPlanException {
-        KernelContext context = new KernelContext();
-        GridScheduler grid = new GridScheduler();
-        WorkerGrid worker = new WorkerGrid1D(1024);
-        worker.setLocalWork(8, 1, 1);
-        grid.setWorkerGrid("s0.t0", worker);
-
-        IntArray data = new IntArray(1024);
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", KernelContextWorkGroupTests::apiTestLocalGroupSizeX, context, data) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(grid) //
-                    .execute();
-        }
-        assertEquals(worker.getLocalWork()[0], data.get(0));
-    }
-
-    @Test
-    public void test05() throws TornadoExecutionPlanException {
-        KernelContext context = new KernelContext();
-        GridScheduler grid = new GridScheduler();
-        WorkerGrid worker = new WorkerGrid2D(1024, 512);
-        worker.setLocalWork(1, 8, 1);
-        grid.setWorkerGrid("s0.t0", worker);
-
-        IntArray data = new IntArray(1024);
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", KernelContextWorkGroupTests::apiTestLocalGroupSizeY, context, data) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(grid) //
-                    .execute();
-        }
-        assertEquals(worker.getLocalWork()[1], data.get(0));
-    }
-
-    @Test
-    public void test06() throws TornadoExecutionPlanException {
-        KernelContext context = new KernelContext();
-        GridScheduler grid = new GridScheduler();
-        WorkerGrid worker = new WorkerGrid3D(1, 1, 1024);
-        worker.setLocalWork(1, 1, 8);
-        grid.setWorkerGrid("s0.t0", worker);
-
-        IntArray data = new IntArray(1024);
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", KernelContextWorkGroupTests::apiTestLocalGroupSizeZ, context, data) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, data);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.withGridScheduler(grid) //
-                    .execute();
-        }
-        assertEquals(worker.getLocalWork()[2], data.get(0));
-    }
+    assertThat(worker.getLocalWork()[2], equalTo(data.get(0)));
+  }
 }
