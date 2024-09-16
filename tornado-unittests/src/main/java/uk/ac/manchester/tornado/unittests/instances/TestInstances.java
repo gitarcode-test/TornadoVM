@@ -18,10 +18,10 @@
 
 package uk.ac.manchester.tornado.unittests.instances;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -31,64 +31,62 @@ import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.instances.TestInstances
  * </code>
- *
  */
 public class TestInstances extends TornadoTestBase {
 
-    public static class Foo {
-        // Parallel initialisation
-        public void compute(DoubleArray array, double initValue) {
-            for (int i = 0; i < array.getSize(); i++) {
-                array.set(i, initValue);
-            }
-        }
-    }
-
-    @Test
-    public void testInit() throws TornadoExecutionPlanException {
-        Foo f = new Foo();
-        DoubleArray array = new DoubleArray(1000);
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", f::compute, array, 2.1) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals(2.1, array.get(i), 0.001);
-        }
-    }
-
+  public static class Foo {
+    // Parallel initialisation
     public void compute(DoubleArray array, double initValue) {
-        for (int i = 0; i < array.getSize(); i++) {
-            array.set(i, initValue);
-        }
+      for (int i = 0; i < array.getSize(); i++) {
+        array.set(i, initValue);
+      }
+    }
+  }
+
+  @Test
+  public void testInit() throws TornadoExecutionPlanException {
+    Foo f = new Foo();
+    DoubleArray array = new DoubleArray(1000);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", f::compute, array, 2.1) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    @Test
-    public void testThis() throws TornadoExecutionPlanException {
-        DoubleArray array = new DoubleArray(1000);
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .task("t0", this::compute, array, 2.1) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        for (int i = 0; i < array.getSize(); i++) {
-            assertEquals(2.1, array.get(i), 0.001);
-        }
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat(2.1, closeTo(array.get(i), 0.001));
     }
+  }
+
+  public void compute(DoubleArray array, double initValue) {
+    for (int i = 0; i < array.getSize(); i++) {
+      array.set(i, initValue);
+    }
+  }
+
+  @Test
+  public void testThis() throws TornadoExecutionPlanException {
+    DoubleArray array = new DoubleArray(1000);
+
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .task("t0", this::compute, array, 2.1) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, array);
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
+    }
+
+    for (int i = 0; i < array.getSize(); i++) {
+      assertThat(2.1, closeTo(array.get(i), 0.001));
+    }
+  }
 }

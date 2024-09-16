@@ -18,10 +18,9 @@
 
 package uk.ac.manchester.tornado.unittests.instances;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -30,87 +29,82 @@ import uk.ac.manchester.tornado.api.enums.DataTransferMode;
 import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
 
 /**
- * <p>
- * How to run?
- * </p>
- * <code>
+ * How to run? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.instances.LocalVariableInstanceTest
  * </code>
- *
  */
 public class LocalVariableInstanceTest {
 
-    public int[] sequential(int[] in) {
-        int[] out = new int[in.length];
-        int x;
-        for (int i = 0; i < in.length; i++) {
-            x = i - 2 + 9;
-            out[i] = i * x;
-        }
-        return out;
+  public int[] sequential(int[] in) {
+    int[] out = new int[in.length];
+    int x;
+    for (int i = 0; i < in.length; i++) {
+      x = i - 2 + 9;
+      out[i] = i * x;
+    }
+    return out;
+  }
+
+  @Test
+  public void testLocalVariable() throws TornadoExecutionPlanException {
+
+    int[] in = new int[5];
+    int[] out = new int[5];
+
+    for (int i = 0; i < in.length; i++) {
+      in[i] = i;
     }
 
-    @Test
-    public void testLocalVariable() throws TornadoExecutionPlanException {
+    MyMap mm = new MyMap();
+    MapSkeleton msk = new MapSkeleton(mm);
 
-        int[] in = new int[5];
-        int[] out = new int[5];
+    TaskGraph taskGraph =
+        new TaskGraph("s0") //
+            .transferToDevice(DataTransferMode.EVERY_EXECUTION, in) //
+            .task("t0", msk::map, in, out) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, out);
 
-        for (int i = 0; i < in.length; i++) {
-            in[i] = i;
-        }
-
-        MyMap mm = new MyMap();
-        MapSkeleton msk = new MapSkeleton(mm);
-
-        TaskGraph taskGraph = new TaskGraph("s0") //
-                .transferToDevice(DataTransferMode.EVERY_EXECUTION, in) //
-                .task("t0", msk::map, in, out) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, out);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        int[] seq = sequential(in);
-
-        assertArrayEquals(seq, out);
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    public static class FlinkMapUDF {
-        public int map(int value) {
-            int x = value - 2 + 9;
-            return value * x;
-        }
+    int[] seq = sequential(in);
+
+    assertArrayEquals(seq, out);
+  }
+
+  public static class FlinkMapUDF {
+    public int map(int value) {
+      int x = value - 2 + 9;
+      return value * x;
+    }
+  }
+
+  public abstract static class MiddleMap {
+    public abstract int mymapintint(int i);
+  }
+
+  public static class MyMap extends MiddleMap {
+    @Override
+    public int mymapintint(int i) {
+      FlinkMapUDF fudf = new FlinkMapUDF();
+      return fudf.map(i);
+    }
+  }
+
+  public static class MapSkeleton {
+
+    public MiddleMap mdm;
+
+    MapSkeleton(MiddleMap mdm) {
+      this.mdm = mdm;
     }
 
-    public abstract static class MiddleMap {
-        public abstract int mymapintint(int i);
+    public void map(int[] input, int[] output) {
+      for (@Parallel int i = 0; i < input.length; i++) {
+        output[i] = mdm.mymapintint(i);
+      }
     }
-
-    public static class MyMap extends MiddleMap {
-        @Override
-        public int mymapintint(int i) {
-            FlinkMapUDF fudf = new FlinkMapUDF();
-            return fudf.map(i);
-        }
-    }
-
-    public static class MapSkeleton {
-
-        public MiddleMap mdm;
-
-        MapSkeleton(MiddleMap mdm) {
-            this.mdm = mdm;
-        }
-
-        public void map(int[] input, int[] output) {
-            for (@Parallel int i = 0; i < input.length; i++) {
-                output[i] = mdm.mymapintint(i);
-            }
-        }
-
-    }
-
+  }
 }
