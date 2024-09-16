@@ -17,13 +17,12 @@
  */
 package uk.ac.manchester.tornado.unittests.logic;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.stream.IntStream;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -34,151 +33,151 @@ import uk.ac.manchester.tornado.api.types.arrays.IntArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
 /**
- * <p>
- * How to test?
- * </p>
- * <code>
+ * How to test? <code>
  * tornado-test -V uk.ac.manchester.tornado.unittests.logic.TestLogic
  * </code>
  */
 public class TestLogic extends TornadoTestBase {
-    // CHECKSTYLE:OFF
+  // CHECKSTYLE:OFF
 
-    public static void logic01(IntArray data, IntArray output) {
-        for (@Parallel int i = 0; i < data.getSize(); i++) {
-            output.set(i, data.get(i) & data.get(i) - 1);
+  public static void logic01(IntArray data, IntArray output) {
+    for (@Parallel int i = 0; i < data.getSize(); i++) {
+      output.set(i, data.get(i) & data.get(i) - 1);
+    }
+  }
+
+  public static void logic02(IntArray data, IntArray output) {
+    for (@Parallel int i = 0; i < data.getSize(); i++) {
+      output.set(i, data.get(i) | data.get(i) - 1);
+    }
+  }
+
+  public static void logic03(IntArray data, IntArray output) {
+    for (@Parallel int i = 0; i < data.getSize(); i++) {
+      output.set(i, data.get(i) ^ data.get(i) - 1);
+    }
+  }
+
+  public static void logic04(IntArray data, IntArray output) {
+    for (@Parallel int i = 0; i < data.getSize(); i++) {
+      int value = data.get(i);
+      if ((value & (value - 1)) != 0) {
+
+        int condition = (value & (value - 1));
+        while (condition != 0) {
+          value &= value - 1;
+          condition = (value & (value - 1));
         }
+      }
+      output.set(i, value);
+    }
+  }
+
+  @Test
+  public void testLogic01() throws TornadoExecutionPlanException {
+    final int N = 1024;
+    IntArray data = new IntArray(N);
+    IntArray output = new IntArray(N);
+    IntArray sequential = new IntArray(N);
+
+    IntStream.range(0, data.getSize()).sequential().forEach(i -> data.set(i, i));
+
+    TaskGraph taskGraph =
+        new TaskGraph("taskGraph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+            .task("t0", TestLogic::logic01, data, output) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
+    }
+    logic01(data, sequential);
+
+    for (int i = 0; i < data.getSize(); i++) {
+      assertThat(sequential.get(i), equalTo(output.get(i)));
+    }
+  }
+
+  @Test
+  public void testLogic02() throws TornadoExecutionPlanException {
+    final int N = 1024;
+    IntArray data = new IntArray(N);
+    IntArray output = new IntArray(N);
+    IntArray sequential = new IntArray(N);
+
+    IntStream.range(0, data.getSize()).sequential().forEach(i -> data.set(i, i));
+
+    TaskGraph taskGraph =
+        new TaskGraph("taskGraph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+            .task("t0", TestLogic::logic02, data, output) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    public static void logic02(IntArray data, IntArray output) {
-        for (@Parallel int i = 0; i < data.getSize(); i++) {
-            output.set(i, data.get(i) | data.get(i) - 1);
-        }
+    logic02(data, sequential);
+
+    for (int i = 0; i < data.getSize(); i++) {
+      assertThat(sequential.get(i), equalTo(output.get(i)));
+    }
+  }
+
+  @Test
+  public void testLogic03() throws TornadoExecutionPlanException {
+    final int N = 1024;
+    IntArray data = new IntArray(N);
+    IntArray output = new IntArray(N);
+    IntArray sequential = new IntArray(N);
+
+    IntStream.range(0, data.getSize()).sequential().forEach(i -> data.set(i, i));
+
+    TaskGraph taskGraph =
+        new TaskGraph("taskGraph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+            .task("t0", TestLogic::logic03, data, output) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    public static void logic03(IntArray data, IntArray output) {
-        for (@Parallel int i = 0; i < data.getSize(); i++) {
-            output.set(i, data.get(i) ^ data.get(i) - 1);
-        }
+    logic03(data, sequential);
+
+    for (int i = 0; i < data.getSize(); i++) {
+      assertThat(sequential.get(i), equalTo(output.get(i)));
+    }
+  }
+
+  @Disabled
+  public void testLogic04() throws TornadoExecutionPlanException {
+    final int N = 1024;
+    IntArray data = new IntArray(N);
+    IntArray output = new IntArray(N);
+    IntArray sequential = new IntArray(N);
+
+    IntStream.range(0, data.getSize()).sequential().forEach(i -> data.set(i, i));
+
+    TaskGraph taskGraph =
+        new TaskGraph("taskGraph") //
+            .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
+            .task("t0", TestLogic::logic04, data, output) //
+            .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
+
+    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+    try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
+      executionPlan.execute();
     }
 
-    public static void logic04(IntArray data, IntArray output) {
-        for (@Parallel int i = 0; i < data.getSize(); i++) {
-            int value = data.get(i);
-            if ((value & (value - 1)) != 0) {
+    logic04(data, sequential);
 
-                int condition = (value & (value - 1));
-                while (condition != 0) {
-                    value &= value - 1;
-                    condition = (value & (value - 1));
-                }
-            }
-            output.set(i, value);
-        }
+    for (int i = 0; i < data.getSize(); i++) {
+      assertThat(sequential.get(i), equalTo(output.get(i)));
     }
-
-    @Test
-    public void testLogic01() throws TornadoExecutionPlanException {
-        final int N = 1024;
-        IntArray data = new IntArray(N);
-        IntArray output = new IntArray(N);
-        IntArray sequential = new IntArray(N);
-
-        IntStream.range(0, data.getSize()).sequential().forEach(i -> data.set(i, i));
-
-        TaskGraph taskGraph = new TaskGraph("taskGraph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestLogic::logic01, data, output) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-        logic01(data, sequential);
-
-        for (int i = 0; i < data.getSize(); i++) {
-            assertEquals(sequential.get(i), output.get(i));
-        }
-
-    }
-
-    @Test
-    public void testLogic02() throws TornadoExecutionPlanException {
-        final int N = 1024;
-        IntArray data = new IntArray(N);
-        IntArray output = new IntArray(N);
-        IntArray sequential = new IntArray(N);
-
-        IntStream.range(0, data.getSize()).sequential().forEach(i -> data.set(i, i));
-
-        TaskGraph taskGraph = new TaskGraph("taskGraph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestLogic::logic02, data, output) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        logic02(data, sequential);
-
-        for (int i = 0; i < data.getSize(); i++) {
-            assertEquals(sequential.get(i), output.get(i));
-        }
-    }
-
-    @Test
-    public void testLogic03() throws TornadoExecutionPlanException {
-        final int N = 1024;
-        IntArray data = new IntArray(N);
-        IntArray output = new IntArray(N);
-        IntArray sequential = new IntArray(N);
-
-        IntStream.range(0, data.getSize()).sequential().forEach(i -> data.set(i, i));
-
-        TaskGraph taskGraph = new TaskGraph("taskGraph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestLogic::logic03, data, output) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        logic03(data, sequential);
-
-        for (int i = 0; i < data.getSize(); i++) {
-            assertEquals(sequential.get(i), output.get(i));
-        }
-    }
-
-    @Ignore
-    public void testLogic04() throws TornadoExecutionPlanException {
-        final int N = 1024;
-        IntArray data = new IntArray(N);
-        IntArray output = new IntArray(N);
-        IntArray sequential = new IntArray(N);
-
-        IntStream.range(0, data.getSize()).sequential().forEach(i -> data.set(i, i));
-
-        TaskGraph taskGraph = new TaskGraph("taskGraph") //
-                .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
-                .task("t0", TestLogic::logic04, data, output) //
-                .transferToHost(DataTransferMode.EVERY_EXECUTION, output);
-
-        ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-        try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-            executionPlan.execute();
-        }
-
-        logic04(data, sequential);
-
-        for (int i = 0; i < data.getSize(); i++) {
-            assertEquals(sequential.get(i), output.get(i));
-        }
-    }
-    // CHECKSTYLE:ON
+  }
+  // CHECKSTYLE:ON
 }
