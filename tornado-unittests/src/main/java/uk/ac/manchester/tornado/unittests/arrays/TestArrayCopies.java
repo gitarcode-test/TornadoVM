@@ -17,11 +17,13 @@
  */
 package uk.ac.manchester.tornado.unittests.arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -153,7 +155,7 @@ public class TestArrayCopies extends TornadoTestBase {
     intPrivateCopy(a, c);
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(b.get(i), c.get(i));
+      assertThat(b.get(i), equalTo(c.get(i)));
     }
   }
 
@@ -189,7 +191,7 @@ public class TestArrayCopies extends TornadoTestBase {
     floatPrivateCopy(a, c);
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(b.get(i), c.get(i), 0.01f);
+      assertThat(b.get(i), closeTo(c.get(i), 0.01f));
     }
   }
 
@@ -225,7 +227,7 @@ public class TestArrayCopies extends TornadoTestBase {
     doublePrivateCopy(a, c);
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(b.get(i), c.get(i), 0.01);
+      assertThat(b.get(i), closeTo(c.get(i), 0.01));
     }
   }
 
@@ -261,7 +263,7 @@ public class TestArrayCopies extends TornadoTestBase {
     longPrivateCopy(a, c);
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(b.get(i), c.get(i));
+      assertThat(b.get(i), equalTo(c.get(i)));
     }
   }
 
@@ -297,7 +299,7 @@ public class TestArrayCopies extends TornadoTestBase {
     intPrivateCopyNoCondition(a, c);
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(b.get(i), c.get(i));
+      assertThat(b.get(i), equalTo(c.get(i)));
     }
   }
 
