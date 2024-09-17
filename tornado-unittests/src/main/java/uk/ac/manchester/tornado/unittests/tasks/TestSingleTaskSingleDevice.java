@@ -18,10 +18,11 @@
 
 package uk.ac.manchester.tornado.unittests.tasks;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoBackend;
@@ -76,7 +77,7 @@ public class TestSingleTaskSingleDevice extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.001);
+      assertThat(a.get(i) + b.get(i), closeTo(c.get(i), 0.001));
     }
   }
 
@@ -111,7 +112,7 @@ public class TestSingleTaskSingleDevice extends TornadoTestBase {
           .execute();
     }
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.001);
+      assertThat(a.get(i) + b.get(i), closeTo(c.get(i), 0.001));
     }
   }
 
@@ -152,7 +153,7 @@ public class TestSingleTaskSingleDevice extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.001);
+      assertThat(a.get(i) + b.get(i), closeTo(c.get(i), 0.001));
     }
   }
 }
