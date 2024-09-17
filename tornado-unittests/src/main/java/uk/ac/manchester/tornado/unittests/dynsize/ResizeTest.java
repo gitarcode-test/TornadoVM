@@ -18,10 +18,11 @@
 
 package uk.ac.manchester.tornado.unittests.dynsize;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -94,7 +95,7 @@ public class ResizeTest extends TornadoTestBase {
     }
 
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals(1.0f, b.get(i), 0.001f);
+      assertThat(1.0f, closeTo(b.get(i), 0.001f));
     }
   }
 
@@ -143,7 +144,7 @@ public class ResizeTest extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(1.0f, c.get(i), 0.001f);
+      assertThat(1.0f, closeTo(c.get(i), 0.001f));
     }
   }
 }
