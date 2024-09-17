@@ -17,8 +17,11 @@
  */
 package uk.ac.manchester.tornado.unittests.tensors;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -100,20 +103,20 @@ public class TestTensorTypes extends TornadoTestBase {
 
     tensorA.init(new HalfFloat(1f));
 
-    Assert.assertEquals(
+    assertThat(
         "Expected shape does not match",
         "Shape{dimensions=[64, 64, 64]}",
-        tensorA.getShape().toString());
-    Assert.assertEquals(
-        "Expected data type does not match", "HALF_FLOAT", tensorA.getDTypeAsString());
-    Assert.assertEquals(
+        equalTo(tensorA.getShape().toString()));
+    assertThat(
+        "Expected data type does not match", "HALF_FLOAT", equalTo(tensorA.getDTypeAsString()));
+    assertThat(
         "Expected TensorFlow shape string does not match",
         "[64,64,64]",
-        tensorA.getShape().toTensorFlowShapeString());
-    Assert.assertEquals(
+        equalTo(tensorA.getShape().toTensorFlowShapeString()));
+    assertThat(
         "Expected ONNX shape string does not match",
         "{dim_0: 64, dim_1: 64, dim_2: 64}",
-        tensorA.getShape().toONNXShapeString());
+        equalTo(tensorA.getShape().toONNXShapeString()));
   }
 
   @Test
@@ -148,10 +151,9 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(
+      assertThat(
           HalfFloat.add(tensorA.get(i), tensorB.get(i)).getFloat32(),
-          tensorC.get(i).getFloat32(),
-          0.01f);
+          closeTo(tensorC.get(i).getFloat32(), 0.01f));
     }
   }
 
@@ -187,7 +189,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -223,7 +225,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -259,7 +261,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -294,7 +296,7 @@ public class TestTensorTypes extends TornadoTestBase {
       executionPlan.execute();
     }
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -330,7 +332,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -366,7 +368,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 }
