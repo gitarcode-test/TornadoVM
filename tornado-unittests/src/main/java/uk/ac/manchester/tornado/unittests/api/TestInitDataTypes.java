@@ -17,9 +17,11 @@
  */
 package uk.ac.manchester.tornado.unittests.api;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -58,7 +60,7 @@ public class TestInitDataTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals((byte) 2, array.get(i));
+      assertThat((byte) 2, equalTo(array.get(i)));
     }
   }
 
@@ -77,7 +79,7 @@ public class TestInitDataTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals('a', array.get(i));
+      assertThat('a', equalTo(array.get(i)));
     }
   }
 
@@ -96,7 +98,7 @@ public class TestInitDataTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(2.0f, array.get(i), 0.001f);
+      assertThat(2.0f, closeTo(array.get(i), 0.001f));
     }
   }
 
@@ -115,7 +117,7 @@ public class TestInitDataTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(2.0, array.get(i), 0.001f);
+      assertThat(2.0, closeTo(array.get(i), 0.001f));
     }
   }
 
@@ -134,7 +136,7 @@ public class TestInitDataTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals((short) 2, array.get(i));
+      assertThat((short) 2, equalTo(array.get(i)));
     }
   }
 
@@ -153,7 +155,7 @@ public class TestInitDataTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(2, array.get(i));
+      assertThat(2, equalTo(array.get(i)));
     }
   }
 
@@ -172,7 +174,7 @@ public class TestInitDataTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(2, array.get(i));
+      assertThat(2, equalTo(array.get(i)));
     }
   }
 
@@ -192,7 +194,7 @@ public class TestInitDataTypes extends TornadoTestBase {
 
     float f = new HalfFloat(2.0f).getFloat32();
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(f, array.get(i).getFloat32(), 0.001f);
+      assertThat(f, closeTo(array.get(i).getFloat32(), 0.001f));
     }
   }
 }
