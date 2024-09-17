@@ -18,11 +18,12 @@
 
 package uk.ac.manchester.tornado.unittests.tasks;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.stream.IntStream;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -81,7 +82,7 @@ public class TestMultipleTasksMultipleDevices extends TornadoTestBase {
     }
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpBeforeClass() {
     assertAvailableDevices();
     setDefaultDevices();
@@ -137,8 +138,8 @@ public class TestMultipleTasksMultipleDevices extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals((30L + i) * i, a.get(i));
-      assertEquals(i, b.get(i));
+      assertThat((30L + i) * i, equalTo(a.get(i)));
+      assertThat(i, equalTo(b.get(i)));
     }
   }
 
@@ -157,9 +158,9 @@ public class TestMultipleTasksMultipleDevices extends TornadoTestBase {
       executionPlan.execute();
     }
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals((30L + i) * i, a.get(i));
-      assertEquals(i, b.get(i));
-      assertEquals(12L * c.get(i) + e.get(i), d.get(i));
+      assertThat((30L + i) * i, equalTo(a.get(i)));
+      assertThat(i, equalTo(b.get(i)));
+      assertThat(12L * c.get(i) + e.get(i), equalTo(d.get(i)));
     }
   }
 
@@ -179,8 +180,8 @@ public class TestMultipleTasksMultipleDevices extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals((b.get(i) * i), a.get(i));
-      assertEquals(12L * c.get(i) + b.get(i), d.get(i));
+      assertThat((b.get(i) * i), equalTo(a.get(i)));
+      assertThat(12L * c.get(i) + b.get(i), equalTo(d.get(i)));
     }
   }
 }
