@@ -17,6 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.tensors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+
 import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OnnxValue;
 import ai.onnxruntime.OrtEnvironment;
@@ -32,8 +36,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.types.tensors.Shape;
 import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
@@ -102,7 +105,7 @@ public class TestTensorAPIWithOnnx extends TornadoTestBase {
         outputTensor = (OnnxTensor) optionalOutputTensor.get();
       }
     } finally {
-      Assert.assertNotNull(outputTensor);
+      assertThat(outputTensor, not(nullValue()));
     }
   }
 
