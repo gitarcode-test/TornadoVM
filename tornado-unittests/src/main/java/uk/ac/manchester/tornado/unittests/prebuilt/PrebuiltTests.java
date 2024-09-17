@@ -17,12 +17,14 @@
  */
 package uk.ac.manchester.tornado.unittests.prebuilt;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.List;
 import java.util.stream.IntStream;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.AccessorParameters;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
@@ -56,7 +58,7 @@ public class PrebuiltTests extends TornadoTestBase {
   private static String FILE_PATH;
   private static TornadoVMBackendType backendType;
 
-  @BeforeClass
+  @BeforeAll
   public static void init() {
     backendType = TornadoRuntimeProvider.getTornadoRuntime().getBackendType(0);
     defaultDevice = TornadoRuntimeProvider.getTornadoRuntime().getBackend(0).getDevice(0);
@@ -120,7 +122,7 @@ public class PrebuiltTests extends TornadoTestBase {
           .execute();
     }
     for (int j = 0; j < c.getSize(); j++) {
-      assertEquals(a.get(j) + b.get(j), c.get(j));
+      assertThat(a.get(j) + b.get(j), equalTo(c.get(j)));
     }
   }
 
@@ -184,7 +186,7 @@ public class PrebuiltTests extends TornadoTestBase {
       for (int i = 0; i < 10; i++) {
         executionPlan.execute();
         for (int j = 0; j < c.getSize(); j++) {
-          assertEquals(a.get(j) + b.get(j), c.get(j));
+          assertThat(a.get(j) + b.get(j), equalTo(c.get(j)));
         }
         IntStream.range(0, numElements).forEach(k -> a.set(k, c.get(k)));
       }
@@ -238,7 +240,7 @@ public class PrebuiltTests extends TornadoTestBase {
       finalSum += v;
     }
 
-    assertEquals(512, finalSum, 0.0f);
+    assertThat(512f, closeTo(finalSum, 0.0f));
   }
 
   /**
@@ -297,7 +299,7 @@ public class PrebuiltTests extends TornadoTestBase {
       finalSum += v;
     }
 
-    assertEquals(64, finalSum, 0.0f);
+    assertThat(64f, closeTo(finalSum, 0.0f));
   }
 
   @Test
@@ -355,7 +357,7 @@ public class PrebuiltTests extends TornadoTestBase {
       finalSum += v;
     }
 
-    assertEquals(512, finalSum, 0.0f);
+    assertThat(512f, closeTo(finalSum, 0.0f));
   }
 
   /**
@@ -434,7 +436,7 @@ public class PrebuiltTests extends TornadoTestBase {
       for (int i = 0; i < 10; i++) {
         executionPlan.execute();
         for (int j = 0; j < c.getSize(); j++) {
-          assertEquals(a.get(j) + b.get(j), c.get(j));
+          assertThat(a.get(j) + b.get(j), equalTo(c.get(j)));
         }
         IntStream.range(0, numElements).forEach(k -> a.set(k, c.get(k)));
       }
