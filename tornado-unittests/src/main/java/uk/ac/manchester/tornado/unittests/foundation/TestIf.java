@@ -17,9 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.foundation;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -54,7 +55,7 @@ public class TestIf extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(50, a.get(0));
+    assertThat(50, equalTo(a.get(0)));
   }
 
   @Test
@@ -77,7 +78,7 @@ public class TestIf extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -101,7 +102,7 @@ public class TestIf extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -125,7 +126,7 @@ public class TestIf extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -149,7 +150,7 @@ public class TestIf extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -173,7 +174,7 @@ public class TestIf extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
     }
   }
 }
