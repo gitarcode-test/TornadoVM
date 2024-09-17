@@ -18,10 +18,14 @@
 
 package uk.ac.manchester.tornado.unittests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -98,7 +102,7 @@ public class TestHello extends TornadoTestBase {
     TaskGraph taskGraph =
         new TaskGraph("s0") //
             .task("t0", TestHello::printHello, 8);
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
@@ -120,7 +124,7 @@ public class TestHello extends TornadoTestBase {
         new TaskGraph("s0")
             .transferToDevice(DataTransferMode.FIRST_EXECUTION, a)
             .task("t0", TestHello::printIntArray, a);
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
@@ -143,7 +147,7 @@ public class TestHello extends TornadoTestBase {
         new TaskGraph("s0")
             .transferToDevice(DataTransferMode.FIRST_EXECUTION, a)
             .task("t0", TestHello::printIntArray2, a);
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
@@ -173,7 +177,7 @@ public class TestHello extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.001);
+      assertThat(a.get(i) + b.get(i), closeTo(c.get(i), 0.001));
     }
   }
 
@@ -204,7 +208,7 @@ public class TestHello extends TornadoTestBase {
     }
 
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals(a.get(i) * 2, b.get(i));
+      assertThat(a.get(i) * 2, equalTo(b.get(i)));
     }
   }
 
@@ -230,7 +234,7 @@ public class TestHello extends TornadoTestBase {
     }
 
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals(a.get(i) * 2, b.get(i));
+      assertThat(a.get(i) * 2, equalTo(b.get(i)));
     }
   }
 
@@ -252,7 +256,7 @@ public class TestHello extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(20, a.get(i));
+      assertThat(20, equalTo(a.get(i)));
     }
   }
 }

@@ -18,14 +18,15 @@
 
 package uk.ac.manchester.tornado.unittests.atomics;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.AccessorParameters;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
@@ -187,7 +188,7 @@ public class TestAtomics extends TornadoTestBase {
 
     atomic03(b);
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(b.get(i), a.get(i));
+      assertThat(b.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -210,7 +211,7 @@ public class TestAtomics extends TornadoTestBase {
       TornadoExecutionResult executionResult = executionPlan.execute();
 
       if (!executionResult.isReady()) {
-        fail();
+        assertThat(false);
       }
     }
 
@@ -219,7 +220,7 @@ public class TestAtomics extends TornadoTestBase {
     // However, the order is not guaranteed. For this test, we need to check that
     // there are not repeated values in the output array.
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -241,7 +242,7 @@ public class TestAtomics extends TornadoTestBase {
       TornadoExecutionResult executionResult = executionPlan.execute();
 
       if (!executionResult.isReady()) {
-        fail();
+        assertThat(false);
       }
     }
 
@@ -250,7 +251,7 @@ public class TestAtomics extends TornadoTestBase {
     // However, the order is not guaranteed. For this test, we need to check that
     // there are not repeated values in the output array.
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   /**
@@ -302,7 +303,7 @@ public class TestAtomics extends TornadoTestBase {
     }
 
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -327,14 +328,14 @@ public class TestAtomics extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       TornadoExecutionResult executionResult = executionPlan.execute();
       if (!executionResult.isReady()) {
-        fail();
+        assertThat(false);
       }
     }
 
     boolean repeated = isValueRepeated(a);
     repeated &= isValueRepeated(a);
 
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -357,11 +358,11 @@ public class TestAtomics extends TornadoTestBase {
       TornadoExecutionResult executionResult = executionPlan.execute();
 
       if (!executionResult.isReady()) {
-        fail();
+        assertThat(false);
       }
     }
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -383,11 +384,11 @@ public class TestAtomics extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       TornadoExecutionResult executionResult = executionPlan.execute();
       if (!executionResult.isReady()) {
-        fail();
+        assertThat(false);
       }
     }
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   private boolean isValueRepeated(IntArray array) {
@@ -431,8 +432,8 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValue + size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValue + size, equalTo(lastValue));
   }
 
   @Test
@@ -462,8 +463,8 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValue + size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValue + size, equalTo(lastValue));
   }
 
   @Test
@@ -493,8 +494,8 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValue + size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValue + size, equalTo(lastValue));
   }
 
   @Test
@@ -526,11 +527,11 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValueA + size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValueA + size, equalTo(lastValue));
 
     lastValue = bi.get();
-    assertEquals(initialValueB + size, lastValue);
+    assertThat(initialValueB + size, equalTo(lastValue));
   }
 
   @Test
@@ -559,8 +560,8 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValueA - size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValueA - size, equalTo(lastValue));
   }
 
   @Test
@@ -590,10 +591,10 @@ public class TestAtomics extends TornadoTestBase {
     }
 
     int lastValue = ai.get();
-    assertEquals(initialValueA + size, lastValue);
+    assertThat(initialValueA + size, equalTo(lastValue));
 
     lastValue = bi.get();
-    assertEquals(initialValueB - size, lastValue);
+    assertThat(initialValueB - size, equalTo(lastValue));
   }
 
   @Test
@@ -620,10 +621,10 @@ public class TestAtomics extends TornadoTestBase {
     }
 
     int lastValue = ai.get();
-    assertEquals(initialValueA + size, lastValue);
+    assertThat(initialValueA + size, equalTo(lastValue));
 
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -652,6 +653,6 @@ public class TestAtomics extends TornadoTestBase {
     }
 
     int lastValue = ai.get();
-    assertEquals(initialValueA + (iterations * size), lastValue);
+    assertThat(initialValueA + (iterations * size), equalTo(lastValue));
   }
 }
