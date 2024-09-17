@@ -17,11 +17,12 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.matrices;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -170,7 +171,7 @@ public class TestMatrixMultiplicationKernelContext extends TornadoTestBase {
     matrixMultiplicationJava(a, b, cJava, size);
 
     for (int i = 0; i < size * size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i), 0.01f);
+      assertThat(cJava.get(i), closeTo(cTornado.get(i), 0.01f));
     }
   }
 
@@ -218,7 +219,7 @@ public class TestMatrixMultiplicationKernelContext extends TornadoTestBase {
     matrixMultiplicationJava(a, b, cJava, size);
 
     for (int i = 0; i < size * size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i), 0.01f);
+      assertThat(cJava.get(i), closeTo(cTornado.get(i), 0.01f));
     }
   }
 
@@ -267,7 +268,7 @@ public class TestMatrixMultiplicationKernelContext extends TornadoTestBase {
     matrixMultiplicationJava(a, b, cJava, size);
 
     for (int i = 0; i < size * size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i), 0.1f);
+      assertThat(cJava.get(i), closeTo(cTornado.get(i), 0.1f));
     }
   }
   // CHECKSTYLE:ON

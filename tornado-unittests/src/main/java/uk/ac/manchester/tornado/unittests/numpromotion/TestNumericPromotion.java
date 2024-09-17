@@ -18,9 +18,10 @@
 
 package uk.ac.manchester.tornado.unittests.numpromotion;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -159,7 +160,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     ByteArray sequential = new ByteArray(4);
     bitwiseOr(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -187,7 +188,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     ByteArray sequential = new ByteArray(4);
     bitwiseAnd(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -215,7 +216,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     ByteArray sequential = new ByteArray(4);
     bitwiseXor(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -243,7 +244,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     ByteArray sequential = new ByteArray(8);
     bitwiseNot(sequential, input);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -271,7 +272,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     ByteArray sequential = new ByteArray(4);
     addition(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -299,7 +300,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     ByteArray sequential = new ByteArray(4);
     subtraction(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -329,7 +330,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     sequential.init((byte) 1);
     multiplication(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -359,7 +360,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     sequential.init((byte) 8);
     division(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -389,7 +390,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     sequential.init((byte) 8);
     signedLeftShift(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -419,7 +420,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     sequential.init((byte) 8);
     signedRightShift(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 
@@ -448,7 +449,7 @@ public class TestNumericPromotion extends TornadoTestBase {
     sequential.init((byte) 8);
     unsignedRightShift(sequential, input, elements);
     for (int i = 0; i < result.getSize(); i++) {
-      assertEquals(sequential.get(i), result.get(i));
+      assertThat(sequential.get(i), equalTo(result.get(i)));
     }
   }
 }
