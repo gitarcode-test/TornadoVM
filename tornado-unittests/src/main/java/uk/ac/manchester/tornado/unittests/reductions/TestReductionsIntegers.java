@@ -17,12 +17,14 @@
  */
 package uk.ac.manchester.tornado.unittests.reductions;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -241,7 +243,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     reductionAnnotation(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -274,7 +276,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     reductionAnnotationLarge(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -304,7 +306,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     reductionAnnotation2(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -332,7 +334,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
 
     IntArray sequential = new IntArray(1);
     reductionAnnotationConstant(input, sequential);
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -364,7 +366,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     multReductionAnnotation(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -395,7 +397,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     IntArray sequential = new IntArray(1);
     maxReductionAnnotation(input, sequential, neutral);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -424,7 +426,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     sequential.init(Integer.MAX_VALUE);
     minReductionAnnotation(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -454,7 +456,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     IntArray sequential = new IntArray(1);
     reductionSequentialSmall(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.001f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.001f));
   }
 
   @Test
@@ -484,7 +486,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     IntArray sequential = new IntArray(1);
     reduction01(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -517,7 +519,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     IntArray sequential = new IntArray(BIG_SIZE);
     mapReduce01(a, b, c, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -551,14 +553,14 @@ public class TestReductionsIntegers extends TornadoTestBase {
     map02(a, seq);
     reduce02(seq, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   /**
    * Currently we cannot do this due to synchronisation between the first part and the second part,
    * unless an explicit barrier is used.
    */
-  @Ignore
+  @Disabled
   public void testMapReduceSameKernel() throws TornadoExecutionPlanException {
     IntArray a = new IntArray(BIG_SIZE);
     IntArray b = new IntArray(BIG_SIZE);
@@ -589,10 +591,10 @@ public class TestReductionsIntegers extends TornadoTestBase {
     IntArray sequential = new IntArray(BIG_SIZE);
     mapReduce01(a, b, c, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
-  @Ignore
+  @Disabled
   public void testMapReduce2() throws TornadoExecutionPlanException {
     IntArray a = new IntArray(BIG_SIZE);
     IntArray b = new IntArray(BIG_SIZE);
@@ -620,7 +622,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     IntArray sequential = new IntArray(BIG_SIZE);
     mapReduce2(a, b, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -649,7 +651,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     IntArray sequential = new IntArray(1);
     reductionAddInts2(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -681,7 +683,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     IntArray sequential = new IntArray(1);
     reductionAddInts3(inputA, inputB, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -712,7 +714,7 @@ public class TestReductionsIntegers extends TornadoTestBase {
     sequential.init(0);
     maxReductionAnnotation2(input, sequential, neutral);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 
   @Test
@@ -748,6 +750,6 @@ public class TestReductionsIntegers extends TornadoTestBase {
 
     IntArray sequential = new IntArray(1);
     minReductionAnnotation2(input, sequential, Integer.MAX_VALUE);
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(sequential.get(0), equalTo(result.get(0)));
   }
 }
