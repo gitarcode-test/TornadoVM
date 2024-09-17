@@ -17,10 +17,11 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.api;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -170,7 +171,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 
@@ -217,7 +218,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 
@@ -263,7 +264,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 
@@ -309,7 +310,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 
@@ -362,7 +363,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 }
