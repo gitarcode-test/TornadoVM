@@ -18,12 +18,13 @@
 
 package uk.ac.manchester.tornado.unittests.images;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static uk.ac.manchester.tornado.api.math.TornadoMath.clamp;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -95,7 +96,7 @@ public class TestResizeImage extends TornadoTestBase {
 
         float center = imageSource.get(cx, cy);
 
-        assertEquals(imageDst.get(i, j), center, 0.1);
+        assertThat(imageDst.get(i, j), closeTo(center, 0.1));
       }
     }
   }
@@ -141,7 +142,7 @@ public class TestResizeImage extends TornadoTestBase {
 
         float center = image1.get(cx, cy);
 
-        assertEquals(image2.get(i, j), center, 0.1);
+        assertThat(image2.get(i, j), closeTo(center, 0.1));
       }
     }
   }

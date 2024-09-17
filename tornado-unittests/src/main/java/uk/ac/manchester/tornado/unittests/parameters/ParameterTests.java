@@ -17,9 +17,11 @@
  */
 package uk.ac.manchester.tornado.unittests.parameters;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -68,39 +70,47 @@ public class ParameterTests extends TornadoTestBase {
    * This test throws a {@link TornadoRuntimeException} because scalar values are used as output
    * parameters. This type of code is not legal in TornadoVM.
    */
-  @Test(expected = TornadoRuntimeException.class)
+  @Test
   public void testScalarParameters01() {
-    int x = 10;
-    int y = 20;
-    int z = 0;
+    assertThrows(
+        TornadoRuntimeException.class,
+        () -> {
+          int x = 10;
+          int y = 20;
+          int z = 0;
 
-    TaskGraph taskGraph =
-        new TaskGraph("s0") //
-            .transferToDevice(DataTransferMode.FIRST_EXECUTION, x, y) //
-            .task("t0", ParameterTests::testWithOnlyScalarValues, x, y, z) //
-            .transferToHost(DataTransferMode.EVERY_EXECUTION, z);
+          TaskGraph taskGraph =
+              new TaskGraph("s0") //
+                  .transferToDevice(DataTransferMode.FIRST_EXECUTION, x, y) //
+                  .task("t0", ParameterTests::testWithOnlyScalarValues, x, y, z) //
+                  .transferToHost(DataTransferMode.EVERY_EXECUTION, z);
 
-    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-    TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph);
-    executionPlan.execute();
+          ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+          TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph);
+          executionPlan.execute();
+        });
   }
 
   /**
    * This test throws a {@link TornadoRuntimeException} because scalar values are used as output
    * parameters. This type of code is not legal in TornadoVM.
    */
-  @Test(expected = TornadoRuntimeException.class)
+  @Test
   public void testScalarParameters02() {
-    int z = 0;
+    assertThrows(
+        TornadoRuntimeException.class,
+        () -> {
+          int z = 0;
 
-    TaskGraph taskGraph =
-        new TaskGraph("s0") //
-            .task("t0", ParameterTests::testWithOnlyScalarValues2, z) //
-            .transferToHost(DataTransferMode.EVERY_EXECUTION, z);
+          TaskGraph taskGraph =
+              new TaskGraph("s0") //
+                  .task("t0", ParameterTests::testWithOnlyScalarValues2, z) //
+                  .transferToHost(DataTransferMode.EVERY_EXECUTION, z);
 
-    ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
-    TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph);
-    executionPlan.execute();
+          ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
+          TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph);
+          executionPlan.execute();
+        });
   }
 
   @Test
@@ -126,7 +136,7 @@ public class ParameterTests extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < z.getSize(); i++) {
-      assertEquals(y + x.get(i), z.get(i));
+      assertThat(y + x.get(i), equalTo(z.get(i)));
     }
   }
 }
