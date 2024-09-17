@@ -17,9 +17,10 @@
  */
 package uk.ac.manchester.tornado.unittests.foundation;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -50,7 +51,7 @@ public class TestDoubles extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(a.get(0), 50.0, 0.01);
+    assertThat(a.get(0), closeTo(50.0, 0.01));
   }
 
   @Test
@@ -81,7 +82,7 @@ public class TestDoubles extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expected.get(i), a.get(i), 0.01f);
+      assertThat(expected.get(i), closeTo(a.get(i), 0.01f));
     }
   }
 
@@ -113,7 +114,7 @@ public class TestDoubles extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expected.get(i), a.get(i), 0.01f);
+      assertThat(expected.get(i), closeTo(a.get(i), 0.01f));
     }
   }
 
@@ -145,7 +146,7 @@ public class TestDoubles extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expected.get(i), a.get(i), 0.01f);
+      assertThat(expected.get(i), closeTo(a.get(i), 0.01f));
     }
   }
 
@@ -176,7 +177,7 @@ public class TestDoubles extends TornadoTestBase {
       executionPlan.execute();
     }
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expected.get(i), a.get(i), 0.01f);
+      assertThat(expected.get(i), closeTo(a.get(i), 0.01f));
     }
   }
 }
