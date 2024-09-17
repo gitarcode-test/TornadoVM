@@ -17,11 +17,12 @@
  */
 package uk.ac.manchester.tornado.unittests.reductions;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -81,6 +82,6 @@ public class InstanceReduction extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(expected.get(0), result.get(0), 0.1f);
+    assertThat(expected.get(0), closeTo(result.get(0), 0.1f));
   }
 }
