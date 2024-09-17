@@ -17,10 +17,11 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.reductions;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -224,7 +225,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum += reduce.get(i);
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -267,7 +268,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum += reduce.get(i);
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -310,7 +311,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.max(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -352,7 +353,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.max(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -395,7 +396,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.min(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -438,6 +439,6 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.min(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 }
