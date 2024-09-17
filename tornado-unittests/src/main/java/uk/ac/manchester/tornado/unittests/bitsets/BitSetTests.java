@@ -18,11 +18,12 @@
 
 package uk.ac.manchester.tornado.unittests.bitsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import org.apache.lucene.util.LongBitSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -81,7 +82,7 @@ public class BitSetTests extends TornadoTestBase {
     intersectionCount(numWords, a, b, seq);
 
     for (int i = 0; i < numWords; i++) {
-      assertEquals(seq.get(i), result.get(i), 0.1f);
+      assertThat(seq.get(i), closeTo(result.get(i), 0.1f));
     }
   }
 }
