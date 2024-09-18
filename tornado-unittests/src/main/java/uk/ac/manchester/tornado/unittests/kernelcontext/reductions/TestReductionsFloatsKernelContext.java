@@ -17,10 +17,56 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.reductions;
 
-import static org.junit.Assert.assertEquals;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -224,7 +270,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum += reduce.get(i);
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -267,7 +313,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum += reduce.get(i);
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -310,7 +356,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.max(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -352,7 +398,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.max(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -395,7 +441,7 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.min(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -438,6 +484,6 @@ public class TestReductionsFloatsKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.min(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat(sequential, closeTo(finalSum, 0));
   }
 }

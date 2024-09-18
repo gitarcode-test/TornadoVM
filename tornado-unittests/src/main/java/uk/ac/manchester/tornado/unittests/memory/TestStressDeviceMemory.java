@@ -17,11 +17,45 @@
  */
 
 package uk.ac.manchester.tornado.unittests.memory;
-
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
+
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
+
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -71,9 +105,9 @@ public class TestStressDeviceMemory extends TornadoTestBase {
     for (int i = 0; i < 10; i++) {
       try {
         stressDataAllocationTest(minSize);
-        assertTrue(true);
+        assertThat(true, is(true));
       } catch (TornadoExecutionPlanException e) {
-        fail();
+        assertThat(false);
       }
     }
   }
@@ -88,16 +122,16 @@ public class TestStressDeviceMemory extends TornadoTestBase {
     long maxMemory = Runtime.getRuntime().maxMemory();
     final long twelveGB = (1024L * 1024 * 1024 * 12);
     if (maxMemory < twelveGB) {
-      fail();
+      assertThat(false);
     } else {
       // Starting in ~1.5GB and move up to ~2GB
       for (int i = 400; i < 500; i += 10) {
         int size = 1024 * 1024 * i;
         try {
           stressDataAllocationTest(size);
-          assertTrue(true);
+          assertThat(true, is(true));
         } catch (TornadoExecutionPlanException e) {
-          fail();
+          assertThat(false);
         }
       }
     }

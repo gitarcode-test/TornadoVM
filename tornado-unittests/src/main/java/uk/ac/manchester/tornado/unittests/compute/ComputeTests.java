@@ -17,12 +17,220 @@
  */
 package uk.ac.manchester.tornado.unittests.compute;
 
-import static org.junit.Assert.assertEquals;
+import java.awt.Color;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageByte3;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat3;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Byte3;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.awt.Color;
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageByte3;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat3;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Byte3;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.awt.Color;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageByte3;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat3;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Byte3;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.awt.Color;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageByte3;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat3;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Byte3;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.awt.Color;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageByte3;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat3;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Byte3;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.awt.Color;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageByte3;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat3;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Byte3;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.awt.Color;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageByte3;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat3;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Byte3;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.awt.Color;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
@@ -111,8 +319,8 @@ public class ComputeTests extends TornadoTestBase {
       FloatArray posSequential,
       FloatArray velSequential) {
     for (int i = 0; i < numBodies * 4; i++) {
-      assertEquals(posSequential.get(i), posTornadoVM.get(i), 0.1f);
-      assertEquals(velSequential.get(i), velTornadoVM.get(i), 0.1f);
+      assertThat(posSequential.get(i), closeTo(posTornadoVM.get(i), 0.1f));
+      assertThat(velSequential.get(i), closeTo(velTornadoVM.get(i), 0.1f));
     }
   }
 
@@ -234,8 +442,8 @@ public class ComputeTests extends TornadoTestBase {
       FloatArray call, FloatArray put, FloatArray callPrice, FloatArray putPrice) {
     double delta = 1.8;
     for (int i = 0; i < call.getSize(); i++) {
-      assertEquals(call.get(i), callPrice.get(i), delta);
-      assertEquals(put.get(i), putPrice.get(i), delta);
+      assertThat(call.get(i), closeTo(callPrice.get(i), delta));
+      assertThat(put.get(i), closeTo(putPrice.get(i), delta));
     }
   }
 
@@ -542,8 +750,8 @@ public class ComputeTests extends TornadoTestBase {
     FloatArray outImagSeq = new FloatArray(size);
     computeDFT(inReal, inImag, outRealSeq, outImagSeq);
     for (int i = 0; i < size; i++) {
-      assertEquals(outImagSeq.get(i), outImag.get(i), 0.1f);
-      assertEquals(outRealSeq.get(i), outReal.get(i), 0.1f);
+      assertThat(outImagSeq.get(i), closeTo(outImag.get(i), 0.1f));
+      assertThat(outRealSeq.get(i), closeTo(outReal.get(i), 0.1f));
     }
   }
 
@@ -665,7 +873,7 @@ public class ComputeTests extends TornadoTestBase {
     hilbertComputation(seq, NROWS, NCOLS);
     for (int i = 0; i < NROWS; i++) {
       for (int j = 0; j < NCOLS; j++) {
-        assertEquals(seq.get(i * NROWS + j), output.get(i * NROWS + j), 0.1f);
+        assertThat(seq.get(i * NROWS + j), closeTo(output.get(i * NROWS + j), 0.1f));
       }
     }
   }
@@ -730,7 +938,7 @@ public class ComputeTests extends TornadoTestBase {
     }
     sumSeq *= 4;
 
-    assertEquals(sumSeq, sumTornado, 0.1);
+    assertThat(sumSeq, closeTo(sumTornado, 0.1));
   }
 
   private void validateMandelbrot(int size, ShortArray output) {
@@ -741,7 +949,7 @@ public class ComputeTests extends TornadoTestBase {
 
     for (int i = 0; i < size; i++)
       for (int j = 0; j < size; j++)
-        assertEquals(result.get(i * size + j), output.get(i * size + j));
+        assertThat(result.get(i * size + j), equalTo(output.get(i * size + j)));
   }
 
   @Test
@@ -809,11 +1017,11 @@ public class ComputeTests extends TornadoTestBase {
     euler(size, input, outputAT, outputBT, outputCT, outputDT, outputET);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(outputAT.get(i), outputA.get(i));
-      assertEquals(outputBT.get(i), outputB.get(i));
-      assertEquals(outputCT.get(i), outputC.get(i));
-      assertEquals(outputDT.get(i), outputD.get(i));
-      assertEquals(outputET.get(i), outputE.get(i));
+      assertThat(outputAT.get(i), equalTo(outputA.get(i)));
+      assertThat(outputBT.get(i), equalTo(outputB.get(i)));
+      assertThat(outputCT.get(i), equalTo(outputC.get(i)));
+      assertThat(outputDT.get(i), equalTo(outputD.get(i)));
+      assertThat(outputET.get(i), equalTo(outputE.get(i)));
     }
   }
 
@@ -848,9 +1056,9 @@ public class ComputeTests extends TornadoTestBase {
     renderTrack(outputJava, input);
     for (int x = 0; x < n; x++) {
       for (int y = 0; y < m; y++) {
-        assertEquals(outputJava.get(x, y).getX(), outputTornadoVM.get(x, y).getX(), 0.1);
-        assertEquals(outputJava.get(x, y).getY(), outputTornadoVM.get(x, y).getY(), 0.1);
-        assertEquals(outputJava.get(x, y).getZ(), outputTornadoVM.get(x, y).getZ(), 0.1);
+        assertThat(outputJava.get(x, y).getX(), closeTo(outputTornadoVM.get(x, y).getX(), 0.1));
+        assertThat(outputJava.get(x, y).getY(), closeTo(outputTornadoVM.get(x, y).getY(), 0.1));
+        assertThat(outputJava.get(x, y).getZ(), closeTo(outputTornadoVM.get(x, y).getZ(), 0.1));
       }
     }
   }
@@ -887,8 +1095,8 @@ public class ComputeTests extends TornadoTestBase {
 
     float delta = 0.01f;
     for (int i = 0; i < hueSeq.getSize(); i++) {
-      assertEquals(hueSeq.get(i), hue.get(i), delta);
-      assertEquals(brightnessSeq.get(i), brightness.get(i), delta);
+      assertThat(hueSeq.get(i), closeTo(hue.get(i), delta));
+      assertThat(brightnessSeq.get(i), closeTo(brightness.get(i), delta));
     }
   }
 
@@ -927,7 +1135,7 @@ public class ComputeTests extends TornadoTestBase {
 
     computeMatrixVector(matrix2DFloat, vectorFloat, resultSeq);
     for (int i = 0; i < vectorFloat.size(); i++) {
-      assertEquals(resultSeq.get(i), result.get(i), 0.01f);
+      assertThat(resultSeq.get(i), closeTo(result.get(i), 0.01f));
     }
   }
 
@@ -985,7 +1193,7 @@ public class ComputeTests extends TornadoTestBase {
 
     computeMatrixVector(inputA, inputB, resultSeq);
     for (int i = 0; i < result.getLength(); i++) {
-      assertEquals(resultSeq.get(i), result.get(i), 0.01f);
+      assertThat(resultSeq.get(i), closeTo(result.get(i), 0.01f));
     }
   }
   // CHECKSTYLE:ON

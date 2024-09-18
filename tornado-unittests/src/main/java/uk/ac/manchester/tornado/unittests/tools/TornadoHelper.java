@@ -93,9 +93,9 @@ public class TornadoHelper {
       boolean testEnabled = false;
       boolean ignoreTest = false;
       for (Annotation a : annotations) {
-        if (a instanceof org.junit.Ignore) {
+        if (a instanceof org.junit.jupiter.api.Disabled) {
           ignoreTest = true;
-        } else if (a instanceof org.junit.Test) {
+        } else if (a instanceof org.junit.jupiter.api.Test) {
           testEnabled = true;
         } else if (a instanceof TornadoNotSupported) {
           testEnabled = true;
