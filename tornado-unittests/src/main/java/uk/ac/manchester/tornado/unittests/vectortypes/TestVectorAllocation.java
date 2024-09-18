@@ -18,9 +18,55 @@
 
 package uk.ac.manchester.tornado.unittests.vectortypes;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -105,7 +151,7 @@ public class TestVectorAllocation extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(a.get(i) + (10), output.get(i), 0.001);
+      assertThat(a.get(i) + (10), closeTo(output.get(i), 0.001));
     }
   }
 
@@ -134,10 +180,10 @@ public class TestVectorAllocation extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Float4 sequential = new Float4(a.getSize(), 10, a.get(i), a.get(i) * 10);
-      assertEquals(sequential.getX(), output.get(i).getX(), 0.001);
-      assertEquals(sequential.getY(), output.get(i).getY(), 0.001);
-      assertEquals(sequential.getZ(), output.get(i).getZ(), 0.001);
-      assertEquals(sequential.getW(), output.get(i).getW(), 0.001);
+      assertThat(sequential.getX(), closeTo(output.get(i).getX(), 0.001));
+      assertThat(sequential.getY(), closeTo(output.get(i).getY(), 0.001));
+      assertThat(sequential.getZ(), closeTo(output.get(i).getZ(), 0.001));
+      assertThat(sequential.getW(), closeTo(output.get(i).getW(), 0.001));
     }
   }
 
@@ -166,9 +212,9 @@ public class TestVectorAllocation extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Float3 sequential = new Float3(a.getSize(), 10, a.get(i));
-      assertEquals(sequential.getX(), output.get(i).getX(), 0.001);
-      assertEquals(sequential.getY(), output.get(i).getY(), 0.001);
-      assertEquals(sequential.getZ(), output.get(i).getZ(), 0.001);
+      assertThat(sequential.getX(), closeTo(output.get(i).getX(), 0.001));
+      assertThat(sequential.getY(), closeTo(output.get(i).getY(), 0.001));
+      assertThat(sequential.getZ(), closeTo(output.get(i).getZ(), 0.001));
     }
   }
 }

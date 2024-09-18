@@ -18,11 +18,57 @@
 
 package uk.ac.manchester.tornado.unittests.reductions;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.annotations.Reduce;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.annotations.Reduce;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.annotations.Reduce;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -80,7 +126,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
     DoubleArray sequential = new DoubleArray(1);
     reductionAddDoubles(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.01f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01f));
   }
 
   private static double myFunction(double a, double b) {
@@ -121,7 +167,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
     DoubleArray sequential = new DoubleArray(1);
     reductionWithFunctionCall(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.01f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01f));
   }
 
   private static void reductionAddDoublesLarge(DoubleArray input, @Reduce DoubleArray result) {
@@ -158,7 +204,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
     DoubleArray sequential = new DoubleArray(1);
     reductionAddDoubles(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.01f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01f));
   }
 
   private static void reductionAddDoubles2(DoubleArray input, @Reduce DoubleArray result) {
@@ -214,7 +260,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
 
     DoubleArray sequential = new DoubleArray(1);
     reductionAddDoubles2(input, sequential);
-    assertEquals(sequential.get(0), result.get(0), 0.01f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01f));
   }
 
   @Test
@@ -244,7 +290,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
     DoubleArray sequential = new DoubleArray(1);
     reductionAddDoubles3(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.1f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.1f));
   }
 
   @Test
@@ -275,7 +321,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
     DoubleArray sequential = new DoubleArray(1);
     reductionAddDoubles4(inputA, inputB, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.1f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.1f));
   }
 
   private static void multiplyDoubles(DoubleArray input, @Reduce DoubleArray result) {
@@ -316,7 +362,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
 
     DoubleArray sequential = new DoubleArray(1);
     multiplyDoubles(input, sequential);
-    assertEquals(sequential.get(0), result.get(0), 0.1f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.1f));
   }
 
   private static void maxReductionAnnotation(DoubleArray input, @Reduce DoubleArray result) {
@@ -356,7 +402,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
 
     maxReductionAnnotation(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.01);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01));
   }
 
   private static void minReductionAnnotation(DoubleArray input, @Reduce DoubleArray result) {
@@ -396,7 +442,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
 
     minReductionAnnotation(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.01);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01));
   }
 
   private static void tornadoRemoveOutliers(final DoubleArray values, @Reduce DoubleArray result) {
@@ -438,7 +484,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
     DoubleArray sequential = new DoubleArray(1);
     tornadoRemoveOutliers(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0), 0.01);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01));
   }
 
   private static void prepareTornadoSumForMeanComputation(
@@ -491,7 +537,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
     computeMapWithReduceValue(sequentialResult, sequentialReduce);
 
     for (int i = 0; i < data.getSize(); i++) {
-      assertEquals(sequentialResult.get(i), data.get(i), 0.01f);
+      assertThat(sequentialResult.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -549,7 +595,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
     prepareTornadoSumForMeanComputation(sequentialData, sequentialSum);
     computeStandardDeviation(sequentialData, sequentialSum, sequentialStd);
 
-    assertEquals(sequentialStd.get(0), resultStd.get(0), 0.01);
+    assertThat(sequentialStd.get(0), closeTo(resultStd.get(0), 0.01));
   }
 
   private static void prepareTornadoSum(final DoubleArray values, @Reduce DoubleArray result) {
@@ -602,8 +648,8 @@ public class TestReductionsDoubles extends TornadoTestBase {
     prepareTornadoSum(sequentialData, sequentialSum);
     compute2(sequentialData, sequentialStd);
 
-    assertEquals(sequentialSum.get(0), resultSum.get(0), 0.01);
-    assertEquals(sequentialStd.get(0), resultStd.get(0), 0.01);
+    assertThat(sequentialSum.get(0), closeTo(resultSum.get(0), 0.01));
+    assertThat(sequentialStd.get(0), closeTo(resultStd.get(0), 0.01));
   }
 
   private static void maxReductionAnnotation2(
@@ -659,8 +705,8 @@ public class TestReductionsDoubles extends TornadoTestBase {
     compute2(sequentialData1, sequentialStd1);
     compute2(sequentialData2, sequentialStd2);
 
-    assertEquals(sequentialStd1.get(0), resultStd1.get(0), 0.01);
-    assertEquals(sequentialStd2.get(0), resultStd2.get(0), 0.01);
+    assertThat(sequentialStd1.get(0), closeTo(resultStd1.get(0), 0.01));
+    assertThat(sequentialStd2.get(0), closeTo(resultStd2.get(0), 0.01));
   }
 
   @Test
@@ -721,9 +767,9 @@ public class TestReductionsDoubles extends TornadoTestBase {
     compute2(sequentialData2, sequentialStd2);
     compute2(sequentialData3, sequentialStd3);
 
-    assertEquals(sequentialStd1.get(0), resultStd1.get(0), 0.01);
-    assertEquals(sequentialStd2.get(0), resultStd2.get(0), 0.01);
-    assertEquals(sequentialStd3.get(0), resultStd3.get(0), 0.01);
+    assertThat(sequentialStd1.get(0), closeTo(resultStd1.get(0), 0.01));
+    assertThat(sequentialStd2.get(0), closeTo(resultStd2.get(0), 0.01));
+    assertThat(sequentialStd3.get(0), closeTo(resultStd3.get(0), 0.01));
   }
 
   @Test
@@ -754,7 +800,7 @@ public class TestReductionsDoubles extends TornadoTestBase {
 
     maxReductionAnnotation2(input, sequential, neutral);
 
-    assertEquals(sequential.get(0), result.get(0), 0.01f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01f));
   }
 
   private static void minReductionAnnotation2(
@@ -797,6 +843,6 @@ public class TestReductionsDoubles extends TornadoTestBase {
     DoubleArray sequential = new DoubleArray(1);
     minReductionAnnotation2(input, sequential, Double.MAX_VALUE);
 
-    assertEquals(sequential.get(0), result.get(0), 0.01f);
+    assertThat(sequential.get(0), closeTo(result.get(0), 0.01f));
   }
 }
