@@ -17,9 +17,46 @@
  */
 package uk.ac.manchester.tornado.unittests.api;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.types.HalfFloat;
 import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
 import uk.ac.manchester.tornado.api.types.arrays.CharArray;
@@ -57,7 +94,7 @@ public class TestSlice extends TornadoTestBase {
     FloatArray slice = c.slice(256, numElements);
 
     for (int i = 0; i < slice.getSize(); i++) {
-      assertEquals("Mismatch in second part of slice", 5.0f, slice.get(i), 0.0f);
+      assertThat("Mismatch in second part of slice", 5.0f, closeTo(slice.get(i), 0.0f));
     }
   }
 
@@ -77,7 +114,7 @@ public class TestSlice extends TornadoTestBase {
     DoubleArray slice = c.slice(256, numElements);
 
     for (int i = 0; i < slice.getSize(); i++) {
-      assertEquals("Mismatch in second part of slice", 5.0d, slice.get(i), 0.0f);
+      assertThat("Mismatch in second part of slice", 5.0d, closeTo(slice.get(i), 0.0f));
     }
   }
 
@@ -97,7 +134,7 @@ public class TestSlice extends TornadoTestBase {
     ByteArray slice = c.slice(256, numElements);
 
     for (int i = 0; i < slice.getSize(); i++) {
-      assertEquals("Mismatch in second part of slice", 5.0, slice.get(i), 0.0f);
+      assertThat("Mismatch in second part of slice", 5.0, closeTo(slice.get(i), 0.0f));
     }
   }
 
@@ -116,7 +153,7 @@ public class TestSlice extends TornadoTestBase {
     LongArray slice = c.slice(256, numElements);
 
     for (int i = 0; i < slice.getSize(); i++) {
-      assertEquals("Mismatch in second part of slice", 5.0, slice.get(i), 0.0f);
+      assertThat("Mismatch in second part of slice", 5.0, closeTo(slice.get(i), 0.0f));
     }
   }
 
@@ -136,7 +173,7 @@ public class TestSlice extends TornadoTestBase {
     IntArray slice = c.slice(256, numElements);
 
     for (int i = 0; i < slice.getSize(); i++) {
-      assertEquals("Mismatch in second part of slice", 5.0d, slice.get(i), 0.0f);
+      assertThat("Mismatch in second part of slice", 5.0d, closeTo(slice.get(i), 0.0f));
     }
   }
 
@@ -156,7 +193,7 @@ public class TestSlice extends TornadoTestBase {
     ShortArray slice = c.slice(256, numElements);
 
     for (int i = 0; i < slice.getSize(); i++) {
-      assertEquals("Mismatch in second part of slice", 5.0, slice.get(i), 0.0f);
+      assertThat("Mismatch in second part of slice", 5.0, closeTo(slice.get(i), 0.0f));
     }
   }
 
@@ -175,7 +212,7 @@ public class TestSlice extends TornadoTestBase {
     CharArray slice = c.slice(256, numElements);
 
     for (int i = 0; i < slice.getSize(); i++) {
-      assertEquals("Mismatch in second part of slice", 5.0d, slice.get(i), 0.0f);
+      assertThat("Mismatch in second part of slice", 5.0d, closeTo(slice.get(i), 0.0f));
     }
   }
 
@@ -195,7 +232,7 @@ public class TestSlice extends TornadoTestBase {
     HalfFloatArray slice = c.slice(256, numElements);
 
     for (int i = 0; i < slice.getSize(); i++) {
-      assertEquals("Mismatch in second part of slice", 5.0d, slice.get(i).getFloat32(), 0.0f);
+      assertThat("Mismatch in second part of slice", 5.0d, closeTo(slice.get(i).getFloat32(), 0.0f));
     }
   }
 }
