@@ -17,8 +17,134 @@
  */
 package uk.ac.manchester.tornado.unittests.tensors;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.tensors.Shape;
+import uk.ac.manchester.tornado.api.types.tensors.TensorByte;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP64;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt64;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.tensors.Shape;
+import uk.ac.manchester.tornado.api.types.tensors.TensorByte;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP64;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt64;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.tensors.Shape;
+import uk.ac.manchester.tornado.api.types.tensors.TensorByte;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP64;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt64;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.tensors.Shape;
+import uk.ac.manchester.tornado.api.types.tensors.TensorByte;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP64;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt64;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.tensors.Shape;
+import uk.ac.manchester.tornado.api.types.tensors.TensorByte;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP64;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt64;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.tensors.Shape;
+import uk.ac.manchester.tornado.api.types.tensors.TensorByte;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP64;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt64;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.tensors.Shape;
+import uk.ac.manchester.tornado.api.types.tensors.TensorByte;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorFP64;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt16;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt32;
+import uk.ac.manchester.tornado.api.types.tensors.TensorInt64;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -100,20 +226,10 @@ public class TestTensorTypes extends TornadoTestBase {
 
     tensorA.init(new HalfFloat(1f));
 
-    Assert.assertEquals(
-        "Expected shape does not match",
-        "Shape{dimensions=[64, 64, 64]}",
-        tensorA.getShape().toString());
-    Assert.assertEquals(
-        "Expected data type does not match", "HALF_FLOAT", tensorA.getDTypeAsString());
-    Assert.assertEquals(
-        "Expected TensorFlow shape string does not match",
-        "[64,64,64]",
-        tensorA.getShape().toTensorFlowShapeString());
-    Assert.assertEquals(
-        "Expected ONNX shape string does not match",
-        "{dim_0: 64, dim_1: 64, dim_2: 64}",
-        tensorA.getShape().toONNXShapeString());
+    assertThat("Expected shape does not match", "Shape{dimensions=[64, 64, 64]}", equalTo(tensorA.getShape().toString()));
+    assertThat("Expected data type does not match", "HALF_FLOAT", equalTo(tensorA.getDTypeAsString()));
+    assertThat("Expected TensorFlow shape string does not match", "[64,64,64]", equalTo(tensorA.getShape().toTensorFlowShapeString()));
+    assertThat("Expected ONNX shape string does not match", "{dim_0: 64, dim_1: 64, dim_2: 64}", equalTo(tensorA.getShape().toONNXShapeString()));
   }
 
   @Test
@@ -148,10 +264,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(
-          HalfFloat.add(tensorA.get(i), tensorB.get(i)).getFloat32(),
-          tensorC.get(i).getFloat32(),
-          0.01f);
+      assertThat(HalfFloat.add(tensorA.get(i), tensorB.get(i)).getFloat32(), closeTo(tensorC.get(i).getFloat32(), 0.01f));
     }
   }
 
@@ -187,7 +300,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -223,7 +336,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -259,7 +372,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -294,7 +407,7 @@ public class TestTensorTypes extends TornadoTestBase {
       executionPlan.execute();
     }
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -330,7 +443,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 
@@ -366,7 +479,7 @@ public class TestTensorTypes extends TornadoTestBase {
     }
 
     for (int i = 0; i < tensorC.getSize(); i++) {
-      Assert.assertEquals(tensorA.get(i) + tensorB.get(i), tensorC.get(i), 0.01f);
+      assertThat(tensorA.get(i) + tensorB.get(i), closeTo(tensorC.get(i), 0.01f));
     }
   }
 }
