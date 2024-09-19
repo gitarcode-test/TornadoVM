@@ -17,15 +17,202 @@
  */
 
 package uk.ac.manchester.tornado.unittests.atomics;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.AccessorParameters;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.TornadoVMIntrinsics;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.common.Access;
+import uk.ac.manchester.tornado.api.common.TornadoDevice;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.enums.TornadoVMBackendType;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.AccessorParameters;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.TornadoVMIntrinsics;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.common.Access;
+import uk.ac.manchester.tornado.api.common.TornadoDevice;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.enums.TornadoVMBackendType;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.AccessorParameters;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.TornadoVMIntrinsics;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.common.Access;
+import uk.ac.manchester.tornado.api.common.TornadoDevice;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.enums.TornadoVMBackendType;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.AccessorParameters;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.TornadoVMIntrinsics;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.common.Access;
+import uk.ac.manchester.tornado.api.common.TornadoDevice;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.enums.TornadoVMBackendType;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.AccessorParameters;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.TornadoVMIntrinsics;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.common.Access;
+import uk.ac.manchester.tornado.api.common.TornadoDevice;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.enums.TornadoVMBackendType;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.AccessorParameters;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.TornadoVMIntrinsics;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.common.Access;
+import uk.ac.manchester.tornado.api.common.TornadoDevice;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.enums.TornadoVMBackendType;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.AccessorParameters;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.TornadoVMIntrinsics;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.common.Access;
+import uk.ac.manchester.tornado.api.common.TornadoDevice;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.enums.TornadoVMBackendType;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.AccessorParameters;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
@@ -187,7 +374,7 @@ public class TestAtomics extends TornadoTestBase {
 
     atomic03(b);
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(b.get(i), a.get(i));
+      assertThat(b.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -210,7 +397,7 @@ public class TestAtomics extends TornadoTestBase {
       TornadoExecutionResult executionResult = executionPlan.execute();
 
       if (!executionResult.isReady()) {
-        fail();
+        assertThat("Fail", false);
       }
     }
 
@@ -219,7 +406,7 @@ public class TestAtomics extends TornadoTestBase {
     // However, the order is not guaranteed. For this test, we need to check that
     // there are not repeated values in the output array.
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -241,7 +428,7 @@ public class TestAtomics extends TornadoTestBase {
       TornadoExecutionResult executionResult = executionPlan.execute();
 
       if (!executionResult.isReady()) {
-        fail();
+        assertThat("Fail", false);
       }
     }
 
@@ -250,7 +437,7 @@ public class TestAtomics extends TornadoTestBase {
     // However, the order is not guaranteed. For this test, we need to check that
     // there are not repeated values in the output array.
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   /**
@@ -302,7 +489,7 @@ public class TestAtomics extends TornadoTestBase {
     }
 
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -327,14 +514,14 @@ public class TestAtomics extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       TornadoExecutionResult executionResult = executionPlan.execute();
       if (!executionResult.isReady()) {
-        fail();
+        assertThat("Fail", false);
       }
     }
 
     boolean repeated = isValueRepeated(a);
     repeated &= isValueRepeated(a);
 
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -357,11 +544,11 @@ public class TestAtomics extends TornadoTestBase {
       TornadoExecutionResult executionResult = executionPlan.execute();
 
       if (!executionResult.isReady()) {
-        fail();
+        assertThat("Fail", false);
       }
     }
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -383,11 +570,11 @@ public class TestAtomics extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       TornadoExecutionResult executionResult = executionPlan.execute();
       if (!executionResult.isReady()) {
-        fail();
+        assertThat("Fail", false);
       }
     }
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   private boolean isValueRepeated(IntArray array) {
@@ -431,8 +618,8 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValue + size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValue + size, equalTo(lastValue));
   }
 
   @Test
@@ -462,8 +649,8 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValue + size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValue + size, equalTo(lastValue));
   }
 
   @Test
@@ -493,8 +680,8 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValue + size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValue + size, equalTo(lastValue));
   }
 
   @Test
@@ -526,11 +713,11 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValueA + size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValueA + size, equalTo(lastValue));
 
     lastValue = bi.get();
-    assertEquals(initialValueB + size, lastValue);
+    assertThat(initialValueB + size, equalTo(lastValue));
   }
 
   @Test
@@ -559,8 +746,8 @@ public class TestAtomics extends TornadoTestBase {
     boolean repeated = isValueRepeated(a);
 
     int lastValue = ai.get();
-    assertFalse(repeated);
-    assertEquals(initialValueA - size, lastValue);
+    assertThat(repeated, is(false));
+    assertThat(initialValueA - size, equalTo(lastValue));
   }
 
   @Test
@@ -590,10 +777,10 @@ public class TestAtomics extends TornadoTestBase {
     }
 
     int lastValue = ai.get();
-    assertEquals(initialValueA + size, lastValue);
+    assertThat(initialValueA + size, equalTo(lastValue));
 
     lastValue = bi.get();
-    assertEquals(initialValueB - size, lastValue);
+    assertThat(initialValueB - size, equalTo(lastValue));
   }
 
   @Test
@@ -620,10 +807,10 @@ public class TestAtomics extends TornadoTestBase {
     }
 
     int lastValue = ai.get();
-    assertEquals(initialValueA + size, lastValue);
+    assertThat(initialValueA + size, equalTo(lastValue));
 
     boolean repeated = isValueRepeated(a);
-    assertFalse(repeated);
+    assertThat(repeated, is(false));
   }
 
   @Test
@@ -652,6 +839,6 @@ public class TestAtomics extends TornadoTestBase {
     }
 
     int lastValue = ai.get();
-    assertEquals(initialValueA + (iterations * size), lastValue);
+    assertThat(initialValueA + (iterations * size), equalTo(lastValue));
   }
 }
