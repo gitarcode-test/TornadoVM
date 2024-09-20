@@ -17,9 +17,37 @@
  */
 package uk.ac.manchester.tornado.unittests.foundation;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -50,7 +78,7 @@ public class TestIntegers extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(50, a.get(0));
+    assertThat(50, equalTo(a.get(0)));
   }
 
   @Test
@@ -73,7 +101,7 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -97,7 +125,7 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(a.get(i), b.get(i));
+      assertThat(a.get(i), equalTo(b.get(i)));
     }
   }
 
@@ -124,7 +152,7 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(expectedResult.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -150,8 +178,8 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResultA.get(i), a.get(i));
-      assertEquals(expectedResultB.get(i), b.get(i));
+      assertThat(expectedResultA.get(i), equalTo(a.get(i)));
+      assertThat(expectedResultB.get(i), equalTo(b.get(i)));
     }
   }
 
@@ -177,8 +205,8 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResultA.get(i), a.get(i));
-      assertEquals(expectedResultB.get(i), b.get(i));
+      assertThat(expectedResultA.get(i), equalTo(a.get(i)));
+      assertThat(expectedResultB.get(i), equalTo(b.get(i)));
     }
   }
 
@@ -205,8 +233,8 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResultA.get(i), a.get(i));
-      assertEquals(expectedResultB.get(i), b.get(i));
+      assertThat(expectedResultA.get(i), equalTo(a.get(i)));
+      assertThat(expectedResultB.get(i), equalTo(b.get(i)));
     }
   }
 }
