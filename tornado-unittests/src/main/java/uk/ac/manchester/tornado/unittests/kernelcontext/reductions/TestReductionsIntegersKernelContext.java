@@ -17,11 +17,128 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.reductions;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -272,7 +389,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(i, input.get(i));
+      assertThat(i, equalTo(input.get(i)));
     }
   }
 
@@ -311,7 +428,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(input.get(i), output.get(i));
+      assertThat(input.get(i), equalTo(output.get(i)));
     }
   }
 
@@ -350,7 +467,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(input.get(i) * 2, output.get(i));
+      assertThat(input.get(i) * 2, equalTo(output.get(i)));
     }
   }
 
@@ -389,7 +506,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(2, output.get(i), 0.0);
+      assertThat((double) 2f, closeTo(output.get(i), 0.0));
     }
   }
 
@@ -428,7 +545,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(2, output.get(i), 0.0);
+      assertThat((double) 2f, closeTo(output.get(i), 0.0));
     }
   }
 
@@ -472,7 +589,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum += reduce.get(i);
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -516,7 +633,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum += reduce.get(i);
     }
 
-    assertEquals(sequential, finalSum);
+    assertThat(sequential, equalTo(finalSum));
   }
 
   @Test
@@ -560,7 +677,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.max(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -604,7 +721,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.max(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -650,7 +767,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.min(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) sequential, closeTo(finalSum, 0));
   }
 
   @Test
@@ -694,6 +811,6 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.min(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) sequential, closeTo(finalSum, 0));
   }
 }
