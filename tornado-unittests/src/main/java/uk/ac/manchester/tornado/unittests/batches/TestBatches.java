@@ -18,12 +18,325 @@
 
 package uk.ac.manchester.tornado.unittests.batches;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoBailoutRuntimeException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -195,7 +508,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 0.1f);
+      assertThat((double) arrayA.get(i) + 100, closeTo(arrayB.get(i), 0.1f));
     }
   }
 
@@ -232,7 +545,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 0.1f);
+      assertThat((double) arrayA.get(i) + 100, closeTo(arrayB.get(i), 0.1f));
     }
   }
 
@@ -266,7 +579,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 0.1f);
+      assertThat((double) arrayA.get(i) + 100, closeTo(arrayB.get(i), 0.1f));
     }
   }
 
@@ -302,7 +615,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 0.1f);
+      assertThat((double) arrayA.get(i) + 100, closeTo(arrayB.get(i), 0.1f));
     }
   }
 
@@ -339,7 +652,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 1.0f);
+      assertThat((double) arrayA.get(i) + 100, closeTo(arrayB.get(i), 1.0f));
     }
   }
 
@@ -378,7 +691,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 1.0f);
+      assertThat((double) arrayA.get(i) + 100, closeTo(arrayB.get(i), 1.0f));
     }
   }
 
@@ -411,7 +724,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(i, arrayA.get(i), 0.1f);
+      assertThat((double) i, closeTo(arrayA.get(i), 0.1f));
     }
   }
 
@@ -446,7 +759,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(i, arrayA.get(i), 0.1f);
+      assertThat((double) i, closeTo(arrayA.get(i), 0.1f));
     }
   }
 
@@ -487,7 +800,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(arrayA.get(i) + arrayB.get(i), arrayC.get(i), 0.1f);
+      assertThat((double) arrayA.get(i) + arrayB.get(i), closeTo(arrayC.get(i), 0.1f));
     }
   }
 
@@ -528,7 +841,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals((arrayA.get(i) + arrayB.get(i)), arrayC.get(i));
+      assertThat((arrayA.get(i) + arrayB.get(i)), equalTo(arrayC.get(i)));
     }
   }
 
@@ -570,7 +883,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(arrayA.get(i) + arrayB.get(i), arrayC.get(i));
+      assertThat(arrayA.get(i) + arrayB.get(i), equalTo(arrayC.get(i)));
     }
   }
 
@@ -610,7 +923,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(arrayA.get(i) + arrayB.get(i), arrayC.get(i), 0.01);
+      assertThat((double) arrayA.get(i) + arrayB.get(i), closeTo(arrayC.get(i), 0.01));
     }
   }
 
@@ -651,7 +964,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(arrayA.get(i) + arrayB.get(i), arrayC.get(i));
+      assertThat(arrayA.get(i) + arrayB.get(i), equalTo(arrayC.get(i)));
     }
   }
 
@@ -669,7 +982,7 @@ public class TestBatches extends TornadoTestBase {
             .transferToHost(DataTransferMode.EVERY_EXECUTION, a1);
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-      Assert.assertThrows(
+      assertThrows(
           TornadoBailoutRuntimeException.class, () -> executionPlan.withBatch("1MB").execute());
     }
   }
@@ -688,7 +1001,7 @@ public class TestBatches extends TornadoTestBase {
             .transferToHost(DataTransferMode.EVERY_EXECUTION, a1);
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-      Assert.assertThrows(
+      assertThrows(
           TornadoBailoutRuntimeException.class, () -> executionPlan.withBatch("1MB").execute());
     }
   }
@@ -707,7 +1020,7 @@ public class TestBatches extends TornadoTestBase {
             .transferToHost(DataTransferMode.EVERY_EXECUTION, a1);
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-      Assert.assertThrows(
+      assertThrows(
           TornadoBailoutRuntimeException.class, () -> executionPlan.withBatch("1MB").execute());
     }
   }
@@ -726,7 +1039,7 @@ public class TestBatches extends TornadoTestBase {
             .transferToHost(DataTransferMode.EVERY_EXECUTION, a1);
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-      Assert.assertThrows(
+      assertThrows(
           TornadoBailoutRuntimeException.class, () -> executionPlan.withBatch("1MB").execute());
     }
   }
@@ -750,7 +1063,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.getSize(); i++) {
-      assertEquals(a0.get(i), a1.get(i), 1e-20);
+      assertThat((double) a0.get(i), closeTo(a1.get(i), 1e-20));
     }
   }
 
@@ -773,7 +1086,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.length; i++) {
-      assertEquals(a0[i], a1[i], 1e-20);
+      assertThat((double) a0[i], closeTo(a1[i], 1e-20));
     }
   }
 
@@ -796,7 +1109,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.getSize(); i++) {
-      assertEquals(a0[i], a1.get(i), 1e-20);
+      assertThat((double) a0[i], closeTo(a1.get(i), 1e-20));
     }
   }
 
@@ -819,7 +1132,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.length; i++) {
-      assertEquals(a0.get(i), a1[i], 1e-20);
+      assertThat((double) a0.get(i), closeTo(a1[i], 1e-20));
     }
   }
 
@@ -842,7 +1155,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.getSize(); i++) {
-      assertEquals(a0[i], a1.get(i));
+      assertThat(a0[i], equalTo(a1.get(i)));
     }
   }
 
@@ -865,7 +1178,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.length; i++) {
-      assertEquals(a0.get(i), a1[i]);
+      assertThat(a0.get(i), equalTo(a1[i]));
     }
   }
 
@@ -906,7 +1219,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(arraySeq.get(i) * 2, array.get(i), 0.01f);
+      assertThat((double) arraySeq.get(i) * 2, closeTo(array.get(i), 0.01f));
     }
   }
 
@@ -934,7 +1247,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(array2.get(i) * 4, array.get(i), 0.01f);
+      assertThat((double) array2.get(i) * 4, closeTo(array.get(i), 0.01f));
     }
   }
 
@@ -964,7 +1277,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(array2.get(i) * 4, array.get(i), 0.01f);
+      assertThat((double) array2.get(i) * 4, closeTo(array.get(i), 0.01f));
     }
   }
 
@@ -993,7 +1306,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(arraySeq.get(i), array.get(i), 0.01f);
+      assertThat((double) arraySeq.get(i), closeTo(array.get(i), 0.01f));
     }
   }
 

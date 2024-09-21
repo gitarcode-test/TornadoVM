@@ -17,12 +17,122 @@
  */
 package uk.ac.manchester.tornado.unittests.tasks;
 
-import static junit.framework.TestCase.assertEquals;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -169,7 +279,7 @@ public class TestMultipleFunctions extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals((a.get(i) + b.get(i)), c.get(i));
+      assertThat((a.get(i) + b.get(i)), equalTo(c.get(i)));
     }
   }
 
@@ -202,7 +312,7 @@ public class TestMultipleFunctions extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals((a.get(i) + (a.get(i) + b.get(i))), c.get(i));
+      assertThat((a.get(i) + (a.get(i) + b.get(i))), equalTo(c.get(i)));
     }
   }
 
@@ -235,7 +345,7 @@ public class TestMultipleFunctions extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals((a.get(i) + (a.get(i) + (a.get(i) + b.get(i)))), c.get(i));
+      assertThat((a.get(i) + (a.get(i) + (a.get(i) + b.get(i)))), equalTo(c.get(i)));
     }
   }
 
@@ -268,7 +378,7 @@ public class TestMultipleFunctions extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals((a.get(i) + a.get(i)) + (b.get(i) * b.get(i)), c.get(i));
+      assertThat((a.get(i) + a.get(i)) + (b.get(i) * b.get(i)), equalTo(c.get(i)));
     }
   }
 
@@ -303,7 +413,7 @@ public class TestMultipleFunctions extends TornadoTestBase {
     vectorAddFloats(a, b, checker);
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(checker.get(i), c.get(i), 0.01f);
+      assertThat((double) checker.get(i), closeTo(c.get(i), 0.01f));
     }
   }
 
@@ -331,10 +441,10 @@ public class TestMultipleFunctions extends TornadoTestBase {
 
     Float4 result = Float4.add(foo(a), bar(b));
 
-    assertEquals(result.getX(), c.getX());
-    assertEquals(result.getY(), c.getY());
-    assertEquals(result.getW(), c.getW());
-    assertEquals(result.getZ(), c.getZ());
+    assertThat(result.getX(), equalTo(c.getX()));
+    assertThat(result.getY(), equalTo(c.getY()));
+    assertThat(result.getW(), equalTo(c.getW()));
+    assertThat(result.getZ(), equalTo(c.getZ()));
   }
 
   /**
@@ -422,17 +532,16 @@ public class TestMultipleFunctions extends TornadoTestBase {
     }
 
     for (int i = 0; i < testArrays.calleeReadTor.getSize(); i++) {
-      Assert.assertEquals(testArrays.calleeReadSeq.get(i), testArrays.calleeReadTor.get(i));
+      assertThat(testArrays.calleeReadSeq.get(i), equalTo(testArrays.calleeReadTor.get(i)));
     }
     for (int i = 0; i < testArrays.callerReadCalleeWriteSeq.getSize(); i++) {
-      Assert.assertEquals(
-          testArrays.callerReadCalleeWriteSeq.get(i), testArrays.callerReadCalleeWriteTor.get(i));
+      assertThat(testArrays.callerReadCalleeWriteSeq.get(i), equalTo(testArrays.callerReadCalleeWriteTor.get(i)));
     }
     for (int i = 0; i < testArrays.callerReadSeq.getSize(); i++) {
-      Assert.assertEquals(testArrays.callerReadSeq.get(i), testArrays.callerReadTor.get(i));
+      assertThat(testArrays.callerReadSeq.get(i), equalTo(testArrays.callerReadTor.get(i)));
     }
     for (int i = 0; i < testArrays.callerWriteSeq.getSize(); i++) {
-      Assert.assertEquals(testArrays.callerWriteSeq.get(i), testArrays.callerWriteSeq.get(i));
+      assertThat(testArrays.callerWriteSeq.get(i), equalTo(testArrays.callerWriteSeq.get(i)));
     }
   }
 
@@ -483,17 +592,16 @@ public class TestMultipleFunctions extends TornadoTestBase {
     }
 
     for (int i = 0; i < testArrays.calleeReadTor.getSize(); i++) {
-      Assert.assertEquals(testArrays.calleeReadSeq.get(i), testArrays.calleeReadTor.get(i));
+      assertThat(testArrays.calleeReadSeq.get(i), equalTo(testArrays.calleeReadTor.get(i)));
     }
     for (int i = 0; i < testArrays.callerReadCalleeWriteSeq.getSize(); i++) {
-      Assert.assertEquals(
-          testArrays.callerReadCalleeWriteSeq.get(i), testArrays.callerReadCalleeWriteTor.get(i));
+      assertThat(testArrays.callerReadCalleeWriteSeq.get(i), equalTo(testArrays.callerReadCalleeWriteTor.get(i)));
     }
     for (int i = 0; i < testArrays.callerReadSeq.getSize(); i++) {
-      Assert.assertEquals(testArrays.callerReadSeq.get(i), testArrays.callerReadTor.get(i));
+      assertThat(testArrays.callerReadSeq.get(i), equalTo(testArrays.callerReadTor.get(i)));
     }
     for (int i = 0; i < testArrays.callerWriteSeq.getSize(); i++) {
-      Assert.assertEquals(testArrays.callerWriteSeq.get(i), testArrays.callerWriteSeq.get(i));
+      assertThat(testArrays.callerWriteSeq.get(i), equalTo(testArrays.callerWriteSeq.get(i)));
     }
   }
 
@@ -565,26 +673,25 @@ public class TestMultipleFunctions extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < arrays.calleeReadTor.getSize(); i++) {
-      Assert.assertEquals(arrays.calleeReadSeq.get(i), arrays.calleeReadTor.get(i));
+      assertThat(arrays.calleeReadSeq.get(i), equalTo(arrays.calleeReadTor.get(i)));
     }
     for (int i = 0; i < arrays.callerReadCalleeWriteSeq.getSize(); i++) {
-      Assert.assertEquals(
-          arrays.callerReadCalleeWriteSeq.get(i), arrays.callerReadCalleeWriteTor.get(i));
+      assertThat(arrays.callerReadCalleeWriteSeq.get(i), equalTo(arrays.callerReadCalleeWriteTor.get(i)));
     }
     for (int i = 0; i < arrays.callerReadSeq.getSize(); i++) {
-      Assert.assertEquals(arrays.callerReadSeq.get(i), arrays.callerReadTor.get(i));
+      assertThat(arrays.callerReadSeq.get(i), equalTo(arrays.callerReadTor.get(i)));
     }
     for (int i = 0; i < arrays.callerWriteSeq.getSize(); i++) {
-      Assert.assertEquals(arrays.callerWriteSeq.get(i), arrays.callerWriteSeq.get(i));
+      assertThat(arrays.callerWriteSeq.get(i), equalTo(arrays.callerWriteSeq.get(i)));
     }
     for (int i = 0; i < arrays.callerReadWriteSeq.getSize(); i++) {
-      Assert.assertEquals(arrays.callerReadWriteSeq.get(i), arrays.callerReadWriteTor.get(i));
+      assertThat(arrays.callerReadWriteSeq.get(i), equalTo(arrays.callerReadWriteTor.get(i)));
     }
     for (int i = 0; i < arrays.callee1WriteSeq.getSize(); i++) {
-      Assert.assertEquals(arrays.callee1WriteSeq.get(i), arrays.callee1WriteTor.get(i));
+      assertThat(arrays.callee1WriteSeq.get(i), equalTo(arrays.callee1WriteTor.get(i)));
     }
     for (int i = 0; i < arrays.callee2ReadSeq.getSize(); i++) {
-      Assert.assertEquals(arrays.callee2ReadSeq.get(i), arrays.callee2ReadTor.get(i));
+      assertThat(arrays.callee2ReadSeq.get(i), equalTo(arrays.callee2ReadTor.get(i)));
     }
   }
 
@@ -612,7 +719,7 @@ public class TestMultipleFunctions extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    Assert.assertEquals(-1, arr.get(0));
+    assertThat(-1, equalTo(arr.get(0)));
   }
 
   // @formatter:off
