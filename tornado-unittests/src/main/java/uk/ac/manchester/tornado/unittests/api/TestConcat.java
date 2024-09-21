@@ -17,9 +17,46 @@
  */
 package uk.ac.manchester.tornado.unittests.api;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.types.HalfFloat;
 import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
 import uk.ac.manchester.tornado.api.types.arrays.CharArray;
@@ -53,14 +90,14 @@ public class TestConcat extends TornadoTestBase {
     FloatArray c = FloatArray.concat(a, b, e);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
+      assertThat("Mismatch in first part of c", (double) 100.0f, closeTo(c.get(i), 0.0f));
     }
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
+      assertThat("Mismatch in second part of c", (double) 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
     for (int i = 0; i < e.getSize(); i++) {
-      assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
+      assertThat("Mismatch in third part of c", (double) 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
     }
   }
 
@@ -78,14 +115,14 @@ public class TestConcat extends TornadoTestBase {
     DoubleArray c = DoubleArray.concat(a, b, e);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
+      assertThat("Mismatch in first part of c", (double) 100.0f, closeTo(c.get(i), 0.0f));
     }
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
+      assertThat("Mismatch in second part of c", (double) 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
     for (int i = 0; i < e.getSize(); i++) {
-      assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
+      assertThat("Mismatch in third part of c", (double) 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
     }
   }
 
@@ -103,14 +140,14 @@ public class TestConcat extends TornadoTestBase {
     ByteArray c = ByteArray.concat(a, b, e);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals("Mismatch in first part of c", 100, c.get(i), 0.0f);
+      assertThat("Mismatch in first part of c", (double) 100f, closeTo(c.get(i), 0.0f));
     }
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals("Mismatch in second part of c", 5, c.get(a.getSize() + i), 0.0f);
+      assertThat("Mismatch in second part of c", (double) 5f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
     for (int i = 0; i < e.getSize(); i++) {
-      assertEquals("Mismatch in third part of c", 12, c.get(a.getSize() + b.getSize() + i), 0.0f);
+      assertThat("Mismatch in third part of c", (double) 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
     }
   }
 
@@ -128,14 +165,14 @@ public class TestConcat extends TornadoTestBase {
     LongArray c = LongArray.concat(a, b, e);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
+      assertThat("Mismatch in first part of c", (double) 100.0f, closeTo(c.get(i), 0.0f));
     }
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
+      assertThat("Mismatch in second part of c", (double) 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
     for (int i = 0; i < e.getSize(); i++) {
-      assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
+      assertThat("Mismatch in third part of c", (double) 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
     }
   }
 
@@ -153,14 +190,14 @@ public class TestConcat extends TornadoTestBase {
     IntArray c = IntArray.concat(a, b, e);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
+      assertThat("Mismatch in first part of c", (double) 100.0f, closeTo(c.get(i), 0.0f));
     }
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
+      assertThat("Mismatch in second part of c", (double) 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
     for (int i = 0; i < e.getSize(); i++) {
-      assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
+      assertThat("Mismatch in third part of c", (double) 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
     }
   }
 
@@ -178,14 +215,14 @@ public class TestConcat extends TornadoTestBase {
     ShortArray c = ShortArray.concat(a, b, e);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
+      assertThat("Mismatch in first part of c", (double) 100.0f, closeTo(c.get(i), 0.0f));
     }
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
+      assertThat("Mismatch in second part of c", (double) 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
     for (int i = 0; i < e.getSize(); i++) {
-      assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
+      assertThat("Mismatch in third part of c", (double) 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
     }
   }
 
@@ -203,14 +240,14 @@ public class TestConcat extends TornadoTestBase {
     CharArray c = CharArray.concat(a, b, e);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals("Mismatch in first part of c", 100.0f, c.get(i), 0.0f);
+      assertThat("Mismatch in first part of c", (double) 100.0f, closeTo(c.get(i), 0.0f));
     }
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i), 0.0f);
+      assertThat("Mismatch in second part of c", (double) 5.0f, closeTo(c.get(a.getSize() + i), 0.0f));
     }
 
     for (int i = 0; i < e.getSize(); i++) {
-      assertEquals("Mismatch in third part of c", 12f, c.get(a.getSize() + b.getSize() + i), 0.0f);
+      assertThat("Mismatch in third part of c", (double) 12f, closeTo(c.get(a.getSize() + b.getSize() + i), 0.0f));
     }
   }
 
@@ -228,18 +265,14 @@ public class TestConcat extends TornadoTestBase {
     HalfFloatArray c = HalfFloatArray.concat(a, b, e);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals("Mismatch in first part of c", 100.0f, c.get(i).getFloat32(), 0.0f);
+      assertThat("Mismatch in first part of c", (double) 100.0f, closeTo(c.get(i).getFloat32(), 0.0f));
     }
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals("Mismatch in second part of c", 5.0f, c.get(a.getSize() + i).getFloat32(), 0.0f);
+      assertThat("Mismatch in second part of c", (double) 5.0f, closeTo(c.get(a.getSize() + i).getFloat32(), 0.0f));
     }
 
     for (int i = 0; i < e.getSize(); i++) {
-      assertEquals(
-          "Mismatch in third part of c",
-          12f,
-          c.get(a.getSize() + b.getSize() + i).getFloat32(),
-          0.0f);
+      assertThat("Mismatch in third part of c", (double) 12f, closeTo(c.get(a.getSize() + b.getSize() + i).getFloat32(), 0.0f));
     }
   }
 }
