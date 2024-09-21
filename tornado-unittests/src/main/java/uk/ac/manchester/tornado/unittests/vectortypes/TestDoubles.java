@@ -18,10 +18,77 @@
 
 package uk.ac.manchester.tornado.unittests.vectortypes;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Random;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble16;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble2;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble3;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble4;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble8;
+import uk.ac.manchester.tornado.api.types.vectors.Double16;
+import uk.ac.manchester.tornado.api.types.vectors.Double2;
+import uk.ac.manchester.tornado.api.types.vectors.Double3;
+import uk.ac.manchester.tornado.api.types.vectors.Double4;
+import uk.ac.manchester.tornado.api.types.vectors.Double8;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Random;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble16;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble2;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble3;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble4;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble8;
+import uk.ac.manchester.tornado.api.types.vectors.Double16;
+import uk.ac.manchester.tornado.api.types.vectors.Double2;
+import uk.ac.manchester.tornado.api.types.vectors.Double3;
+import uk.ac.manchester.tornado.api.types.vectors.Double4;
+import uk.ac.manchester.tornado.api.types.vectors.Double8;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.Random;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble16;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble2;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble3;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble4;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble8;
+import uk.ac.manchester.tornado.api.types.vectors.Double16;
+import uk.ac.manchester.tornado.api.types.vectors.Double2;
+import uk.ac.manchester.tornado.api.types.vectors.Double3;
+import uk.ac.manchester.tornado.api.types.vectors.Double4;
+import uk.ac.manchester.tornado.api.types.vectors.Double8;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -244,7 +311,7 @@ public class TestDoubles extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(8.0, output.get(i), DELTA);
+      assertThat((double) 8.0, closeTo(output.get(i), DELTA));
     }
   }
 
@@ -267,7 +334,7 @@ public class TestDoubles extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(12.0, output.get(i), DELTA);
+      assertThat((double) 12.0, closeTo(output.get(i), DELTA));
     }
   }
 
@@ -290,7 +357,7 @@ public class TestDoubles extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(20.0, output.get(i), DELTA);
+      assertThat((double) 20.0, closeTo(output.get(i), DELTA));
     }
   }
 
@@ -313,7 +380,7 @@ public class TestDoubles extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(72., output.get(i), DELTA);
+      assertThat((double) 72., closeTo(output.get(i), DELTA));
     }
   }
 
@@ -342,7 +409,7 @@ public class TestDoubles extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(i + i, output.get(i), DELTA);
+      assertThat((double) i + i, closeTo(output.get(i), DELTA));
     }
   }
 
@@ -380,7 +447,7 @@ public class TestDoubles extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(seqReduce.get(0), outputReduce.get(0), DELTA);
+    assertThat((double) seqReduce.get(0), closeTo(outputReduce.get(0), DELTA));
   }
 
   @Test
@@ -409,8 +476,8 @@ public class TestDoubles extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Double2 sequential = new Double2(i + (size - i), i + (size - i));
-      assertEquals(sequential.getX(), output.get(i).getX(), DELTA);
-      assertEquals(sequential.getY(), output.get(i).getY(), DELTA);
+      assertThat((double) sequential.getX(), closeTo(output.get(i).getX(), DELTA));
+      assertThat((double) sequential.getY(), closeTo(output.get(i).getY(), DELTA));
     }
   }
 
@@ -440,9 +507,9 @@ public class TestDoubles extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Double3 sequential = new Double3(i + (size - i), i + (size - i), i + (size - i));
-      assertEquals(sequential.getX(), output.get(i).getX(), DELTA);
-      assertEquals(sequential.getY(), output.get(i).getY(), DELTA);
-      assertEquals(sequential.getZ(), output.get(i).getZ(), DELTA);
+      assertThat((double) sequential.getX(), closeTo(output.get(i).getX(), DELTA));
+      assertThat((double) sequential.getY(), closeTo(output.get(i).getY(), DELTA));
+      assertThat((double) sequential.getZ(), closeTo(output.get(i).getZ(), DELTA));
     }
   }
 
@@ -473,10 +540,10 @@ public class TestDoubles extends TornadoTestBase {
     for (int i = 0; i < size; i++) {
       Double4 sequential =
           new Double4(i + (size - i), i + (size - i), i + (size - i), i + (size - i));
-      assertEquals(sequential.getX(), output.get(i).getX(), DELTA);
-      assertEquals(sequential.getY(), output.get(i).getY(), DELTA);
-      assertEquals(sequential.getZ(), output.get(i).getZ(), DELTA);
-      assertEquals(sequential.getW(), output.get(i).getW(), DELTA);
+      assertThat((double) sequential.getX(), closeTo(output.get(i).getX(), DELTA));
+      assertThat((double) sequential.getY(), closeTo(output.get(i).getY(), DELTA));
+      assertThat((double) sequential.getZ(), closeTo(output.get(i).getZ(), DELTA));
+      assertThat((double) sequential.getW(), closeTo(output.get(i).getW(), DELTA));
     }
   }
 
@@ -520,7 +587,7 @@ public class TestDoubles extends TornadoTestBase {
               i + (size - i));
 
       for (int j = 0; j < 8; j++) {
-        assertEquals(sequential.get(j), output.get(i).get(j), DELTA);
+        assertThat((double) sequential.get(j), closeTo(output.get(i).get(j), DELTA));
       }
     }
   }
@@ -574,7 +641,7 @@ public class TestDoubles extends TornadoTestBase {
               i + (size - i));
 
       for (int j = 0; j < 16; j++) {
-        assertEquals(sequential.get(j), output.get(i).get(j), DELTA);
+        assertThat((double) sequential.get(j), closeTo(output.get(i).get(j), DELTA));
       }
     }
   }
@@ -597,8 +664,8 @@ public class TestDoubles extends TornadoTestBase {
     testPrivateVectorDouble2(sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
     }
   }
 
@@ -620,10 +687,10 @@ public class TestDoubles extends TornadoTestBase {
     testPrivateVectorDouble4(sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
-      assertEquals(sequentialOutput.get(i).getZ(), tornadoOutput.get(i).getZ(), DELTA);
-      assertEquals(sequentialOutput.get(i).getW(), tornadoOutput.get(i).getW(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getZ(), closeTo(tornadoOutput.get(i).getZ(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getW(), closeTo(tornadoOutput.get(i).getW(), DELTA));
     }
   }
 
@@ -645,14 +712,14 @@ public class TestDoubles extends TornadoTestBase {
     testPrivateVectorDouble8(sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getS0(), tornadoOutput.get(i).getS0(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS1(), tornadoOutput.get(i).getS1(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS2(), tornadoOutput.get(i).getS2(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS3(), tornadoOutput.get(i).getS3(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS4(), tornadoOutput.get(i).getS4(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS5(), tornadoOutput.get(i).getS5(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS6(), tornadoOutput.get(i).getS6(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS7(), tornadoOutput.get(i).getS7(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getS0(), closeTo(tornadoOutput.get(i).getS0(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS1(), closeTo(tornadoOutput.get(i).getS1(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS2(), closeTo(tornadoOutput.get(i).getS2(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS3(), closeTo(tornadoOutput.get(i).getS3(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS4(), closeTo(tornadoOutput.get(i).getS4(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS5(), closeTo(tornadoOutput.get(i).getS5(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS6(), closeTo(tornadoOutput.get(i).getS6(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS7(), closeTo(tornadoOutput.get(i).getS7(), DELTA));
     }
   }
 
@@ -685,8 +752,8 @@ public class TestDoubles extends TornadoTestBase {
     vectorComputation01(sequentialInput, sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
     }
   }
 
@@ -719,9 +786,9 @@ public class TestDoubles extends TornadoTestBase {
     vectorComputation02(sequentialInput, sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
-      assertEquals(sequentialOutput.get(i).getZ(), tornadoOutput.get(i).getZ(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getZ(), closeTo(tornadoOutput.get(i).getZ(), DELTA));
     }
   }
 
@@ -754,9 +821,9 @@ public class TestDoubles extends TornadoTestBase {
     vectorComputation03(sequentialInput, sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
-      assertEquals(sequentialOutput.get(i).getZ(), tornadoOutput.get(i).getZ(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getZ(), closeTo(tornadoOutput.get(i).getZ(), DELTA));
     }
   }
 
@@ -789,8 +856,8 @@ public class TestDoubles extends TornadoTestBase {
     vectorComputation04(sequentialInput, sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
     }
   }
 }
