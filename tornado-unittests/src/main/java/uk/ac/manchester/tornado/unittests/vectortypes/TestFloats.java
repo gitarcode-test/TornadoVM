@@ -18,11 +18,504 @@
 
 package uk.ac.manchester.tornado.unittests.vectortypes;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static java.time.Duration.ofMillis;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static java.time.Duration.ofMillis;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static java.time.Duration.ofMillis;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static java.time.Duration.ofMillis;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat16;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat2;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat8;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt16;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt2;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt4;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt8;
+import uk.ac.manchester.tornado.api.types.vectors.Float16;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int16;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int4;
+import uk.ac.manchester.tornado.api.types.vectors.Int8;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -352,7 +845,7 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(7, output.get(0), DELTA);
+    assertThat((double) 7, closeTo(output.get(0), DELTA));
   }
 
   @Test
@@ -372,7 +865,7 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(10, output.get(0), DELTA);
+    assertThat((double) 10, closeTo(output.get(0), DELTA));
   }
 
   @Test
@@ -392,7 +885,7 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(20, output.get(0), DELTA);
+    assertThat((double) 20, closeTo(output.get(0), DELTA));
   }
 
   @Test
@@ -412,7 +905,7 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(120, output.get(0), DELTA);
+    assertThat((double) 120, closeTo(output.get(0), DELTA));
   }
 
   @Test
@@ -432,7 +925,7 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(120, output.get(0), DELTA);
+    assertThat((double) 120, closeTo(output.get(0), DELTA));
   }
 
   @Test
@@ -454,9 +947,9 @@ public class TestFloats extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(4, output.get(i).getX(), DELTA);
-      assertEquals(4, output.get(i).getY(), DELTA);
-      assertEquals(4, output.get(i).getZ(), DELTA);
+      assertThat((double) 4, closeTo(output.get(i).getX(), DELTA));
+      assertThat((double) 4, closeTo(output.get(i).getY(), DELTA));
+      assertThat((double) 4, closeTo(output.get(i).getZ(), DELTA));
     }
   }
 
@@ -485,7 +978,7 @@ public class TestFloats extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(i + i, output[i], DELTA);
+      assertThat((double) i + i, closeTo(output[i], DELTA));
     }
   }
 
@@ -515,8 +1008,8 @@ public class TestFloats extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Float2 sequential = new Float2(i + i, i + i);
-      assertEquals(sequential.getX(), output[i].getX(), DELTA);
-      assertEquals(sequential.getY(), output[i].getY(), DELTA);
+      assertThat((double) sequential.getX(), closeTo(output[i].getX(), DELTA));
+      assertThat((double) sequential.getY(), closeTo(output[i].getY(), DELTA));
     }
   }
 
@@ -546,8 +1039,8 @@ public class TestFloats extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Float2 sequential = new Float2(i + (size - i), i + (size - i));
-      assertEquals(sequential.getX(), output.get(i).getX(), DELTA);
-      assertEquals(sequential.getY(), output.get(i).getY(), DELTA);
+      assertThat((double) sequential.getX(), closeTo(output.get(i).getX(), DELTA));
+      assertThat((double) sequential.getY(), closeTo(output.get(i).getY(), DELTA));
     }
   }
 
@@ -577,9 +1070,9 @@ public class TestFloats extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Float3 sequential = new Float3(i + (size - i), i + (size - i), i + (size - i));
-      assertEquals(sequential.getX(), output.get(i).getX(), DELTA);
-      assertEquals(sequential.getY(), output.get(i).getY(), DELTA);
-      assertEquals(sequential.getZ(), output.get(i).getZ(), DELTA);
+      assertThat((double) sequential.getX(), closeTo(output.get(i).getX(), DELTA));
+      assertThat((double) sequential.getY(), closeTo(output.get(i).getY(), DELTA));
+      assertThat((double) sequential.getZ(), closeTo(output.get(i).getZ(), DELTA));
     }
   }
 
@@ -635,10 +1128,10 @@ public class TestFloats extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Float4 sequential = new Float4(i + (size - i), i + (size - i), i + (size - i), i + size);
-      assertEquals(sequential.getX(), output.get(i).getX(), DELTA);
-      assertEquals(sequential.getY(), output.get(i).getY(), DELTA);
-      assertEquals(sequential.getZ(), output.get(i).getZ(), DELTA);
-      assertEquals(sequential.getW(), output.get(i).getW(), DELTA);
+      assertThat((double) sequential.getX(), closeTo(output.get(i).getX(), DELTA));
+      assertThat((double) sequential.getY(), closeTo(output.get(i).getY(), DELTA));
+      assertThat((double) sequential.getZ(), closeTo(output.get(i).getZ(), DELTA));
+      assertThat((double) sequential.getW(), closeTo(output.get(i).getW(), DELTA));
     }
   }
 
@@ -689,22 +1182,22 @@ public class TestFloats extends TornadoTestBase {
               i + (size - i),
               i + (size - i),
               i + size);
-      assertEquals(sequential.getS0(), output.get(i).getS0(), DELTA);
-      assertEquals(sequential.getS1(), output.get(i).getS1(), DELTA);
-      assertEquals(sequential.getS2(), output.get(i).getS2(), DELTA);
-      assertEquals(sequential.getS3(), output.get(i).getS3(), DELTA);
-      assertEquals(sequential.getS4(), output.get(i).getS4(), DELTA);
-      assertEquals(sequential.getS5(), output.get(i).getS5(), DELTA);
-      assertEquals(sequential.getS6(), output.get(i).getS6(), DELTA);
-      assertEquals(sequential.getS7(), output.get(i).getS7(), DELTA);
-      assertEquals(sequential.getS8(), output.get(i).getS8(), DELTA);
-      assertEquals(sequential.getS9(), output.get(i).getS9(), DELTA);
-      assertEquals(sequential.getS10(), output.get(i).getS10(), DELTA);
-      assertEquals(sequential.getS11(), output.get(i).getS11(), DELTA);
-      assertEquals(sequential.getS12(), output.get(i).getS12(), DELTA);
-      assertEquals(sequential.getS13(), output.get(i).getS13(), DELTA);
-      assertEquals(sequential.getS14(), output.get(i).getS14(), DELTA);
-      assertEquals(sequential.getS15(), output.get(i).getS15(), DELTA);
+      assertThat((double) sequential.getS0(), closeTo(output.get(i).getS0(), DELTA));
+      assertThat((double) sequential.getS1(), closeTo(output.get(i).getS1(), DELTA));
+      assertThat((double) sequential.getS2(), closeTo(output.get(i).getS2(), DELTA));
+      assertThat((double) sequential.getS3(), closeTo(output.get(i).getS3(), DELTA));
+      assertThat((double) sequential.getS4(), closeTo(output.get(i).getS4(), DELTA));
+      assertThat((double) sequential.getS5(), closeTo(output.get(i).getS5(), DELTA));
+      assertThat((double) sequential.getS6(), closeTo(output.get(i).getS6(), DELTA));
+      assertThat((double) sequential.getS7(), closeTo(output.get(i).getS7(), DELTA));
+      assertThat((double) sequential.getS8(), closeTo(output.get(i).getS8(), DELTA));
+      assertThat((double) sequential.getS9(), closeTo(output.get(i).getS9(), DELTA));
+      assertThat((double) sequential.getS10(), closeTo(output.get(i).getS10(), DELTA));
+      assertThat((double) sequential.getS11(), closeTo(output.get(i).getS11(), DELTA));
+      assertThat((double) sequential.getS12(), closeTo(output.get(i).getS12(), DELTA));
+      assertThat((double) sequential.getS13(), closeTo(output.get(i).getS13(), DELTA));
+      assertThat((double) sequential.getS14(), closeTo(output.get(i).getS14(), DELTA));
+      assertThat((double) sequential.getS15(), closeTo(output.get(i).getS15(), DELTA));
     }
   }
 
@@ -743,14 +1236,14 @@ public class TestFloats extends TornadoTestBase {
               i + (size - i),
               i + (size - i),
               i + size);
-      assertEquals(sequential.getS0(), output.get(i).getS0(), DELTA);
-      assertEquals(sequential.getS1(), output.get(i).getS1(), DELTA);
-      assertEquals(sequential.getS2(), output.get(i).getS2(), DELTA);
-      assertEquals(sequential.getS3(), output.get(i).getS3(), DELTA);
-      assertEquals(sequential.getS4(), output.get(i).getS4(), DELTA);
-      assertEquals(sequential.getS5(), output.get(i).getS5(), DELTA);
-      assertEquals(sequential.getS6(), output.get(i).getS6(), DELTA);
-      assertEquals(sequential.getS7(), output.get(i).getS7(), DELTA);
+      assertThat((double) sequential.getS0(), closeTo(output.get(i).getS0(), DELTA));
+      assertThat((double) sequential.getS1(), closeTo(output.get(i).getS1(), DELTA));
+      assertThat((double) sequential.getS2(), closeTo(output.get(i).getS2(), DELTA));
+      assertThat((double) sequential.getS3(), closeTo(output.get(i).getS3(), DELTA));
+      assertThat((double) sequential.getS4(), closeTo(output.get(i).getS4(), DELTA));
+      assertThat((double) sequential.getS5(), closeTo(output.get(i).getS5(), DELTA));
+      assertThat((double) sequential.getS6(), closeTo(output.get(i).getS6(), DELTA));
+      assertThat((double) sequential.getS7(), closeTo(output.get(i).getS7(), DELTA));
     }
   }
 
@@ -778,14 +1271,14 @@ public class TestFloats extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       Float8 sequential = new Float8(i, i, i, i, i, i, i, i);
-      assertEquals(sequential.getS0(), output.get(i).getS0(), DELTA);
-      assertEquals(sequential.getS1(), output.get(i).getS1(), DELTA);
-      assertEquals(sequential.getS2(), output.get(i).getS2(), DELTA);
-      assertEquals(sequential.getS3(), output.get(i).getS3(), DELTA);
-      assertEquals(sequential.getS4(), output.get(i).getS4(), DELTA);
-      assertEquals(sequential.getS5(), output.get(i).getS5(), DELTA);
-      assertEquals(sequential.getS6(), output.get(i).getS6(), DELTA);
-      assertEquals(sequential.getS7(), output.get(i).getS7(), DELTA);
+      assertThat((double) sequential.getS0(), closeTo(output.get(i).getS0(), DELTA));
+      assertThat((double) sequential.getS1(), closeTo(output.get(i).getS1(), DELTA));
+      assertThat((double) sequential.getS2(), closeTo(output.get(i).getS2(), DELTA));
+      assertThat((double) sequential.getS3(), closeTo(output.get(i).getS3(), DELTA));
+      assertThat((double) sequential.getS4(), closeTo(output.get(i).getS4(), DELTA));
+      assertThat((double) sequential.getS5(), closeTo(output.get(i).getS5(), DELTA));
+      assertThat((double) sequential.getS6(), closeTo(output.get(i).getS6(), DELTA));
+      assertThat((double) sequential.getS7(), closeTo(output.get(i).getS7(), DELTA));
     }
   }
 
@@ -824,7 +1317,7 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(seqReduce.get(0), outputReduce.get(0), DELTA);
+    assertThat((double) seqReduce.get(0), closeTo(outputReduce.get(0), DELTA));
   }
 
   @Test
@@ -846,9 +1339,9 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(8.0f, output.get(0).getS0(), DELTA);
-    assertEquals(8.0f, output.get(0).getS1(), DELTA);
-    assertEquals(8.0f, output.get(0).getS2(), DELTA);
+    assertThat((double) 8.0f, closeTo(output.get(0).getS0(), DELTA));
+    assertThat((double) 8.0f, closeTo(output.get(0).getS1(), DELTA));
+    assertThat((double) 8.0f, closeTo(output.get(0).getS2(), DELTA));
   }
 
   @Test
@@ -869,8 +1362,8 @@ public class TestFloats extends TornadoTestBase {
     testPrivateVectorFloat2(sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
     }
   }
 
@@ -892,10 +1385,10 @@ public class TestFloats extends TornadoTestBase {
     testPrivateVectorFloat4(sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
-      assertEquals(sequentialOutput.get(i).getZ(), tornadoOutput.get(i).getZ(), DELTA);
-      assertEquals(sequentialOutput.get(i).getW(), tornadoOutput.get(i).getW(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getZ(), closeTo(tornadoOutput.get(i).getZ(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getW(), closeTo(tornadoOutput.get(i).getW(), DELTA));
     }
   }
 
@@ -917,14 +1410,14 @@ public class TestFloats extends TornadoTestBase {
     testPrivateVectorFloat8(sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getS0(), tornadoOutput.get(i).getS0(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS1(), tornadoOutput.get(i).getS1(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS2(), tornadoOutput.get(i).getS2(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS3(), tornadoOutput.get(i).getS3(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS4(), tornadoOutput.get(i).getS4(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS5(), tornadoOutput.get(i).getS5(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS6(), tornadoOutput.get(i).getS6(), DELTA);
-      assertEquals(sequentialOutput.get(i).getS7(), tornadoOutput.get(i).getS7(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getS0(), closeTo(tornadoOutput.get(i).getS0(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS1(), closeTo(tornadoOutput.get(i).getS1(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS2(), closeTo(tornadoOutput.get(i).getS2(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS3(), closeTo(tornadoOutput.get(i).getS3(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS4(), closeTo(tornadoOutput.get(i).getS4(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS5(), closeTo(tornadoOutput.get(i).getS5(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS6(), closeTo(tornadoOutput.get(i).getS6(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getS7(), closeTo(tornadoOutput.get(i).getS7(), DELTA));
     }
   }
 
@@ -946,10 +1439,10 @@ public class TestFloats extends TornadoTestBase {
     vectorFloatUnary(sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), output.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), output.get(i).getY(), DELTA);
-      assertEquals(sequentialOutput.get(i).getZ(), output.get(i).getZ(), DELTA);
-      assertEquals(sequentialOutput.get(i).getW(), output.get(i).getW(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(output.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(output.get(i).getY(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getZ(), closeTo(output.get(i).getZ(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getW(), closeTo(output.get(i).getW(), DELTA));
     }
   }
 
@@ -982,8 +1475,8 @@ public class TestFloats extends TornadoTestBase {
     vectorComputation01(sequentialInput, sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
     }
   }
 
@@ -1016,9 +1509,9 @@ public class TestFloats extends TornadoTestBase {
     vectorComputation02(sequentialInput, sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
-      assertEquals(sequentialOutput.get(i).getZ(), tornadoOutput.get(i).getZ(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getZ(), closeTo(tornadoOutput.get(i).getZ(), DELTA));
     }
   }
 
@@ -1051,9 +1544,9 @@ public class TestFloats extends TornadoTestBase {
     vectorComputation03(sequentialInput, sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
-      assertEquals(sequentialOutput.get(i).getZ(), tornadoOutput.get(i).getZ(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getZ(), closeTo(tornadoOutput.get(i).getZ(), DELTA));
     }
   }
 
@@ -1086,20 +1579,22 @@ public class TestFloats extends TornadoTestBase {
     vectorComputation04(sequentialInput, sequentialOutput);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(sequentialOutput.get(i).getX(), tornadoOutput.get(i).getX(), DELTA);
-      assertEquals(sequentialOutput.get(i).getY(), tornadoOutput.get(i).getY(), DELTA);
+      assertThat((double) sequentialOutput.get(i).getX(), closeTo(tornadoOutput.get(i).getX(), DELTA));
+      assertThat((double) sequentialOutput.get(i).getY(), closeTo(tornadoOutput.get(i).getY(), DELTA));
     }
   }
 
-  @Test(timeout = 1000) // timeout of 1sec
+  @Test
   public void testAllocationIssue() {
+ assertTimeout(ofMillis(1000), () -> {
     int size = 8192 * 4096;
 
     VectorFloat4 buffer = new VectorFloat4(size);
     for (int x = 0; x < size; x++) {
       buffer.set(x, new Float4(x, x, x, x));
     }
-  }
+  }); 
+}
 
   @Test
   public void testVectorFloat4Float4() throws TornadoExecutionPlanException {
@@ -1127,10 +1622,10 @@ public class TestFloats extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       executionPlan.execute();
       for (int i = 0; i < size; i++) {
-        assertEquals(seq.get(i).getX(), output.get(i).getX(), DELTA);
-        assertEquals(seq.get(i).getY(), output.get(i).getY(), DELTA);
-        assertEquals(seq.get(i).getZ(), output.get(i).getZ(), DELTA);
-        assertEquals(seq.get(i).getW(), output.get(i).getW(), DELTA);
+        assertThat((double) seq.get(i).getX(), closeTo(output.get(i).getX(), DELTA));
+        assertThat((double) seq.get(i).getY(), closeTo(output.get(i).getY(), DELTA));
+        assertThat((double) seq.get(i).getZ(), closeTo(output.get(i).getZ(), DELTA));
+        assertThat((double) seq.get(i).getW(), closeTo(output.get(i).getW(), DELTA));
       }
     }
   }
@@ -1162,8 +1657,8 @@ public class TestFloats extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       executionPlan.execute();
       for (int i = 0; i < size; i++) {
-        assertEquals(seq.get(i).getX(), output.get(i).getX(), DELTA);
-        assertEquals(seq.get(i).getY(), output.get(i).getY(), DELTA);
+        assertThat((double) seq.get(i).getX(), closeTo(output.get(i).getX(), DELTA));
+        assertThat((double) seq.get(i).getY(), closeTo(output.get(i).getY(), DELTA));
       }
     }
   }
@@ -1195,10 +1690,10 @@ public class TestFloats extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       executionPlan.execute();
       for (int i = 0; i < size; i++) {
-        assertEquals(seq.get(i).getX(), output.get(i).getX(), DELTA);
-        assertEquals(seq.get(i).getY(), output.get(i).getY(), DELTA);
-        assertEquals(seq.get(i).getZ(), output.get(i).getZ(), DELTA);
-        assertEquals(seq.get(i).getW(), output.get(i).getW(), DELTA);
+        assertThat((double) seq.get(i).getX(), closeTo(output.get(i).getX(), DELTA));
+        assertThat((double) seq.get(i).getY(), closeTo(output.get(i).getY(), DELTA));
+        assertThat((double) seq.get(i).getZ(), closeTo(output.get(i).getZ(), DELTA));
+        assertThat((double) seq.get(i).getW(), closeTo(output.get(i).getW(), DELTA));
       }
     }
   }
@@ -1238,7 +1733,7 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
       for (int i = 0; i < size; i++) {
         for (int k = 0; k < 8; k++) {
-          assertEquals(seq.get(i).get(k), output.get(i).get(k), DELTA);
+          assertThat((double) seq.get(i).get(k), closeTo(output.get(i).get(k), DELTA));
         }
       }
     }
@@ -1280,7 +1775,7 @@ public class TestFloats extends TornadoTestBase {
       executionPlan.execute();
       for (int i = 0; i < size; i++) {
         for (int k = 0; k < 16; k++) {
-          assertEquals(seq.get(i).get(k), output.get(i).get(k), DELTA);
+          assertThat((double) seq.get(i).get(k), closeTo(output.get(i).get(k), DELTA));
         }
       }
     }
