@@ -17,10 +17,56 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.api;
 
-import static org.junit.Assert.assertEquals;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -170,7 +216,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 
@@ -217,7 +263,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 
@@ -263,7 +309,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 
@@ -309,7 +355,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 
@@ -362,7 +408,7 @@ public class TestCombinedTaskGraph extends TornadoTestBase {
     vectorSubV1(cJava, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cJava.get(i), equalTo(cTornado.get(i)));
     }
   }
 }
