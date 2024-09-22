@@ -17,10 +17,47 @@
  */
 package uk.ac.manchester.tornado.unittests.api;
 
-import static org.junit.Assert.assertEquals;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -79,7 +116,7 @@ public class TestIO extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(2 * i, arrayC.get(i), 0.0f);
+      assertThat((double) 2 * i, closeTo(arrayC.get(i), 0.0f));
     }
   }
 
@@ -111,7 +148,7 @@ public class TestIO extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(2 * i, arrayC.get(i), 0.0f);
+      assertThat((double) 2 * i, closeTo(arrayC.get(i), 0.0f));
     }
   }
 
@@ -146,7 +183,7 @@ public class TestIO extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(2 * i, arrayC.get(i), 0.0f);
+      assertThat((double) 2 * i, closeTo(arrayC.get(i), 0.0f));
     }
   }
 
@@ -194,8 +231,7 @@ public class TestIO extends TornadoTestBase {
         copyInSumSimpleExecWithDev += executionResult.getProfilerResult().getDeviceWriteTime();
       }
       // Generous assertions with delta of 25%
-      assertEquals(
-          copyInSumSimpleExec, copyInSumSimpleExecWithDev, (float) copyInSumSimpleExec / 4);
+      assertThat((double) copyInSumSimpleExec, closeTo(copyInSumSimpleExecWithDev, (float) copyInSumSimpleExec / 4));
     }
   }
   // CHECKSTYLE:ON
