@@ -17,11 +17,54 @@
  */
 package uk.ac.manchester.tornado.unittests.vm.concurrency;
 
-import static org.junit.Assert.assertEquals;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.common.TornadoVMMultiDeviceNotSupported;
+import uk.ac.manchester.tornado.unittests.tasks.TestMultipleTasksMultipleDevices;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.stream.IntStream;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.common.TornadoVMMultiDeviceNotSupported;
+import uk.ac.manchester.tornado.unittests.tasks.TestMultipleTasksMultipleDevices;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.common.TornadoVMMultiDeviceNotSupported;
+import uk.ac.manchester.tornado.unittests.tasks.TestMultipleTasksMultipleDevices;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -59,7 +102,7 @@ public class TestConcurrentBackends extends TornadoTestBase {
   private static IntArray d;
   private static IntArray e;
 
-  @BeforeClass
+  @BeforeAll
   public static void setUp() {
     setDefaultDevices();
 
@@ -108,8 +151,8 @@ public class TestConcurrentBackends extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals((30L + i) * i, a.get(i));
-      assertEquals(i, b.get(i));
+      assertThat(a.get(i), equalTo((30L + i) * i));
+      assertThat(b.get(i), equalTo(i));
     }
   }
 
@@ -132,8 +175,8 @@ public class TestConcurrentBackends extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals((30L + i) * i, a.get(i));
-      assertEquals(i, b.get(i));
+      assertThat(a.get(i), equalTo((30L + i) * i));
+      assertThat(b.get(i), equalTo(i));
     }
   }
 
@@ -157,9 +200,9 @@ public class TestConcurrentBackends extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals((30L + i) * i, a.get(i));
-      assertEquals(i, b.get(i));
-      assertEquals(12L * c.get(i) + e.get(i), d.get(i));
+      assertThat(a.get(i), equalTo((30L + i) * i));
+      assertThat(b.get(i), equalTo(i));
+      assertThat(d.get(i), equalTo(12L * c.get(i) + e.get(i)));
     }
   }
 
@@ -181,9 +224,9 @@ public class TestConcurrentBackends extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals((30L + i) * i, a.get(i));
-      assertEquals(i, b.get(i));
-      assertEquals(12L * c.get(i) + e.get(i), d.get(i));
+      assertThat(a.get(i), equalTo((30L + i) * i));
+      assertThat(b.get(i), equalTo(i));
+      assertThat(d.get(i), equalTo(12L * c.get(i) + e.get(i)));
     }
   }
 
