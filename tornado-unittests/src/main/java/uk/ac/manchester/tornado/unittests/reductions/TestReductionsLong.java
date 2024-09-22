@@ -17,11 +17,54 @@
  */
 package uk.ac.manchester.tornado.unittests.reductions;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.annotations.Reduce;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.annotations.Reduce;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.annotations.Reduce;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -77,7 +120,7 @@ public class TestReductionsLong extends TornadoTestBase {
     reductionAnnotation(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(result.get(0), equalTo(sequential.get(0)));
   }
 
   private static void multReductionAnnotation(LongArray input, @Reduce LongArray result) {
@@ -114,7 +157,7 @@ public class TestReductionsLong extends TornadoTestBase {
     multReductionAnnotation(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(result.get(0), equalTo(sequential.get(0)));
   }
 
   private static void maxReductionAnnotation(LongArray input, @Reduce LongArray result) {
@@ -152,7 +195,7 @@ public class TestReductionsLong extends TornadoTestBase {
     LongArray sequential = new LongArray(1);
     maxReductionAnnotation(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(result.get(0), equalTo(sequential.get(0)));
   }
 
   private static void minReductionAnnotation(LongArray input, @Reduce LongArray result) {
@@ -188,7 +231,7 @@ public class TestReductionsLong extends TornadoTestBase {
     sequential.init(Long.MAX_VALUE);
     minReductionAnnotation(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(result.get(0), equalTo(sequential.get(0)));
   }
 
   private static void maxReductionAnnotation2(LongArray input, @Reduce LongArray result) {
@@ -224,7 +267,7 @@ public class TestReductionsLong extends TornadoTestBase {
     LongArray sequential = new LongArray(1);
     sequential.init(neutral);
     maxReductionAnnotation2(input, sequential);
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(result.get(0), equalTo(sequential.get(0)));
   }
 
   private static void minReductionAnnotation2(LongArray input, @Reduce LongArray result) {
@@ -260,6 +303,6 @@ public class TestReductionsLong extends TornadoTestBase {
     LongArray sequential = new LongArray(1);
     minReductionAnnotation2(input, sequential);
 
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(result.get(0), equalTo(sequential.get(0)));
   }
 }
