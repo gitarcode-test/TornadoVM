@@ -18,7 +18,19 @@
 
 package uk.ac.manchester.tornado.unittests.fails;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoBackend;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoFailureException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoRuntimeException;
+import uk.ac.manchester.tornado.api.runtime.TornadoRuntimeProvider;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoBackend;
@@ -53,8 +65,9 @@ public class TestFails extends TornadoTestBase {
     }
   }
 
-  @Test(expected = TornadoFailureException.class)
+  @Test
   public void test01() {
+ assertThrows(TornadoFailureException.class, () -> {
     // =============================================================================
     // Call reset after warm-up. This is not legal in TornadoVM. WarmUP will
     // initialize the heap and the code cache. If reset is called, it will clean all
@@ -85,7 +98,8 @@ public class TestFails extends TornadoTestBase {
     executionPlanPlan.withWarmUp().execute();
     reset();
     executionPlanPlan.execute();
-  }
+  }); 
+}
 
   private static void kernel(FloatArray a, FloatArray b) {
     for (@Parallel int i = 0; i < a.getSize(); i++) {
@@ -93,8 +107,9 @@ public class TestFails extends TornadoTestBase {
     }
   }
 
-  @Test(expected = TornadoRuntimeException.class)
+  @Test
   public void test02() {
+ assertThrows(TornadoRuntimeException.class, () -> {
     // This test fails because the Java method's name to be accelerated corresponds
     // to an OpenCL token.
 
@@ -111,5 +126,6 @@ public class TestFails extends TornadoTestBase {
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     TornadoExecutionPlan executionPlanPlan = new TornadoExecutionPlan(immutableTaskGraph);
     executionPlanPlan.execute();
-  }
+  }); 
+}
 }
