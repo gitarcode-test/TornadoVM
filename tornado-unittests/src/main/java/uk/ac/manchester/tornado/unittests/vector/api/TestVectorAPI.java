@@ -22,9 +22,19 @@ import java.util.Random;
 import java.util.stream.IntStream;
 import jdk.incubator.vector.FloatVector;
 import jdk.incubator.vector.VectorSpecies;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import java.util.Random;
+import java.util.stream.IntStream;
+import jdk.incubator.vector.FloatVector;
+import jdk.incubator.vector.VectorSpecies;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
 import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
 
@@ -47,7 +57,7 @@ public class TestVectorAPI extends TornadoTestBase {
     return rand.nextFloat() * (max - min) + min;
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpBeforeClass() {
     arrayA = new FloatArray(SIZE);
     arrayB = new FloatArray(SIZE);
@@ -106,7 +116,7 @@ public class TestVectorAPI extends TornadoTestBase {
   public void test64BitVectors() {
     VectorSpecies<Float> species = FloatVector.SPECIES_64;
     float[] result = parallelVectorAdd(arrayA, arrayB, species);
-    Assert.assertArrayEquals(result, referenceResult.toHeapArray(), DELTA);
+    assertArrayEquals(result, referenceResult.toHeapArray(), DELTA);
   }
 
   /** Test method for vector addition with 128-bit vector species. */
@@ -114,7 +124,7 @@ public class TestVectorAPI extends TornadoTestBase {
   public void test128BitVectors() {
     VectorSpecies<Float> species = FloatVector.SPECIES_128;
     float[] result = parallelVectorAdd(arrayA, arrayB, species);
-    Assert.assertArrayEquals(result, referenceResult.toHeapArray(), DELTA);
+    assertArrayEquals(result, referenceResult.toHeapArray(), DELTA);
   }
 
   /** Test method for vector addition with 256-bit vector species. */
@@ -122,7 +132,7 @@ public class TestVectorAPI extends TornadoTestBase {
   public void test256BitVectors() {
     VectorSpecies<Float> species = FloatVector.SPECIES_256;
     float[] result = parallelVectorAdd(arrayA, arrayB, species);
-    Assert.assertArrayEquals(result, referenceResult.toHeapArray(), DELTA);
+    assertArrayEquals(result, referenceResult.toHeapArray(), DELTA);
   }
 
   /** Test method for vector addition with 512-bit vector species. */
@@ -130,6 +140,6 @@ public class TestVectorAPI extends TornadoTestBase {
   public void test512BitVectors() {
     VectorSpecies<Float> species = FloatVector.SPECIES_512;
     float[] result = parallelVectorAdd(arrayA, arrayB, species);
-    Assert.assertArrayEquals(result, referenceResult.toHeapArray(), DELTA);
+    assertArrayEquals(result, referenceResult.toHeapArray(), DELTA);
   }
 }
