@@ -17,11 +17,48 @@
  */
 package uk.ac.manchester.tornado.unittests.logic;
 
-import static org.junit.Assert.assertEquals;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.stream.IntStream;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -94,7 +131,7 @@ public class TestLogic extends TornadoTestBase {
     logic01(data, sequential);
 
     for (int i = 0; i < data.getSize(); i++) {
-      assertEquals(sequential.get(i), output.get(i));
+      assertThat(output.get(i), equalTo(sequential.get(i)));
     }
   }
 
@@ -121,7 +158,7 @@ public class TestLogic extends TornadoTestBase {
     logic02(data, sequential);
 
     for (int i = 0; i < data.getSize(); i++) {
-      assertEquals(sequential.get(i), output.get(i));
+      assertThat(output.get(i), equalTo(sequential.get(i)));
     }
   }
 
@@ -148,11 +185,11 @@ public class TestLogic extends TornadoTestBase {
     logic03(data, sequential);
 
     for (int i = 0; i < data.getSize(); i++) {
-      assertEquals(sequential.get(i), output.get(i));
+      assertThat(output.get(i), equalTo(sequential.get(i)));
     }
   }
 
-  @Ignore
+  @Disabled
   public void testLogic04() throws TornadoExecutionPlanException {
     final int N = 1024;
     IntArray data = new IntArray(N);
@@ -175,7 +212,7 @@ public class TestLogic extends TornadoTestBase {
     logic04(data, sequential);
 
     for (int i = 0; i < data.getSize(); i++) {
-      assertEquals(sequential.get(i), output.get(i));
+      assertThat(output.get(i), equalTo(sequential.get(i)));
     }
   }
   // CHECKSTYLE:ON
