@@ -17,7 +17,20 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.api;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.exceptions.TornadoRuntimeException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -83,8 +96,9 @@ public class Grids extends TornadoTestBase {
     }
   }
 
-  @Test(expected = TornadoRuntimeException.class)
+  @Test
   public void testWithIncorrectGraphName() {
+ assertThrows(TornadoRuntimeException.class, () -> {
     FloatArray timesArray = new FloatArray(size);
     FloatArray obsArray = new FloatArray(size);
 
@@ -109,10 +123,12 @@ public class Grids extends TornadoTestBase {
     executionPlan
         .withGridScheduler(gridScheduler) //
         .execute();
-  }
+  }); 
+}
 
-  @Test(expected = TornadoRuntimeException.class)
+  @Test
   public void testWithIncorrectGraphAndTaskName() {
+ assertThrows(TornadoRuntimeException.class, () -> {
     FloatArray timesArray = new FloatArray(size);
     FloatArray obsArray = new FloatArray(size);
 
@@ -137,5 +153,6 @@ public class Grids extends TornadoTestBase {
     executionPlan
         .withGridScheduler(gridScheduler) //
         .execute();
-  }
+  }); 
+}
 }
