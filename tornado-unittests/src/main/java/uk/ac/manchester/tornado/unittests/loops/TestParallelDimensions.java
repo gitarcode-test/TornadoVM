@@ -17,9 +17,40 @@
  */
 package uk.ac.manchester.tornado.unittests.loops;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -60,7 +91,7 @@ public class TestParallelDimensions extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(10, a.get(i));
+      assertThat(a.get(i), equalTo(10));
     }
   }
 
@@ -90,7 +121,7 @@ public class TestParallelDimensions extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {
-        assertEquals(10, a.get(i * size + j));
+        assertThat(a.get(i * size + j), equalTo(10));
       }
     }
   }
@@ -124,7 +155,7 @@ public class TestParallelDimensions extends TornadoTestBase {
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {
         for (int y = 0; y < size; y++) {
-          assertEquals(10, a.get((size * size * y) + (size * j) + i));
+          assertThat(a.get((size * size * y) + (size * j) + i), equalTo(10));
         }
       }
     }
@@ -164,7 +195,7 @@ public class TestParallelDimensions extends TornadoTestBase {
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {
         for (int y = 0; y < size; y++) {
-          assertEquals(110, a.get((size * size * y) + (size * j) + i));
+          assertThat(a.get((size * size * y) + (size * j) + i), equalTo(110));
         }
       }
     }
