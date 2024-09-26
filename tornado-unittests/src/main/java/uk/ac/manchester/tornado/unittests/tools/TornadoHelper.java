@@ -43,6 +43,30 @@ import uk.ac.manchester.tornado.unittests.common.TornadoVMPTXNotSupported;
 import uk.ac.manchester.tornado.unittests.common.TornadoVMSPIRVNotSupported;
 import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Request;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
+import uk.ac.manchester.tornado.api.exceptions.TornadoDeviceFP16NotSupported;
+import uk.ac.manchester.tornado.api.exceptions.TornadoDeviceFP64NotSupported;
+import uk.ac.manchester.tornado.api.exceptions.TornadoNoOpenCLPlatformException;
+import uk.ac.manchester.tornado.unittests.common.SPIRVOptNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoVMMultiDeviceNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoVMOpenCLNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoVMPTXNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoVMSPIRVNotSupported;
+import uk.ac.manchester.tornado.unittests.tools.Exceptions.UnsupportedConfigurationException;
+
 public class TornadoHelper {
 
   public static final boolean OPTIMIZE_LOAD_STORE_SPIRV =
@@ -93,9 +117,9 @@ public class TornadoHelper {
       boolean testEnabled = false;
       boolean ignoreTest = false;
       for (Annotation a : annotations) {
-        if (a instanceof org.junit.Ignore) {
+        if (a instanceof org.junit.jupiter.api.Disabled) {
           ignoreTest = true;
-        } else if (a instanceof org.junit.Test) {
+        } else if (a instanceof org.junit.jupiter.api.Test) {
           testEnabled = true;
         } else if (a instanceof TornadoNotSupported) {
           testEnabled = true;
