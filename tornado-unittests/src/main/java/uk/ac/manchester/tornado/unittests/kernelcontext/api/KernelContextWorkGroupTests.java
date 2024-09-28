@@ -17,9 +17,55 @@
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.api;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.WorkerGrid2D;
+import uk.ac.manchester.tornado.api.WorkerGrid3D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.WorkerGrid2D;
+import uk.ac.manchester.tornado.api.WorkerGrid3D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.WorkerGrid2D;
+import uk.ac.manchester.tornado.api.WorkerGrid3D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -86,7 +132,7 @@ public class KernelContextWorkGroupTests extends TornadoTestBase {
           .execute();
     }
 
-    assertEquals(16, data.get(0));
+    assertThat(data.get(0), equalTo(16));
   }
 
   @Test
@@ -109,7 +155,7 @@ public class KernelContextWorkGroupTests extends TornadoTestBase {
           .execute();
     }
 
-    assertEquals(8, data.get(0));
+    assertThat(data.get(0), equalTo(8));
   }
 
   @Test
@@ -130,7 +176,7 @@ public class KernelContextWorkGroupTests extends TornadoTestBase {
           .withGridScheduler(grid) //
           .execute();
     }
-    assertEquals(4, data.get(0));
+    assertThat(data.get(0), equalTo(4));
   }
 
   @Test
@@ -153,7 +199,7 @@ public class KernelContextWorkGroupTests extends TornadoTestBase {
           .withGridScheduler(grid) //
           .execute();
     }
-    assertEquals(worker.getLocalWork()[0], data.get(0));
+    assertThat(data.get(0), equalTo(worker.getLocalWork()[0]));
   }
 
   @Test
@@ -176,7 +222,7 @@ public class KernelContextWorkGroupTests extends TornadoTestBase {
           .withGridScheduler(grid) //
           .execute();
     }
-    assertEquals(worker.getLocalWork()[1], data.get(0));
+    assertThat(data.get(0), equalTo(worker.getLocalWork()[1]));
   }
 
   @Test
@@ -199,6 +245,6 @@ public class KernelContextWorkGroupTests extends TornadoTestBase {
           .withGridScheduler(grid) //
           .execute();
     }
-    assertEquals(worker.getLocalWork()[2], data.get(0));
+    assertThat(data.get(0), equalTo(worker.getLocalWork()[2]));
   }
 }
