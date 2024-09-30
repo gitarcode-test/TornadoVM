@@ -16,10 +16,10 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.memory;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -53,7 +53,7 @@ public class MemoryConsumptionTest extends TestMemoryCommon {
       long totalBytesTransferred = executionResult.getProfilerResult().getTotalBytesTransferred();
       long copyInBytes = executionResult.getProfilerResult().getTotalBytesCopyIn();
       long copyOutBytes = executionResult.getProfilerResult().getTotalBytesCopyOut();
-      assertEquals(copyInBytes + copyOutBytes, totalBytesTransferred);
+      assertThat(totalBytesTransferred, equalTo(copyInBytes + copyOutBytes));
     }
   }
 
@@ -74,7 +74,7 @@ public class MemoryConsumptionTest extends TestMemoryCommon {
 
       // 3 Arrays
       final long sizeAllocated = a.getNumBytesOfSegmentWithHeader() * 3;
-      assertEquals(sizeAllocated, totalMemoryUsedInBytes);
+      assertThat(totalMemoryUsedInBytes, equalTo(sizeAllocated));
     }
   }
 
@@ -92,7 +92,7 @@ public class MemoryConsumptionTest extends TestMemoryCommon {
       executionPlan.withProfiler(ProfilerMode.SILENT).execute();
       long currentMemoryUsageInBytes = executionPlan.getCurrentDeviceMemoryUsage();
       final long sizeAllocated = a.getNumBytesOfSegmentWithHeader() * 3;
-      assertEquals(sizeAllocated, currentMemoryUsageInBytes);
+      assertThat(currentMemoryUsageInBytes, equalTo(sizeAllocated));
     }
   }
 }
