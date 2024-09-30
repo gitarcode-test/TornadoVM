@@ -17,15 +17,71 @@
  */
 
 package uk.ac.manchester.tornado.unittests.matrices;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -39,7 +95,7 @@ import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
  * tornado-test -V uk.ac.manchester.tornado.unittests.matrices.TestMatrices
  * </code>
  */
-@Ignore
+@Disabled
 public class TestMatrices extends TornadoTestBase {
   // CHECKSTYLE:OFF
 
@@ -173,7 +229,7 @@ public class TestMatrices extends TornadoTestBase {
     }
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void testFillMatrix() throws TornadoExecutionPlanException {
     final int numElements = 16;
@@ -191,7 +247,7 @@ public class TestMatrices extends TornadoTestBase {
 
     for (int i = 0; i < a.length; i++) {
       for (int j = 0; j < a[i].length; j++) {
-        assertEquals(i, a[i][j]);
+        assertThat(a[i][j], equalTo(i));
       }
     }
   }
@@ -214,7 +270,7 @@ public class TestMatrices extends TornadoTestBase {
 
     for (int i = 0; i < a.length; i++) {
       for (int j = 0; j < a[i].length; j++) {
-        assertEquals(i, a[i][j]);
+        assertThat(a[i][j], equalTo(i));
       }
     }
   }
@@ -237,7 +293,7 @@ public class TestMatrices extends TornadoTestBase {
 
     for (int i = 0; i < a.length; i++) {
       for (int j = 0; j < a[i].length; j++) {
-        assertEquals(i, a[i][j]);
+        assertThat(a[i][j], equalTo(i));
       }
     }
   }
@@ -278,7 +334,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixVector(matrix, vector, resultSeq, N);
 
     for (int i = 0; i < vector.length; i++) {
-      assertEquals(resultSeq[i], result[i], 0.01f);
+      assertThat((double) result[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -318,7 +374,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixVector(matrix, vector, resultSeq, N);
 
     for (int i = 0; i < vector.length; i++) {
-      assertEquals(resultSeq[i], result[i], 0.01f);
+      assertThat((double) result[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -341,7 +397,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixInit1D(resultSeq, N);
 
     for (int i = 0; i < matrix.length; i++) {
-      assertEquals(resultSeq[i], matrix[i], 0.01f);
+      assertThat((double) matrix[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -364,7 +420,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixInit1D(resultSeq, N);
 
     for (int i = 0; i < matrix.length; i++) {
-      assertEquals(resultSeq[i], matrix[i], 0.01f);
+      assertThat((double) matrix[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -387,7 +443,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixInit2D(resultSeq, N);
 
     for (int i = 0; i < matrix.length; i++) {
-      assertEquals(resultSeq[i], matrix[i], 0.01f);
+      assertThat((double) matrix[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -410,7 +466,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixInit2D(resultSeq, N);
 
     for (int i = 0; i < matrix.length; i++) {
-      assertEquals(resultSeq[i], matrix[i], 0.01f);
+      assertThat((double) matrix[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -450,7 +506,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixAddition1D(matrixA, matrixB, resultSeq, N);
 
     for (int i = 0; i < matrixB.length; i++) {
-      assertEquals(resultSeq[i], result[i], 0.01f);
+      assertThat((double) result[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -490,7 +546,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixAddition1D(matrixA, matrixB, resultSeq, N);
 
     for (int i = 0; i < matrixB.length; i++) {
-      assertEquals(resultSeq[i], result[i], 0.01f);
+      assertThat((double) result[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -530,7 +586,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixAddition2D(matrixA, matrixB, resultSeq, N);
 
     for (int i = 0; i < matrixB.length; i++) {
-      assertEquals(resultSeq[i], result[i], 0.01f);
+      assertThat((double) result[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -570,7 +626,7 @@ public class TestMatrices extends TornadoTestBase {
     matrixAddition2D(matrixA, matrixB, resultSeq, N);
 
     for (int i = 0; i < matrixB.length; i++) {
-      assertEquals(resultSeq[i], result[i], 0.01f);
+      assertThat((double) result[i], closeTo(resultSeq[i], 0.01f));
     }
   }
 
@@ -601,7 +657,7 @@ public class TestMatrices extends TornadoTestBase {
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        assertEquals(matrixA[i][j], matrixB[i][j], 0.01);
+        assertThat((double) matrixB[i][j], closeTo(matrixA[i][j], 0.01));
       }
     }
   }
@@ -646,7 +702,7 @@ public class TestMatrices extends TornadoTestBase {
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        assertEquals(resultSeq[i * N + j], matrixC[i * N + j], 0.1);
+        assertThat((double) matrixC[i * N + j], closeTo(resultSeq[i * N + j], 0.1));
       }
     }
   }
@@ -691,7 +747,7 @@ public class TestMatrices extends TornadoTestBase {
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        assertEquals(resultSeq[i * N + j], matrixC[i * N + j], 0.1);
+        assertThat((double) matrixC[i * N + j], closeTo(resultSeq[i * N + j], 0.1));
       }
     }
   }
@@ -734,7 +790,7 @@ public class TestMatrices extends TornadoTestBase {
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        assertEquals(resultSeq[i * N + j], matrixC[i * N + j], 0.1f);
+        assertThat((double) matrixC[i * N + j], closeTo(resultSeq[i * N + j], 0.1f));
       }
     }
   }
@@ -778,7 +834,7 @@ public class TestMatrices extends TornadoTestBase {
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        assertEquals(resultSeq[i * N + j], matrixC[i * N + j], 0.1f);
+        assertThat((double) matrixC[i * N + j], closeTo(resultSeq[i * N + j], 0.1f));
       }
     }
   }
@@ -818,7 +874,7 @@ public class TestMatrices extends TornadoTestBase {
     }
 
     for (int i = 0; i < matrix.length; i++) {
-      Assert.assertArrayEquals(matrixSeq[i], matrix[i]);
+      assertArrayEquals(matrixSeq[i], matrix[i]);
     }
   }
 
@@ -862,7 +918,7 @@ public class TestMatrices extends TornadoTestBase {
     }
 
     for (int i = 0; i < firstMatrix.length; i++) {
-      Assert.assertArrayEquals(firstMatrixSeq[i], firstMatrix[i], 0.01f);
+      assertArrayEquals(firstMatrixSeq[i], firstMatrix[i], 0.01f);
     }
   }
   // CHECKSTYLE:ON

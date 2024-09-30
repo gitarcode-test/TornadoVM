@@ -16,12 +16,32 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.loops;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.unittests.common.TornadoNotSupported;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -323,7 +343,7 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(10, a.get(i));
+      assertThat(a.get(i), equalTo(10));
     }
   }
 
@@ -343,7 +363,7 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(10, a.get(i));
+      assertThat(a.get(i), equalTo(10));
     }
   }
 
@@ -364,7 +384,7 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(10, a.get(i));
+      assertThat(a.get(i), equalTo(10));
     }
   }
 
@@ -384,7 +404,7 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < m.getNumRows(); i++) {
       for (int j = 0; j < m.getNumColumns(); j++) {
-        assertEquals(10.0f, m.get(i, j), 0.001f);
+        assertThat((double) m.get(i, j), closeTo(10.0f, 0.001f));
       }
     }
   }
@@ -405,7 +425,7 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < m.getNumRows(); i++) {
       for (int j = 0; j < m.getNumColumns(); j++) {
-        assertEquals(10.0f, m.get(i, j), 0.001f);
+        assertThat((double) m.get(i, j), closeTo(10.0f, 0.001f));
       }
     }
   }
@@ -427,7 +447,7 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < m2.getNumRows(); i++) {
       for (int j = 0; j < m2.getNumColumns(); j++) {
-        assertEquals(10.0f, m2.get(i, j), 0.001f);
+        assertThat((double) m2.get(i, j), closeTo(10.0f, 0.001f));
       }
     }
   }
@@ -449,7 +469,7 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(10, a.get(i));
+      assertThat(a.get(i), equalTo(10));
     }
   }
 
@@ -471,8 +491,8 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i += 2) {
-      assertEquals(200, a.get(i));
-      assertEquals(75, a.get(i + 1));
+      assertThat(a.get(i), equalTo(200));
+      assertThat(a.get(i + 1), equalTo(75));
     }
   }
 
@@ -493,7 +513,7 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(200, a.get(i));
+      assertThat(a.get(i), equalTo(200));
     }
   }
 
@@ -515,7 +535,7 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(200, a.get(i));
+      assertThat(a.get(i), equalTo(200));
     }
   }
 
@@ -536,9 +556,9 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i += 4) {
-      assertEquals(200, a.get(i));
+      assertThat(a.get(i), equalTo(200));
       for (int j = (i + 1); j < (i + 4) && j < size; j++) {
-        assertEquals(75, a.get(j));
+        assertThat(a.get(j), equalTo(75));
       }
     }
   }
@@ -561,9 +581,9 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i += 3) {
-      assertEquals(200, a.get(i));
+      assertThat(a.get(i), equalTo(200));
       for (int j = (i + 1); j < (i + 3) && j < size; j++) {
-        assertEquals(75, a.get(j));
+        assertThat(a.get(j), equalTo(75));
       }
     }
   }
@@ -585,9 +605,9 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i += 7) {
-      assertEquals(200, a.get(i));
+      assertThat(a.get(i), equalTo(200));
       for (int j = (i + 1); j < (i + 7) && j < size; j++) {
-        assertEquals(75, a.get(j));
+        assertThat(a.get(j), equalTo(75));
       }
     }
   }
@@ -609,9 +629,9 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i += 10) {
-      assertEquals(200, a.get(i));
+      assertThat(a.get(i), equalTo(200));
       for (int j = (i + 1); j < (i + 10) && j < size; j++) {
-        assertEquals(75, a.get(j));
+        assertThat(a.get(j), equalTo(75));
       }
     }
   }
@@ -636,9 +656,9 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < a.getSize(); i++) {
       if (i == 4) {
-        assertEquals(4, a.get(i));
+        assertThat(a.get(i), equalTo(4));
       } else {
-        assertEquals(10, a.get(i));
+        assertThat(a.get(i), equalTo(10));
       }
     }
   }
@@ -661,9 +681,9 @@ public class TestLoops extends TornadoTestBase {
     }
     for (int i = 0; i < a.getSize(); i++) {
       if (i == 4) {
-        assertEquals(1, a.get(i));
+        assertThat(a.get(i), equalTo(1));
       } else {
-        assertEquals(10, a.get(i));
+        assertThat(a.get(i), equalTo(10));
       }
     }
   }
@@ -684,11 +704,11 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < a.getSize(); i++) {
       if (i == 4) {
-        assertEquals(4, a.get(i));
+        assertThat(a.get(i), equalTo(4));
       } else if (i == 5) {
-        assertEquals(5, a.get(i));
+        assertThat(a.get(i), equalTo(5));
       } else {
-        assertEquals(10, a.get(i));
+        assertThat(a.get(i), equalTo(10));
       }
     }
   }
@@ -698,7 +718,7 @@ public class TestLoops extends TornadoTestBase {
    *
    * @throws TornadoExecutionPlanException
    */
-  @Ignore
+  @Disabled
   public void testTwoDLoopTwoDArray() throws TornadoExecutionPlanException {
     final int size = 10;
 
@@ -715,7 +735,7 @@ public class TestLoops extends TornadoTestBase {
 
     for (int[] ints : a) {
       for (int anInt : ints) {
-        assertEquals(10, anInt);
+        assertThat(anInt, equalTo(10));
       }
     }
   }
@@ -738,12 +758,12 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {
-        assertEquals(10, a.get(i * size + j));
+        assertThat(a.get(i * size + j), equalTo(10));
       }
     }
   }
 
-  @Ignore
+  @Disabled
   public void testNestedForLoopTwoDArray() throws TornadoExecutionPlanException {
     final int size = 10;
 
@@ -764,7 +784,7 @@ public class TestLoops extends TornadoTestBase {
 
     for (int[] ints : a) {
       for (int anInt : ints) {
-        assertEquals(10, anInt);
+        assertThat(anInt, equalTo(10));
       }
     }
   }
@@ -793,9 +813,9 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < a.getSize(); i++) {
       if (i == 4) {
-        assertEquals(4, a.get(i));
+        assertThat(a.get(i), equalTo(4));
       } else {
-        assertEquals(1, a.get(i));
+        assertThat(a.get(i), equalTo(1));
       }
     }
   }
@@ -821,9 +841,9 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < a.getSize(); i++) {
       if (i == 2) {
-        assertEquals(10, a.get(i));
+        assertThat(a.get(i), equalTo(10));
       } else {
-        assertEquals(1000, a.get(i));
+        assertThat(a.get(i), equalTo(1000));
       }
     }
   }
@@ -846,9 +866,9 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < foo.getSize(); i++) {
       if (i == 4) {
-        assertEquals(50, foo.get(i));
+        assertThat(foo.get(i), equalTo(50));
       } else {
-        assertEquals(150, foo.get(i));
+        assertThat(foo.get(i), equalTo(150));
       }
     }
   }
@@ -872,7 +892,7 @@ public class TestLoops extends TornadoTestBase {
 
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {
-        assertEquals(10, a.get(i * size + j));
+        assertThat(a.get(i * size + j), equalTo(10));
       }
     }
   }
@@ -897,13 +917,13 @@ public class TestLoops extends TornadoTestBase {
     for (int i = 0; i < size; i++) {
       int y = 0;
       while (y < size) {
-        assertEquals(10, a.get(i * size + y));
+        assertThat(a.get(i * size + y), equalTo(10));
         y++;
       }
     }
   }
 
-  @Ignore
+  @Disabled
   public void testInnerDoWhileLoop() throws TornadoExecutionPlanException {
     final int size = 100;
 
@@ -923,7 +943,7 @@ public class TestLoops extends TornadoTestBase {
     for (int i = 0; i < size; i++) {
       int y = 0;
       while (y < size) {
-        assertEquals(10, a.get(i * size + y));
+        assertThat(a.get(i * size + y), equalTo(10));
         y++;
       }
     }
@@ -950,7 +970,7 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(2, c[i]);
+      assertThat(c[i], equalTo(2));
     }
   }
 
@@ -972,7 +992,7 @@ public class TestLoops extends TornadoTestBase {
     }
 
     for (int j = 0; j < size; j++) {
-      assertEquals(10, a.get(j));
+      assertThat(a.get(j), equalTo(10));
     }
   }
 
@@ -1014,7 +1034,7 @@ public class TestLoops extends TornadoTestBase {
     testSingleThreadLoopCond(inSeq, outSeq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(outSeq.get(i), outTor.get(i));
+      assertThat(outTor.get(i), equalTo(outSeq.get(i)));
     }
   }
 
@@ -1051,7 +1071,7 @@ public class TestLoops extends TornadoTestBase {
     testMultipleThreadLoopCond(inSeq, outSeq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(outSeq.get(i), outTor.get(i));
+      assertThat(outTor.get(i), equalTo(outSeq.get(i)));
     }
     // Assert.assertArrayEquals(outSeq, outTor);
   }
