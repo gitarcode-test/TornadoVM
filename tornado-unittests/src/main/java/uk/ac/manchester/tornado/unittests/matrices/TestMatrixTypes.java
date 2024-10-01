@@ -17,13 +17,96 @@
  */
 
 package uk.ac.manchester.tornado.unittests.matrices;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Random;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DDouble;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DInt;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix3DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix3DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Random;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DDouble;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DInt;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix3DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix3DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Random;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorDouble;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat;
+import uk.ac.manchester.tornado.api.types.collections.VectorInt;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DDouble;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DFloat4;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix2DInt;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix3DFloat;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix3DFloat4;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Random;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -173,7 +256,7 @@ public class TestMatrixTypes extends TornadoTestBase {
     for (int i = 0; i < X; i++) {
       for (int j = 0; j < Y; j++) {
         Float4 expected = Float4.add(matrixA.get(i, j), matrixA.get(i, j));
-        assertTrue(Float4.isEqual(expected, matrixB.get(i, j)));
+        assertThat(Float4.isEqual(expected, matrixB.get(i, j)), is(true));
       }
     }
   }
@@ -211,8 +294,8 @@ public class TestMatrixTypes extends TornadoTestBase {
         for (int k = 0; k < Z; k++) {
           Float4 expected = Float4.add(matrixA.get(i, j, k), matrixA.get(i, j, k));
           if (!Float4.isEqual(expected, matrixB.get(i, j, k))) {
-            fail();
-          } else assertTrue(true);
+            assertThat("Fail", false);
+          } else assertThat(true, is(true));
         }
       }
     }
@@ -243,7 +326,7 @@ public class TestMatrixTypes extends TornadoTestBase {
 
     for (int i = 0; i < X; i++) {
       for (int j = 0; j < Y; j++) {
-        assertEquals(matrixA.get(i, j) + matrixA.get(i, j), matrixB.get(i, j), 0.01f);
+        assertThat((double) matrixB.get(i, j), closeTo(matrixA.get(i, j) + matrixA.get(i, j), 0.01f));
       }
     }
   }
@@ -273,7 +356,7 @@ public class TestMatrixTypes extends TornadoTestBase {
 
     for (int i = 0; i < X; i++) {
       for (int j = 0; j < Y; j++) {
-        assertEquals(matrixA.get(i, j) + matrixA.get(i, j), matrixB.get(i, j));
+        assertThat(matrixB.get(i, j), equalTo(matrixA.get(i, j) + matrixA.get(i, j)));
       }
     }
   }
@@ -303,7 +386,7 @@ public class TestMatrixTypes extends TornadoTestBase {
 
     for (int i = 0; i < X; i++) {
       for (int j = 0; j < Y; j++) {
-        assertEquals(matrixA.get(i, j) + matrixA.get(i, j), matrixB.get(i, j), 0.01);
+        assertThat((double) matrixB.get(i, j), closeTo(matrixA.get(i, j) + matrixA.get(i, j), 0.01));
       }
     }
   }
@@ -324,12 +407,12 @@ public class TestMatrixTypes extends TornadoTestBase {
     VectorInt row1 = matrix.row(1);
     VectorInt row2 = matrix.row(2);
 
-    assertEquals(1, row0.getArray().get(0), 0.01f);
-    assertEquals(2, row0.getArray().get(1), 0.01f);
-    assertEquals(3, row1.getArray().get(0), 0.01f);
-    assertEquals(4, row1.getArray().get(1), 0.01f);
-    assertEquals(5, row2.getArray().get(0), 0.01f);
-    assertEquals(6, row2.getArray().get(1), 0.01f);
+    assertThat((double) row0.getArray().get(0), closeTo(1f, 0.01f));
+    assertThat((double) row0.getArray().get(1), closeTo(2f, 0.01f));
+    assertThat((double) row1.getArray().get(0), closeTo(3f, 0.01f));
+    assertThat((double) row1.getArray().get(1), closeTo(4f, 0.01f));
+    assertThat((double) row2.getArray().get(0), closeTo(5f, 0.01f));
+    assertThat((double) row2.getArray().get(1), closeTo(6f, 0.01f));
   }
 
   @Test
@@ -347,12 +430,12 @@ public class TestMatrixTypes extends TornadoTestBase {
     VectorInt row0 = matrix.row(0);
     VectorInt row1 = matrix.row(1);
 
-    assertEquals(1, row0.getArray().get(0), 0.01f);
-    assertEquals(2, row0.getArray().get(1), 0.01f);
-    assertEquals(3, row0.getArray().get(2), 0.01f);
-    assertEquals(4, row1.getArray().get(0), 0.01f);
-    assertEquals(5, row1.getArray().get(1), 0.01f);
-    assertEquals(6, row1.getArray().get(2), 0.01f);
+    assertThat((double) row0.getArray().get(0), closeTo(1f, 0.01f));
+    assertThat((double) row0.getArray().get(1), closeTo(2f, 0.01f));
+    assertThat((double) row0.getArray().get(2), closeTo(3f, 0.01f));
+    assertThat((double) row1.getArray().get(0), closeTo(4f, 0.01f));
+    assertThat((double) row1.getArray().get(1), closeTo(5f, 0.01f));
+    assertThat((double) row1.getArray().get(2), closeTo(6f, 0.01f));
   }
 
   @Test
@@ -371,12 +454,12 @@ public class TestMatrixTypes extends TornadoTestBase {
     VectorFloat row1 = matrix.row(1);
     VectorFloat row2 = matrix.row(2);
 
-    assertEquals(1, row0.getArray().get(0), 0.01f);
-    assertEquals(2, row0.getArray().get(1), 0.01f);
-    assertEquals(3, row1.getArray().get(0), 0.01f);
-    assertEquals(4, row1.getArray().get(1), 0.01f);
-    assertEquals(5, row2.getArray().get(0), 0.01f);
-    assertEquals(6, row2.getArray().get(1), 0.01f);
+    assertThat((double) row0.getArray().get(0), closeTo(1f, 0.01f));
+    assertThat((double) row0.getArray().get(1), closeTo(2f, 0.01f));
+    assertThat((double) row1.getArray().get(0), closeTo(3f, 0.01f));
+    assertThat((double) row1.getArray().get(1), closeTo(4f, 0.01f));
+    assertThat((double) row2.getArray().get(0), closeTo(5f, 0.01f));
+    assertThat((double) row2.getArray().get(1), closeTo(6f, 0.01f));
   }
 
   @Test
@@ -394,12 +477,12 @@ public class TestMatrixTypes extends TornadoTestBase {
     VectorFloat row0 = matrix.row(0);
     VectorFloat row1 = matrix.row(1);
 
-    assertEquals(1, row0.getArray().get(0), 0.01f);
-    assertEquals(2, row0.getArray().get(1), 0.01f);
-    assertEquals(3, row0.getArray().get(2), 0.01f);
-    assertEquals(4, row1.getArray().get(0), 0.01f);
-    assertEquals(5, row1.getArray().get(1), 0.01f);
-    assertEquals(6, row1.getArray().get(2), 0.01f);
+    assertThat((double) row0.getArray().get(0), closeTo(1f, 0.01f));
+    assertThat((double) row0.getArray().get(1), closeTo(2f, 0.01f));
+    assertThat((double) row0.getArray().get(2), closeTo(3f, 0.01f));
+    assertThat((double) row1.getArray().get(0), closeTo(4f, 0.01f));
+    assertThat((double) row1.getArray().get(1), closeTo(5f, 0.01f));
+    assertThat((double) row1.getArray().get(2), closeTo(6f, 0.01f));
   }
 
   @Test
@@ -417,12 +500,12 @@ public class TestMatrixTypes extends TornadoTestBase {
     VectorFloat row0 = matrix.row(0);
     VectorFloat row1 = matrix.row(1);
 
-    assertEquals(1, row0.getArray().get(0), 0.01f);
-    assertEquals(2, row0.getArray().get(1), 0.01f);
-    assertEquals(3, row0.getArray().get(2), 0.01f);
-    assertEquals(4, row1.getArray().get(0), 0.01f);
-    assertEquals(5, row1.getArray().get(1), 0.01f);
-    assertEquals(6, row1.getArray().get(2), 0.01f);
+    assertThat((double) row0.getArray().get(0), closeTo(1f, 0.01f));
+    assertThat((double) row0.getArray().get(1), closeTo(2f, 0.01f));
+    assertThat((double) row0.getArray().get(2), closeTo(3f, 0.01f));
+    assertThat((double) row1.getArray().get(0), closeTo(4f, 0.01f));
+    assertThat((double) row1.getArray().get(1), closeTo(5f, 0.01f));
+    assertThat((double) row1.getArray().get(2), closeTo(6f, 0.01f));
   }
 
   @Test
@@ -441,12 +524,12 @@ public class TestMatrixTypes extends TornadoTestBase {
     VectorDouble row1 = matrix.row(1);
     VectorDouble row2 = matrix.row(2);
 
-    assertEquals(1, row0.getArray().get(0), 0.01f);
-    assertEquals(2, row0.getArray().get(1), 0.01f);
-    assertEquals(3, row1.getArray().get(0), 0.01f);
-    assertEquals(4, row1.getArray().get(1), 0.01f);
-    assertEquals(5, row2.getArray().get(0), 0.01f);
-    assertEquals(6, row2.getArray().get(1), 0.01f);
+    assertThat((double) row0.getArray().get(0), closeTo(1f, 0.01f));
+    assertThat((double) row0.getArray().get(1), closeTo(2f, 0.01f));
+    assertThat((double) row1.getArray().get(0), closeTo(3f, 0.01f));
+    assertThat((double) row1.getArray().get(1), closeTo(4f, 0.01f));
+    assertThat((double) row2.getArray().get(0), closeTo(5f, 0.01f));
+    assertThat((double) row2.getArray().get(1), closeTo(6f, 0.01f));
   }
 
   @Test
@@ -464,12 +547,12 @@ public class TestMatrixTypes extends TornadoTestBase {
     VectorDouble row0 = matrix.row(0);
     VectorDouble row1 = matrix.row(1);
 
-    assertEquals(1, row0.getArray().get(0), 0.01f);
-    assertEquals(2, row0.getArray().get(1), 0.01f);
-    assertEquals(3, row0.getArray().get(2), 0.01f);
-    assertEquals(4, row1.getArray().get(0), 0.01f);
-    assertEquals(5, row1.getArray().get(1), 0.01f);
-    assertEquals(6, row1.getArray().get(2), 0.01f);
+    assertThat((double) row0.getArray().get(0), closeTo(1f, 0.01f));
+    assertThat((double) row0.getArray().get(1), closeTo(2f, 0.01f));
+    assertThat((double) row0.getArray().get(2), closeTo(3f, 0.01f));
+    assertThat((double) row1.getArray().get(0), closeTo(4f, 0.01f));
+    assertThat((double) row1.getArray().get(1), closeTo(5f, 0.01f));
+    assertThat((double) row1.getArray().get(2), closeTo(6f, 0.01f));
   }
 
   @Test
@@ -483,12 +566,12 @@ public class TestMatrixTypes extends TornadoTestBase {
     matrix.set(1, 1, 5);
     matrix.set(1, 2, 6);
 
-    assertEquals(1, matrix.get(0, 0));
-    assertEquals(2, matrix.get(0, 1));
-    assertEquals(3, matrix.get(0, 2));
-    assertEquals(4, matrix.get(1, 0));
-    assertEquals(5, matrix.get(1, 1));
-    assertEquals(6, matrix.get(1, 2));
+    assertThat(matrix.get(0, 0), equalTo(1));
+    assertThat(matrix.get(0, 1), equalTo(2));
+    assertThat(matrix.get(0, 2), equalTo(3));
+    assertThat(matrix.get(1, 0), equalTo(4));
+    assertThat(matrix.get(1, 1), equalTo(5));
+    assertThat(matrix.get(1, 2), equalTo(6));
   }
 
   /**
@@ -551,7 +634,7 @@ public class TestMatrixTypes extends TornadoTestBase {
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        assertEquals(matrixA.get(i, j) + matrixA.get(i, j), matrixB.get(i, j), 0.01f);
+        assertThat((double) matrixB.get(i, j), closeTo(matrixA.get(i, j) + matrixA.get(i, j), 0.01f));
       }
     }
   }
@@ -582,7 +665,7 @@ public class TestMatrixTypes extends TornadoTestBase {
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        assertEquals(matrixA.get(i, j) + matrixA.get(i, j), matrixB.get(i, j), 0.01f);
+        assertThat((double) matrixB.get(i, j), closeTo(matrixA.get(i, j) + matrixA.get(i, j), 0.01f));
       }
     }
   }
@@ -617,7 +700,7 @@ public class TestMatrixTypes extends TornadoTestBase {
 
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
-        assertEquals(sequential.get(i, j), matrixC.get(i, j), 0.01f);
+        assertThat((double) matrixC.get(i, j), closeTo(sequential.get(i, j), 0.01f));
       }
     }
   }
@@ -650,7 +733,7 @@ public class TestMatrixTypes extends TornadoTestBase {
     for (int i = 0; i < N; i++) {
       for (int j = 0; j < N; j++) {
         for (int k = 0; k < N; k++) {
-          assertEquals(matrixA.get(i, j, k) + matrixA.get(i, j, k), matrixB.get(i, j, k), 0.01f);
+          assertThat((double) matrixB.get(i, j, k), closeTo(matrixA.get(i, j, k) + matrixA.get(i, j, k), 0.01f));
         }
       }
     }
@@ -738,7 +821,7 @@ public class TestMatrixTypes extends TornadoTestBase {
       for (int j = 0; j < SMALL_SIZE; j++) {
         for (int k = 0; k < SMALL_SIZE; k++) {
           Float4 expected = Float4.add(matrixA.get(i, j, k), matrixA.get(i, j, k));
-          assertTrue(Float4.isEqual(expected, matrixB.get(i, j, k)));
+          assertThat(Float4.isEqual(expected, matrixB.get(i, j, k)), is(true));
         }
       }
     }
@@ -776,7 +859,7 @@ public class TestMatrixTypes extends TornadoTestBase {
     for (int i = 0; i < X; i++) {
       for (int j = 0; j < Y; j++) {
         for (int k = 0; k < Z; k++) {
-          assertEquals(matrixA.get(i, j, k) + matrixA.get(i, j, k), matrixB.get(i, j, k), 0.01f);
+          assertThat((double) matrixB.get(i, j, k), closeTo(matrixA.get(i, j, k) + matrixA.get(i, j, k), 0.01f));
         }
       }
     }
@@ -829,7 +912,7 @@ public class TestMatrixTypes extends TornadoTestBase {
 
     for (int i = 0; i < X; i++) {
       for (int j = 0; j < Y; j++) {
-        assertEquals(matrixA.get(i, j) + matrixA.get(i, j), matrixB.get(i, j), 0.01f);
+        assertThat((double) matrixB.get(i, j), closeTo(matrixA.get(i, j) + matrixA.get(i, j), 0.01f));
       }
     }
   }
@@ -862,7 +945,7 @@ public class TestMatrixTypes extends TornadoTestBase {
 
     for (int i = 0; i < X; i++) {
       for (int j = 0; j < Y; j++) {
-        assertEquals(matrixA.get(i, j) + matrixA.get(i, j), matrixB.get(i, j), 0.01f);
+        assertThat((double) matrixB.get(i, j), closeTo(matrixA.get(i, j) + matrixA.get(i, j), 0.01f));
       }
     }
   }
