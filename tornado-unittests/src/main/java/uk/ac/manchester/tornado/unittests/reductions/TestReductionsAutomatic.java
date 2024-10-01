@@ -16,12 +16,33 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.reductions;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.annotations.Reduce;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -81,7 +102,7 @@ public class TestReductionsAutomatic extends TornadoTestBase {
     test(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0));
+    assertThat(result.get(0), equalTo(sequential.get(0)));
   }
 
   private void testIrregular(final int inputSize) throws TornadoExecutionPlanException {
@@ -113,7 +134,7 @@ public class TestReductionsAutomatic extends TornadoTestBase {
     testFloat(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0), 0.1f);
+    assertThat((double) result.get(0), closeTo(sequential.get(0), 0.1f));
   }
 
   @Test
@@ -170,6 +191,6 @@ public class TestReductionsAutomatic extends TornadoTestBase {
     testDouble(input, sequential);
 
     // Check result
-    assertEquals(sequential.get(0), result.get(0), 0.01);
+    assertThat((double) result.get(0), closeTo(sequential.get(0), 0.01));
   }
 }
