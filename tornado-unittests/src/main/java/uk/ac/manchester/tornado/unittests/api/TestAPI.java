@@ -17,6 +17,8 @@
  */
 
 package uk.ac.manchester.tornado.unittests.api;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,7 +27,400 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.DataRange;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.TornadoExecutionResult;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.types.HalfFloat;
+import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
+import uk.ac.manchester.tornado.api.types.arrays.CharArray;
+import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.HalfFloatArray;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.api.types.arrays.LongArray;
+import uk.ac.manchester.tornado.api.types.arrays.ShortArray;
+import uk.ac.manchester.tornado.unittests.arrays.TestArrays;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
+
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.DataRange;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
@@ -61,16 +456,16 @@ public class TestAPI extends TornadoTestBase {
     ByteArray dataB = ByteArray.fromArray(new byte[] {0, 1, 2, 3});
 
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(dataA.get(i), dataB.get(i));
+      assertThat(dataB.get(i), equalTo(dataA.get(i)));
     }
     byte[] fArray = dataA.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArray[i], dataA.get(i));
+      assertThat(dataA.get(i), equalTo(fArray[i]));
     }
 
     byte[] fArrayB = dataB.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArrayB[i], dataB.get(i));
+      assertThat(dataB.get(i), equalTo(fArrayB[i]));
     }
   }
 
@@ -80,16 +475,16 @@ public class TestAPI extends TornadoTestBase {
     CharArray dataB = CharArray.fromArray(new char[] {0, 1, 2, 3});
 
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(dataA.get(i), dataB.get(i));
+      assertThat(dataB.get(i), equalTo(dataA.get(i)));
     }
     char[] fArray = dataA.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArray[i], dataA.get(i));
+      assertThat(dataA.get(i), equalTo(fArray[i]));
     }
 
     char[] fArrayB = dataB.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArrayB[i], dataB.get(i));
+      assertThat(dataB.get(i), equalTo(fArrayB[i]));
     }
   }
 
@@ -99,16 +494,16 @@ public class TestAPI extends TornadoTestBase {
     ShortArray dataB = ShortArray.fromArray(new short[] {0, 1, 2, 3});
 
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(dataA.get(i), dataB.get(i));
+      assertThat(dataB.get(i), equalTo(dataA.get(i)));
     }
     short[] fArray = dataA.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArray[i], dataA.get(i));
+      assertThat(dataA.get(i), equalTo(fArray[i]));
     }
 
     short[] fArrayB = dataB.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArrayB[i], dataB.get(i));
+      assertThat(dataB.get(i), equalTo(fArrayB[i]));
     }
   }
 
@@ -118,16 +513,16 @@ public class TestAPI extends TornadoTestBase {
     IntArray dataB = IntArray.fromArray(new int[] {0, 1, 2, 3});
 
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(dataA.get(i), dataB.get(i));
+      assertThat(dataB.get(i), equalTo(dataA.get(i)));
     }
     int[] fArray = dataA.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArray[i], dataA.get(i));
+      assertThat(dataA.get(i), equalTo(fArray[i]));
     }
 
     int[] fArrayB = dataB.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArrayB[i], dataB.get(i));
+      assertThat(dataB.get(i), equalTo(fArrayB[i]));
     }
   }
 
@@ -137,16 +532,16 @@ public class TestAPI extends TornadoTestBase {
     LongArray dataB = LongArray.fromArray(new long[] {0, 1, 2, 3});
 
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(dataA.get(i), dataB.get(i));
+      assertThat(dataB.get(i), equalTo(dataA.get(i)));
     }
     long[] fArray = dataA.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArray[i], dataA.get(i));
+      assertThat(dataA.get(i), equalTo(fArray[i]));
     }
 
     long[] fArrayB = dataB.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArrayB[i], dataB.get(i));
+      assertThat(dataB.get(i), equalTo(fArrayB[i]));
     }
   }
 
@@ -156,16 +551,16 @@ public class TestAPI extends TornadoTestBase {
     FloatArray dataB = FloatArray.fromArray(new float[] {0, 1, 2, 3});
 
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(dataA.get(i), dataB.get(i), 0.01f);
+      assertThat((double) dataB.get(i), closeTo(dataA.get(i), 0.01f));
     }
     float[] fArray = dataA.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArray[i], dataA.get(i), 0.01f);
+      assertThat((double) dataA.get(i), closeTo(fArray[i], 0.01f));
     }
 
     float[] fArrayB = dataB.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArrayB[i], dataB.get(i), 0.01f);
+      assertThat((double) dataB.get(i), closeTo(fArrayB[i], 0.01f));
     }
   }
 
@@ -175,16 +570,16 @@ public class TestAPI extends TornadoTestBase {
     DoubleArray dataB = DoubleArray.fromArray(new double[] {0, 1, 2, 3});
 
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(dataA.get(i), dataB.get(i), 0.001);
+      assertThat((double) dataB.get(i), closeTo(dataA.get(i), 0.001));
     }
     double[] fArray = dataA.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArray[i], dataA.get(i), 0.001);
+      assertThat((double) dataA.get(i), closeTo(fArray[i], 0.001));
     }
 
     double[] fArrayB = dataB.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArrayB[i], dataB.get(i), 0.001);
+      assertThat((double) dataB.get(i), closeTo(fArrayB[i], 0.001));
     }
   }
 
@@ -204,16 +599,16 @@ public class TestAPI extends TornadoTestBase {
             });
 
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(dataA.get(i).getFloat32(), dataB.get(i).getFloat32(), 0.01f);
+      assertThat((double) dataB.get(i).getFloat32(), closeTo(dataA.get(i).getFloat32(), 0.01f));
     }
     HalfFloat[] fArray = dataA.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArray[i].getFloat32(), dataA.get(i).getFloat32(), 0.01f);
+      assertThat((double) dataA.get(i).getFloat32(), closeTo(fArray[i].getFloat32(), 0.01f));
     }
 
     HalfFloat[] fArrayB = dataB.toHeapArray();
     for (int i = 0; i < dataA.getSize(); i++) {
-      assertEquals(fArrayB[i].getFloat32(), dataB.get(i).getFloat32(), 0.01f);
+      assertThat((double) dataB.get(i).getFloat32(), closeTo(fArrayB[i].getFloat32(), 0.01f));
     }
   }
 
@@ -226,7 +621,7 @@ public class TestAPI extends TornadoTestBase {
     data.init(size);
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph
         .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
@@ -243,7 +638,7 @@ public class TestAPI extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(21, data.get(i));
+      assertThat(data.get(i), equalTo(21));
     }
   }
 
@@ -261,7 +656,7 @@ public class TestAPI extends TornadoTestBase {
     IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data);
     taskGraph.task("t0", TestArrays::addAccumulator, data, 1);
@@ -276,7 +671,7 @@ public class TestAPI extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(21, data.get(i));
+      assertThat(data.get(i), equalTo(21));
     }
   }
 
@@ -290,7 +685,7 @@ public class TestAPI extends TornadoTestBase {
     IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph
         .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
@@ -309,7 +704,7 @@ public class TestAPI extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(21, data.get(i));
+      assertThat(data.get(i), equalTo(21));
     }
   }
 
@@ -323,7 +718,7 @@ public class TestAPI extends TornadoTestBase {
     IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, size));
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph
         .transferToDevice(DataTransferMode.FIRST_EXECUTION, data) //
@@ -338,7 +733,7 @@ public class TestAPI extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(21, data.get(i));
+      assertThat(data.get(i), equalTo(21));
     }
   }
 
@@ -358,7 +753,7 @@ public class TestAPI extends TornadoTestBase {
     FloatArray floatArray = FloatArray.fromSegment(m);
 
     for (int i = 0; i < n; i++) {
-      assertEquals(10 + i, floatArray.get(i), 0.001f);
+      assertThat((double) floatArray.get(i), closeTo(10 + i, 0.001f));
     }
   }
 
@@ -378,7 +773,7 @@ public class TestAPI extends TornadoTestBase {
     DoubleArray doubleArray = DoubleArray.fromSegment(m);
 
     for (int i = 0; i < n; i++) {
-      assertEquals(10 + i, doubleArray.get(i), 0.001);
+      assertThat((double) doubleArray.get(i), closeTo(10 + i, 0.001));
     }
   }
 
@@ -398,7 +793,7 @@ public class TestAPI extends TornadoTestBase {
     IntArray intArray = IntArray.fromSegment(m);
 
     for (int i = 0; i < n; i++) {
-      assertEquals(10 + i, intArray.get(i));
+      assertThat(intArray.get(i), equalTo(10 + i));
     }
   }
 
@@ -418,7 +813,7 @@ public class TestAPI extends TornadoTestBase {
     LongArray longArray = LongArray.fromSegment(m);
 
     for (int i = 0; i < n; i++) {
-      assertEquals(10 + i, longArray.get(i));
+      assertThat(longArray.get(i), equalTo(10 + i));
     }
   }
 
@@ -438,7 +833,7 @@ public class TestAPI extends TornadoTestBase {
     ShortArray shortArray = ShortArray.fromSegment(m);
 
     for (int i = 0; i < n; i++) {
-      assertEquals((short) 10 + i, shortArray.get(i));
+      assertThat(shortArray.get(i), equalTo((short) 10 + i));
     }
   }
 
@@ -457,7 +852,7 @@ public class TestAPI extends TornadoTestBase {
     ByteArray array = ByteArray.fromSegment(m);
 
     for (int i = 0; i < n; i++) {
-      assertEquals((byte) 10 + i, array.get(i));
+      assertThat(array.get(i), equalTo((byte) 10 + i));
     }
   }
 
@@ -476,7 +871,7 @@ public class TestAPI extends TornadoTestBase {
     CharArray charArray = CharArray.fromSegment(m);
 
     for (int i = 0; i < n; i++) {
-      assertEquals((char) 10 + i, charArray.get(i));
+      assertThat(charArray.get(i), equalTo((char) 10 + i));
     }
   }
 
@@ -496,7 +891,7 @@ public class TestAPI extends TornadoTestBase {
     HalfFloatArray halfFloatArray = HalfFloatArray.fromSegment(m);
 
     for (int i = 0; i < n; i++) {
-      assertEquals(10 + i, halfFloatArray.get(i).getFloat32(), 0.001f);
+      assertThat((double) halfFloatArray.get(i).getFloat32(), closeTo(10 + i, 0.001f));
     }
   }
 
