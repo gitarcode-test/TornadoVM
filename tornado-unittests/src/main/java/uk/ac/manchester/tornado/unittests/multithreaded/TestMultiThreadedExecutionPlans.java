@@ -17,9 +17,24 @@
  */
 package uk.ac.manchester.tornado.unittests.multithreaded;
 
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.enums.ProfilerMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -231,13 +246,13 @@ public class TestMultiThreadedExecutionPlans extends TornadoTestBase {
       try {
         t1.join();
       } catch (InterruptedException e) {
-        fail("Error");
+        assertThat("Error", false);
       }
 
       try {
         t2.join();
       } catch (InterruptedException e) {
-        fail("Error");
+        assertThat("Error", false);
       }
     }
   }
@@ -271,13 +286,13 @@ public class TestMultiThreadedExecutionPlans extends TornadoTestBase {
       try {
         t1.join();
       } catch (InterruptedException e) {
-        fail("Error");
+        assertThat("Error", false);
       }
 
       try {
         t2.join();
       } catch (InterruptedException e) {
-        fail("Error");
+        assertThat("Error", false);
       }
     }
   }
