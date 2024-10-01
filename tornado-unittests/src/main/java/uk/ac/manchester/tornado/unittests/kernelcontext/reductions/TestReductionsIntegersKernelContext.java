@@ -16,12 +16,34 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.reductions;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.GridScheduler;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.KernelContext;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.WorkerGrid;
+import uk.ac.manchester.tornado.api.WorkerGrid1D;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.exceptions.TornadoExecutionPlanException;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.IntArray;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -272,7 +294,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(i, input.get(i));
+      assertThat(input.get(i), equalTo(i));
     }
   }
 
@@ -311,7 +333,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(input.get(i), output.get(i));
+      assertThat(output.get(i), equalTo(input.get(i)));
     }
   }
 
@@ -350,7 +372,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(input.get(i) * 2, output.get(i));
+      assertThat(output.get(i), equalTo(input.get(i) * 2));
     }
   }
 
@@ -389,7 +411,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(2, output.get(i), 0.0);
+      assertThat((double) output.get(i), closeTo(2f, 0.0));
     }
   }
 
@@ -428,7 +450,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(2, output.get(i), 0.0);
+      assertThat((double) output.get(i), closeTo(2f, 0.0));
     }
   }
 
@@ -472,7 +494,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum += reduce.get(i);
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) finalSum, closeTo(sequential, 0));
   }
 
   @Test
@@ -516,7 +538,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum += reduce.get(i);
     }
 
-    assertEquals(sequential, finalSum);
+    assertThat(finalSum, equalTo(sequential));
   }
 
   @Test
@@ -560,7 +582,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.max(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) finalSum, closeTo(sequential, 0));
   }
 
   @Test
@@ -604,7 +626,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.max(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) finalSum, closeTo(sequential, 0));
   }
 
   @Test
@@ -650,7 +672,7 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.min(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) finalSum, closeTo(sequential, 0));
   }
 
   @Test
@@ -694,6 +716,6 @@ public class TestReductionsIntegersKernelContext extends TornadoTestBase {
       finalSum = TornadoMath.min(finalSum, reduce.get(i));
     }
 
-    assertEquals(sequential, finalSum, 0);
+    assertThat((double) finalSum, closeTo(sequential, 0));
   }
 }
