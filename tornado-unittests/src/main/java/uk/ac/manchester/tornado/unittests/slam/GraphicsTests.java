@@ -17,6 +17,8 @@
  */
 
 package uk.ac.manchester.tornado.unittests.slam;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import static org.junit.Assert.assertEquals;
 import static uk.ac.manchester.tornado.api.math.TornadoMath.min;
@@ -29,9 +31,59 @@ import static uk.ac.manchester.tornado.unittests.slam.utils.GraphicsMath.rigidTr
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
+import uk.ac.manchester.tornado.api.TaskGraph;
+import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
+import uk.ac.manchester.tornado.api.annotations.Parallel;
+import uk.ac.manchester.tornado.api.enums.DataTransferMode;
+import uk.ac.manchester.tornado.api.math.TornadoMath;
+import uk.ac.manchester.tornado.api.types.arrays.FloatArray;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat3;
+import uk.ac.manchester.tornado.api.types.collections.VectorFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageByte3;
+import uk.ac.manchester.tornado.api.types.images.ImageByte4;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat3;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat4;
+import uk.ac.manchester.tornado.api.types.images.ImageFloat8;
+import uk.ac.manchester.tornado.api.types.matrix.Matrix4x4Float;
+import uk.ac.manchester.tornado.api.types.utils.FloatOps;
+import uk.ac.manchester.tornado.api.types.utils.VolumeOps;
+import uk.ac.manchester.tornado.api.types.vectors.Byte3;
+import uk.ac.manchester.tornado.api.types.vectors.Byte4;
+import uk.ac.manchester.tornado.api.types.vectors.Float2;
+import uk.ac.manchester.tornado.api.types.vectors.Float3;
+import uk.ac.manchester.tornado.api.types.vectors.Float4;
+import uk.ac.manchester.tornado.api.types.vectors.Float8;
+import uk.ac.manchester.tornado.api.types.vectors.Int2;
+import uk.ac.manchester.tornado.api.types.vectors.Int3;
+import uk.ac.manchester.tornado.api.types.vectors.Short2;
+import uk.ac.manchester.tornado.api.types.volumes.VolumeShort2;
+import uk.ac.manchester.tornado.unittests.common.TornadoTestBase;
+import uk.ac.manchester.tornado.unittests.slam.utils.FloatSE3;
+import uk.ac.manchester.tornado.unittests.slam.utils.GraphicsMath;
+import uk.ac.manchester.tornado.unittests.slam.utils.ImagingOps;
+import uk.ac.manchester.tornado.unittests.slam.utils.Renderer;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+
+import static org.junit.Assert.assertEquals;
+import static uk.ac.manchester.tornado.api.math.TornadoMath.min;
+import static uk.ac.manchester.tornado.api.math.TornadoMath.sqrt;
+import static uk.ac.manchester.tornado.api.types.vectors.Float2.mult;
+import static uk.ac.manchester.tornado.api.types.vectors.Float3.add;
+import static uk.ac.manchester.tornado.api.types.vectors.Float3.length;
+import static uk.ac.manchester.tornado.api.types.vectors.Float3.normalise;
+import static uk.ac.manchester.tornado.unittests.slam.utils.GraphicsMath.rigidTransform;
+
+import java.util.Random;
+import java.util.stream.IntStream;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -528,7 +580,7 @@ public class GraphicsTests extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < destSize * destSize; i++) {
-      assertEquals(dest.get(i), destSeq.get(i), 0.001);
+      assertThat((double) destSeq.get(i), closeTo(dest.get(i), 0.001));
     }
   }
 
@@ -574,7 +626,7 @@ public class GraphicsTests extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < scaledSize * scaledSize; i++) {
-      assertEquals("index = " + i, destSeq.get(i), dest.get(i), 0.001);
+      assertThat("index = " + i, (double) dest.get(i), closeTo(destSeq.get(i), 0.001));
     }
   }
 
@@ -615,7 +667,7 @@ public class GraphicsTests extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < scaledSize * scaledSize; i++) {
-      assertEquals("index = " + i, destSeq.get(i), dest.get(i), 0.001);
+      assertThat("index = " + i, (double) dest.get(i), closeTo(destSeq.get(i), 0.001));
     }
   }
 
@@ -655,9 +707,9 @@ public class GraphicsTests extends TornadoTestBase {
     for (int i = 0; i < size; i++) {
       Float3 o = result.get(i);
       Float3 s = sequential.get(i);
-      assertEquals(s.getS0(), o.getS0(), 0.001);
-      assertEquals(s.getS1(), o.getS1(), 0.001);
-      assertEquals(s.getS2(), o.getS2(), 0.001);
+      assertThat((double) o.getS0(), closeTo(s.getS0(), 0.001));
+      assertThat((double) o.getS1(), closeTo(s.getS1(), 0.001));
+      assertThat((double) o.getS2(), closeTo(s.getS2(), 0.001));
     }
   }
 
@@ -702,9 +754,9 @@ public class GraphicsTests extends TornadoTestBase {
       for (int j = 0; j < size; j++) {
         Float3 o = vertext.get(i, j);
         Float3 s = sequential.get(i, j);
-        assertEquals(s.getS0(), o.getS0(), 0.001);
-        assertEquals(s.getS1(), o.getS1(), 0.001);
-        assertEquals(s.getS2(), o.getS2(), 0.001);
+        assertThat((double) o.getS0(), closeTo(s.getS0(), 0.001));
+        assertThat((double) o.getS1(), closeTo(s.getS1(), 0.001));
+        assertThat((double) o.getS2(), closeTo(s.getS2(), 0.001));
       }
     }
   }
@@ -739,9 +791,9 @@ public class GraphicsTests extends TornadoTestBase {
       for (int j = 0; j < size; j++) {
         Float3 o = pyramidNormals.get(i, j);
         Float3 s = sequentialNormals.get(i, j);
-        assertEquals(s.getS0(), o.getS0(), 0.001);
-        assertEquals(s.getS1(), o.getS1(), 0.001);
-        assertEquals(s.getS2(), o.getS2(), 0.001);
+        assertThat((double) o.getS0(), closeTo(s.getS0(), 0.001));
+        assertThat((double) o.getS1(), closeTo(s.getS1(), 0.001));
+        assertThat((double) o.getS2(), closeTo(s.getS2(), 0.001));
       }
     }
   }
@@ -838,14 +890,14 @@ public class GraphicsTests extends TornadoTestBase {
       for (int j = 0; j < size; j++) {
         Float8 o = pyramidTrackingResults.get(i);
         Float8 s = sequantialPyramidTrackingResults.get(i);
-        assertEquals(s.getS0(), o.getS0(), 0.001);
-        assertEquals(s.getS1(), o.getS1(), 0.001);
-        assertEquals(s.getS2(), o.getS2(), 0.001);
-        assertEquals(s.getS3(), o.getS3(), 0.001);
-        assertEquals(s.getS4(), o.getS4(), 0.001);
-        assertEquals(s.getS5(), o.getS5(), 0.001);
-        assertEquals(s.getS6(), o.getS6(), 0.001);
-        assertEquals(s.getS7(), o.getS7(), 0.001);
+        assertThat((double) o.getS0(), closeTo(s.getS0(), 0.001));
+        assertThat((double) o.getS1(), closeTo(s.getS1(), 0.001));
+        assertThat((double) o.getS2(), closeTo(s.getS2(), 0.001));
+        assertThat((double) o.getS3(), closeTo(s.getS3(), 0.001));
+        assertThat((double) o.getS4(), closeTo(s.getS4(), 0.001));
+        assertThat((double) o.getS5(), closeTo(s.getS5(), 0.001));
+        assertThat((double) o.getS6(), closeTo(s.getS6(), 0.001));
+        assertThat((double) o.getS7(), closeTo(s.getS7(), 0.001));
       }
     }
   }
@@ -888,9 +940,9 @@ public class GraphicsTests extends TornadoTestBase {
 
     Float3 o = vertices.get(0);
     Float3 s = verticesSeq.get(0);
-    Assert.assertEquals(s.getS0(), o.getS0(), 0.01);
-    Assert.assertEquals(s.getS1(), o.getS1(), 0.01);
-    Assert.assertEquals(s.getS2(), o.getS2(), 0.01);
+    assertThat((double) o.getS0(), closeTo(s.getS0(), 0.01));
+    assertThat((double) o.getS1(), closeTo(s.getS1(), 0.01));
+    assertThat((double) o.getS2(), closeTo(s.getS2(), 0.01));
   }
 
   @Test
@@ -931,9 +983,9 @@ public class GraphicsTests extends TornadoTestBase {
 
     Float3 o = vertices.get(0);
     Float3 s = verticesSeq.get(0);
-    Assert.assertEquals(s.getS0(), o.getS0(), 0.01);
-    Assert.assertEquals(s.getS1(), o.getS1(), 0.01);
-    Assert.assertEquals(s.getS2(), o.getS2(), 0.01);
+    assertThat((double) o.getS0(), closeTo(s.getS0(), 0.01));
+    assertThat((double) o.getS1(), closeTo(s.getS1(), 0.01));
+    assertThat((double) o.getS2(), closeTo(s.getS2(), 0.01));
   }
 
   @Test
@@ -973,9 +1025,9 @@ public class GraphicsTests extends TornadoTestBase {
     for (int i = 0; i < size; i++) {
       Float3 o = output.get(i);
       Float3 s = sequential.get(i);
-      assertEquals(s.getS0(), o.getS0(), 0.001);
-      assertEquals(s.getS1(), o.getS1(), 0.001);
-      assertEquals(s.getS2(), o.getS2(), 0.001);
+      assertThat((double) o.getS0(), closeTo(s.getS0(), 0.001));
+      assertThat((double) o.getS1(), closeTo(s.getS1(), 0.001));
+      assertThat((double) o.getS2(), closeTo(s.getS2(), 0.001));
     }
   }
 
@@ -1012,9 +1064,9 @@ public class GraphicsTests extends TornadoTestBase {
     for (int i = 0; i < size; i++) {
       Float3 o = out.get(i);
       Float3 s = outSeq.get(i);
-      assertEquals(s.getS0(), o.getS0(), 0.001);
-      assertEquals(s.getS1(), o.getS1(), 0.001);
-      assertEquals(s.getS2(), o.getS2(), 0.001);
+      assertThat((double) o.getS0(), closeTo(s.getS0(), 0.001));
+      assertThat((double) o.getS1(), closeTo(s.getS1(), 0.001));
+      assertThat((double) o.getS2(), closeTo(s.getS2(), 0.001));
     }
   }
 
@@ -1091,9 +1143,9 @@ public class GraphicsTests extends TornadoTestBase {
       for (int j = 0; j < size; j++) {
         Float3 o = verticies.get(i, j);
         Float3 s = verticiesSequential.get(i, j);
-        assertEquals(s.getS0(), o.getS0(), 0.001);
-        assertEquals(s.getS1(), o.getS1(), 0.001);
-        assertEquals(s.getS2(), o.getS2(), 0.001);
+        assertThat((double) o.getS0(), closeTo(s.getS0(), 0.001));
+        assertThat((double) o.getS1(), closeTo(s.getS1(), 0.001));
+        assertThat((double) o.getS2(), closeTo(s.getS2(), 0.001));
       }
     }
 
@@ -1101,9 +1153,9 @@ public class GraphicsTests extends TornadoTestBase {
       for (int j = 0; j < size; j++) {
         Float3 o = normals.get(i, j);
         Float3 s = normalsSequential.get(i, j);
-        assertEquals(s.getS0(), o.getS0(), 0.001);
-        assertEquals(s.getS1(), o.getS1(), 0.001);
-        assertEquals(s.getS2(), o.getS2(), 0.001);
+        assertThat((double) o.getS0(), closeTo(s.getS0(), 0.001));
+        assertThat((double) o.getS1(), closeTo(s.getS1(), 0.001));
+        assertThat((double) o.getS2(), closeTo(s.getS2(), 0.001));
       }
     }
   }
@@ -1173,10 +1225,10 @@ public class GraphicsTests extends TornadoTestBase {
       for (int j = 0; j < output.Y(); j++) {
         Float4 o = output.get(i, j);
         Float4 s = outputSeq.get(i, j);
-        assertEquals(s.getX(), o.getX(), 0.001);
-        assertEquals(s.getY(), o.getY(), 0.001);
-        assertEquals(s.getZ(), o.getZ(), 0.001);
-        assertEquals(s.getW(), o.getW(), 0.001);
+        assertThat((double) o.getX(), closeTo(s.getX(), 0.001));
+        assertThat((double) o.getY(), closeTo(s.getY(), 0.001));
+        assertThat((double) o.getZ(), closeTo(s.getZ(), 0.001));
+        assertThat((double) o.getW(), closeTo(s.getW(), 0.001));
       }
     }
   }
@@ -1259,8 +1311,8 @@ public class GraphicsTests extends TornadoTestBase {
         for (int k = 0; k < size; k++) {
           Short2 got = volume.get(i, j, k);
           Short2 expected = sequential.get(i, j, k);
-          assertEquals(expected.getX(), got.getX());
-          assertEquals(expected.getY(), got.getY());
+          assertThat(got.getX(), equalTo(expected.getX()));
+          assertThat(got.getY(), equalTo(expected.getY()));
         }
       }
     }
@@ -1302,9 +1354,9 @@ public class GraphicsTests extends TornadoTestBase {
       for (int j = 0; j < size; j++) {
         Byte3 o = output.get(i, j);
         Byte3 expected = sequential.get(i, j);
-        assertEquals(expected.getX(), o.getX());
-        assertEquals(expected.getY(), o.getY());
-        assertEquals(expected.getZ(), o.getZ());
+        assertThat(o.getX(), equalTo(expected.getX()));
+        assertThat(o.getY(), equalTo(expected.getY()));
+        assertThat(o.getZ(), equalTo(expected.getZ()));
       }
     }
   }
@@ -1347,9 +1399,9 @@ public class GraphicsTests extends TornadoTestBase {
     for (int i = 0; i < output.getLength(); i++) {
       Float3 o = output.get(i);
       Float3 s = outputSeq.get(i);
-      Assert.assertEquals("difference on index " + i + " s0", s.getS0(), o.getS0(), 0.01f);
-      Assert.assertEquals("difference on index " + i + " s1", s.getS1(), o.getS1(), 0.01f);
-      Assert.assertEquals("difference on index " + i + " s2", s.getS2(), o.getS2(), 0.01f);
+      assertThat("difference on index " + i + " s0", (double) o.getS0(), closeTo(s.getS0(), 0.01f));
+      assertThat("difference on index " + i + " s1", (double) o.getS1(), closeTo(s.getS1(), 0.01f));
+      assertThat("difference on index " + i + " s2", (double) o.getS2(), closeTo(s.getS2(), 0.01f));
     }
   }
 
@@ -1373,7 +1425,7 @@ public class GraphicsTests extends TornadoTestBase {
 
     for (int i = 0; i < m.getNumRows(); i++) {
       for (int j = 0; j < m.getNumColumns(); j++) {
-        Assert.assertEquals(seq.get(i, j), m.get(i, j), 0.01f);
+        assertThat((double) m.get(i, j), closeTo(seq.get(i, j), 0.01f));
       }
     }
   }
@@ -1461,10 +1513,10 @@ public class GraphicsTests extends TornadoTestBase {
       for (int j = 0; j < output.Y(); j++) {
         Byte4 o = output.get(i, j);
         Byte4 s = outputSeq.get(i, j);
-        Assert.assertEquals("index = " + i + ", " + j, s.getX(), o.getX());
-        Assert.assertEquals("index = " + i + ", " + j, s.getY(), o.getY());
-        Assert.assertEquals("index = " + i + ", " + j, s.getZ(), o.getZ());
-        Assert.assertEquals("index = " + i + ", " + j, s.getW(), o.getW());
+        assertThat("index = " + i + ", " + j, o.getX(), equalTo(s.getX()));
+        assertThat("index = " + i + ", " + j, o.getY(), equalTo(s.getY()));
+        assertThat("index = " + i + ", " + j, o.getZ(), equalTo(s.getZ()));
+        assertThat("index = " + i + ", " + j, o.getW(), equalTo(s.getW()));
       }
     }
   }
@@ -1512,7 +1564,7 @@ public class GraphicsTests extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < output.getSize(); i++) {
-      Assert.assertEquals(outputSeq.get(i), output.get(i), 0.1f);
+      assertThat((double) output.get(i), closeTo(outputSeq.get(i), 0.1f));
     }
   }
 
@@ -1543,11 +1595,11 @@ public class GraphicsTests extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < output.getSize(); i++) {
-      Assert.assertEquals(outputSeq.get(i), output.get(i), 0.1f);
+      assertThat((double) output.get(i), closeTo(outputSeq.get(i), 0.1f));
     }
   }
 
-  @Ignore
+  @Disabled
   public void testMapReduceSlam3() {
 
     final int size = 16;
@@ -1614,7 +1666,7 @@ public class GraphicsTests extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < output.length; i++) {
-      assertEquals(seq[i], output[i], 0.001f);
+      assertThat((double) output[i], closeTo(seq[i], 0.001f));
     }
   }
 
