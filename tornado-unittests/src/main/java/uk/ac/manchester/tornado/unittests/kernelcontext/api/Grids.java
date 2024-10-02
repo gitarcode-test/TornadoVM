@@ -16,8 +16,9 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.api;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -83,8 +84,9 @@ public class Grids extends TornadoTestBase {
     }
   }
 
-  @Test(expected = TornadoRuntimeException.class)
+  @Test
   public void testWithIncorrectGraphName() {
+ assertThrows(TornadoRuntimeException.class, () -> {
     FloatArray timesArray = new FloatArray(size);
     FloatArray obsArray = new FloatArray(size);
 
@@ -109,10 +111,12 @@ public class Grids extends TornadoTestBase {
     executionPlan
         .withGridScheduler(gridScheduler) //
         .execute();
-  }
+  }); 
+}
 
-  @Test(expected = TornadoRuntimeException.class)
+  @Test
   public void testWithIncorrectGraphAndTaskName() {
+ assertThrows(TornadoRuntimeException.class, () -> {
     FloatArray timesArray = new FloatArray(size);
     FloatArray obsArray = new FloatArray(size);
 
@@ -137,5 +141,6 @@ public class Grids extends TornadoTestBase {
     executionPlan
         .withGridScheduler(gridScheduler) //
         .execute();
-  }
+  }); 
+}
 }
