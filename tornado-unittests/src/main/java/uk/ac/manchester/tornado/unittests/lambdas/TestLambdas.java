@@ -16,12 +16,12 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.lambdas;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -69,7 +69,7 @@ public class TestLambdas extends TornadoTestBase {
     }
 
     for (int i = 0; i < b.getSize(); i++) {
-      assertEquals(b.get(i) * b.get(i), a.get(i));
+      assertThat(a.get(i), equalTo(b.get(i) * b.get(i)));
     }
   }
 }
