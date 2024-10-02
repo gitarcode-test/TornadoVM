@@ -16,12 +16,12 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.vm.concurrency;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -106,8 +106,8 @@ public class TestParallelTaskGraph extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(i, a.get(i), DELTA);
-      assertEquals((refB.get(i) * i) + alpha, b.get(i), DELTA);
+      assertThat((double) a.get(i), closeTo(i, DELTA));
+      assertThat((double) b.get(i), closeTo((refB.get(i) * i) + alpha, DELTA));
     }
   }
 
@@ -169,8 +169,8 @@ public class TestParallelTaskGraph extends TornadoTestBase {
     multiply(refB, alpha);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(i, a.get(i), DELTA);
-      assertEquals(refB.get(i), b.get(i), DELTA_05);
+      assertThat((double) a.get(i), closeTo(i, DELTA));
+      assertThat((double) b.get(i), closeTo(refB.get(i), DELTA_05));
     }
   }
 
@@ -230,8 +230,8 @@ public class TestParallelTaskGraph extends TornadoTestBase {
     multiply(refB, alpha);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(i, a.get(i), DELTA);
-      assertEquals(refB.get(i), b.get(i), DELTA_05);
+      assertThat((double) a.get(i), closeTo(i, DELTA));
+      assertThat((double) b.get(i), closeTo(refB.get(i), DELTA_05));
     }
   }
 
@@ -283,8 +283,8 @@ public class TestParallelTaskGraph extends TornadoTestBase {
     }
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(i, a.get(i), DELTA);
-      assertEquals((refB.get(i) * i) + alpha, b.get(i), DELTA);
+      assertThat((double) a.get(i), closeTo(i, DELTA));
+      assertThat((double) b.get(i), closeTo((refB.get(i) * i) + alpha, DELTA));
     }
   }
 
@@ -345,8 +345,8 @@ public class TestParallelTaskGraph extends TornadoTestBase {
     multiply(refB, alpha);
 
     for (int i = 0; i < a.getSize(); i++) {
-      assertEquals(i, a.get(i), DELTA);
-      assertEquals(refB.get(i), b.get(i), DELTA_05);
+      assertThat((double) a.get(i), closeTo(i, DELTA));
+      assertThat((double) b.get(i), closeTo(refB.get(i), DELTA_05));
     }
   }
 }
