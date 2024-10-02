@@ -16,12 +16,13 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.fields;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.DataRange;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
@@ -72,7 +73,7 @@ public class TestFields extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(100, foo.output.get(i));
+      assertThat(foo.output.get(i), equalTo(100));
     }
   }
 
@@ -92,7 +93,7 @@ public class TestFields extends TornadoTestBase {
       executionResult.transferToHost(foo.output);
     }
     for (int i = 0; i < N; i++) {
-      assertEquals(foo.a.get(i) + foo.b.get(i), foo.output.get(i));
+      assertThat(foo.output.get(i), equalTo(foo.a.get(i) + foo.b.get(i)));
     }
   }
 
@@ -111,7 +112,7 @@ public class TestFields extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(15, bar.output.get(i));
+      assertThat(bar.output.get(i), equalTo(15));
     }
   }
 
@@ -132,7 +133,7 @@ public class TestFields extends TornadoTestBase {
       executionResult.transferToHost(dataRange.withOffset(N / 2).withSize(N / 2));
     }
     for (int i = 0; i < N; i++) {
-      assertEquals(foo.a.get(i) + foo.b.get(i), foo.output.get(i));
+      assertThat(foo.output.get(i), equalTo(foo.a.get(i) + foo.b.get(i)));
     }
   }
 
@@ -155,7 +156,7 @@ public class TestFields extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(foo.a.get(i) + foo.b.get(i), foo.output.get(i));
+      assertThat(foo.output.get(i), equalTo(foo.a.get(i) + foo.b.get(i)));
     }
   }
 
@@ -180,7 +181,7 @@ public class TestFields extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(foo.a.get(i) + foo.b.get(i), foo.output.get(i));
+      assertThat(foo.output.get(i), equalTo(foo.a.get(i) + foo.b.get(i)));
     }
   }
 
@@ -204,10 +205,10 @@ public class TestFields extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       executionPlan.execute();
     }
-    assertEquals(77, a.someOtherField, 0.01f);
-    assertEquals(-1, a.b.someField, 0.01f);
+    assertThat((double) a.someOtherField, closeTo(77f, 0.01f));
+    assertThat((double) a.b.someField, closeTo(-1, 0.01f));
     for (int i = 0; i < b.someArray.getSize(); i++) {
-      assertEquals(-1, a.b.someArray.get(i));
+      assertThat(a.b.someArray.get(i), equalTo(-1));
     }
   }
 
@@ -231,10 +232,10 @@ public class TestFields extends TornadoTestBase {
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
       executionPlan.execute();
     }
-    assertEquals(77, a.b.someField, 0.01f);
-    assertEquals(-1, a.someOtherField, 0.01f);
+    assertThat((double) a.b.someField, closeTo(77f, 0.01f));
+    assertThat((double) a.someOtherField, closeTo(-1, 0.01f));
     for (int i = 0; i < b.someArray.getSize(); i++) {
-      assertEquals(-1, a.b.someArray.get(i));
+      assertThat(a.b.someArray.get(i), equalTo(-1));
     }
   }
 
@@ -257,10 +258,10 @@ public class TestFields extends TornadoTestBase {
     }
 
     for (int i = 0; i < b.someArray.getSize(); i++) {
-      assertEquals(6, a.b.someArray.get(i));
+      assertThat(a.b.someArray.get(i), equalTo(6));
     }
-    assertEquals(-1, a.someOtherField, 0.01f);
-    assertEquals(-1, a.b.someField, 0.01f);
+    assertThat((double) a.someOtherField, closeTo(-1, 0.01f));
+    assertThat((double) a.b.someField, closeTo(-1, 0.01f));
   }
 
   private static class Foo {
