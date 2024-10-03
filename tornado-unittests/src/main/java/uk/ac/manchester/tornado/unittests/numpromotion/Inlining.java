@@ -16,11 +16,13 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.numpromotion;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -139,7 +141,7 @@ public class Inlining extends TornadoTestBase {
     rgbToGreyKernel(rgbBytes, seq);
 
     for (int i = 0; i < seq.getSize(); i++) {
-      Assert.assertEquals(seq.get(i), greyInts.get(i));
+      assertThat(greyInts.get(i), equalTo(seq.get(i)));
     }
   }
 
@@ -169,7 +171,7 @@ public class Inlining extends TornadoTestBase {
     rgbToGreyKernelInt(rgbBytes, seq);
 
     for (int i = 0; i < seq.getSize(); i++) {
-      Assert.assertEquals(seq.get(i), greyInts.get(i));
+      assertThat(greyInts.get(i), equalTo(seq.get(i)));
     }
   }
 
@@ -200,7 +202,7 @@ public class Inlining extends TornadoTestBase {
     rgbToGreyKernelSmall(rgbBytes, seq);
 
     for (int i = 0; i < seq.getSize(); i++) {
-      Assert.assertEquals(seq.get(i), greyInts.get(i));
+      assertThat(greyInts.get(i), equalTo(seq.get(i)));
     }
   }
 
@@ -229,7 +231,7 @@ public class Inlining extends TornadoTestBase {
     b2i(rgbBytes, seq);
 
     for (int i = 0; i < seq.getSize(); i++) {
-      Assert.assertEquals(seq.get(i), greyInts.get(i));
+      assertThat(greyInts.get(i), equalTo(seq.get(i)));
     }
   }
 }
