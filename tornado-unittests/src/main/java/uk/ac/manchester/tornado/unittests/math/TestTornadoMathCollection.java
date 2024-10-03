@@ -16,12 +16,13 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.math;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -269,7 +270,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoCos(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -301,7 +302,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoCosPI(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -333,7 +334,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoCosPIDouble(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01));
     }
   }
 
@@ -365,7 +366,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoSinPI(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -397,7 +398,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoSinPIDouble(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -429,7 +430,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoSignum(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -464,7 +465,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoSignum(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -496,7 +497,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoSignum(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01));
     }
   }
 
@@ -531,7 +532,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoSignum(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -563,7 +564,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoSin(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -597,7 +598,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoAtan(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -631,7 +632,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoAtan(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01));
     }
   }
 
@@ -663,7 +664,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoTan(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -695,7 +696,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoTan(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01));
     }
   }
 
@@ -727,7 +728,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoTanh(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -759,7 +760,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoTanh(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01));
     }
   }
 
@@ -790,7 +791,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoMin(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -821,7 +822,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoMax(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -852,7 +853,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoSqrt(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -883,7 +884,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoExp(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01));
     }
   }
 
@@ -914,7 +915,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoExp(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -946,7 +947,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoClamp(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -977,7 +978,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoFract(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -1009,7 +1010,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoLog2(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -1040,7 +1041,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoLog(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01));
     }
   }
 
@@ -1071,7 +1072,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoLog(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -1103,7 +1104,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoPI(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -1135,7 +1136,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testFloor(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -1169,7 +1170,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
 
     testClamp(a, seq);
     for (int i = 0; i < size; i++) {
-      assertEquals(b.get(i), seq.get(i));
+      assertThat(seq.get(i), equalTo(b.get(i)));
     }
   }
 
@@ -1201,7 +1202,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoRadians(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01f);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01f));
     }
   }
 
@@ -1233,7 +1234,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoRadians(seq);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(data.get(i), seq.get(i), 0.01);
+      assertThat((double) seq.get(i), closeTo(data.get(i), 0.01));
     }
   }
 
@@ -1271,7 +1272,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoAtan2(seqA, seqB);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(a.get(i), seqA.get(i), 0.01f);
+      assertThat((double) seqA.get(i), closeTo(a.get(i), 0.01f));
     }
   }
 
@@ -1309,7 +1310,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoAtan2(seqA, seqB);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(a.get(i), seqA.get(i), 0.01);
+      assertThat((double) seqA.get(i), closeTo(a.get(i), 0.01));
     }
   }
 
@@ -1342,7 +1343,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoAcos(seqA);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(a.get(i), seqA.get(i), 0.01f);
+      assertThat((double) seqA.get(i), closeTo(a.get(i), 0.01f));
     }
   }
 
@@ -1374,7 +1375,7 @@ public class TestTornadoMathCollection extends TornadoTestBase {
     testTornadoAsin(seqA);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(a.get(i), seqA.get(i), 0.01f);
+      assertThat((double) seqA.get(i), closeTo(a.get(i), 0.01f));
     }
   }
 }
