@@ -16,12 +16,13 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.grid;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
@@ -89,7 +90,7 @@ public class TestGrid extends TornadoTestBase {
 
     for (int i = 0; i < X; i++) {
       for (int j = 0; j < Y; j++) {
-        assertEquals(matrixA.get(i, j) + matrixA.get(i, j), matrixB.get(i, j));
+        assertThat(matrixB.get(i, j), equalTo(matrixA.get(i, j) + matrixA.get(i, j)));
       }
     }
   }
@@ -130,7 +131,7 @@ public class TestGrid extends TornadoTestBase {
     }
 
     for (int i = 0; i < 512; i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.01f);
+      assertThat((double) c.get(i), closeTo(a.get(i) + b.get(i), 0.01f));
     }
   }
 
@@ -172,7 +173,7 @@ public class TestGrid extends TornadoTestBase {
 
     for (int i = 0; i < numElements; i++) {
       for (int j = 0; j < numElements; j++) {
-        assertEquals(seq.get(i * numElements + j), c.get(i * numElements + j), 0.1f);
+        assertThat((double) c.get(i * numElements + j), closeTo(seq.get(i * numElements + j), 0.1f));
       }
     }
   }
@@ -220,7 +221,7 @@ public class TestGrid extends TornadoTestBase {
     }
 
     for (int i = 0; i < 512; i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.01f);
+      assertThat((double) c.get(i), closeTo(a.get(i) + b.get(i), 0.01f));
     }
   }
 
