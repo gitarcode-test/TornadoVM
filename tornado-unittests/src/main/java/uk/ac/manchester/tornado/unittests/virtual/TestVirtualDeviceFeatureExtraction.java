@@ -16,15 +16,17 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.virtual;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.stream.IntStream;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -73,7 +75,7 @@ public class TestVirtualDeviceFeatureExtraction extends TornadoTestBase {
     return sourceSum == expectedSum;
   }
 
-  @After
+  @AfterEach
   public void after() {
     // make sure the source file generated is deleted
     File fileLog = new File(FEATURE_DUMP_DIR);
@@ -116,11 +118,11 @@ public class TestVirtualDeviceFeatureExtraction extends TornadoTestBase {
       inputBytes = Files.readAllBytes(fileLog.toPath());
       expectedBytes = Files.readAllBytes(expectedKernelFile.toPath());
     } catch (IOException e) {
-      Assert.fail();
+      assertThat("Fail", false);
     }
 
     boolean fileEquivalent = performComparison(inputBytes, expectedBytes);
-    Assert.assertTrue(fileEquivalent);
+    assertThat(fileEquivalent, is(true));
   }
 
   @Test
