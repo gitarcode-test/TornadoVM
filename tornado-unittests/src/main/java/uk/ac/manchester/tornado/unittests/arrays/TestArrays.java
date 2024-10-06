@@ -17,13 +17,15 @@
  */
 
 package uk.ac.manchester.tornado.unittests.arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -174,7 +176,7 @@ public class TestArrays extends TornadoTestBase {
     IntStream.range(0, N).parallel().forEach(idx -> data.set(idx, idx));
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph.transferToDevice(DataTransferMode.FIRST_EXECUTION, data);
     for (int i = 0; i < numKernels; i++) {
@@ -188,7 +190,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(i + numKernels, data.get(i));
+      assertThat(data.get(i), equalTo(i + numKernels));
     }
   }
 
@@ -199,7 +201,7 @@ public class TestArrays extends TornadoTestBase {
     ByteArray data = new ByteArray(N);
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph.task("t0", TestArrays::initializeSequentialByte, data);
     taskGraph.transferToHost(DataTransferMode.EVERY_EXECUTION, data);
@@ -210,7 +212,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals((byte) 21, data.get(i));
+      assertThat(data.get(i), equalTo((byte) 21));
     }
   }
 
@@ -222,7 +224,7 @@ public class TestArrays extends TornadoTestBase {
     IntArray data = new IntArray(N);
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph.task("t0", TestArrays::initializeSequential, data);
     taskGraph.transferToHost(DataTransferMode.EVERY_EXECUTION, data);
@@ -233,7 +235,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(1, data.get(i), 0.0001);
+      assertThat((double) data.get(i), closeTo(1f, 0.0001));
     }
   }
 
@@ -245,7 +247,7 @@ public class TestArrays extends TornadoTestBase {
     IntArray data = new IntArray(N);
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph.task("t0", TestArrays::initializeToOneParallel, data);
     taskGraph.transferToHost(DataTransferMode.EVERY_EXECUTION, data);
@@ -256,7 +258,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(1, data.get(i), 0.0001);
+      assertThat((double) data.get(i), closeTo(1f, 0.0001));
     }
   }
 
@@ -276,7 +278,7 @@ public class TestArrays extends TornadoTestBase {
             });
 
     TaskGraph taskGraph = new TaskGraph("s0");
-    assertNotNull(taskGraph);
+    assertThat(taskGraph, not(nullValue()));
 
     taskGraph.transferToDevice(DataTransferMode.EVERY_EXECUTION, data);
     for (int i = 0; i < numKernels; i++) {
@@ -290,7 +292,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < N; i++) {
-      assertEquals(i + numKernels, data.get(i), 0.0001);
+      assertThat((double) data.get(i), closeTo(i + numKernels, 0.0001));
     }
   }
 
@@ -321,7 +323,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.01);
+      assertThat((double) c.get(i), closeTo(a.get(i) + b.get(i), 0.01));
     }
   }
 
@@ -352,7 +354,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.01f);
+      assertThat((double) c.get(i), closeTo(a.get(i) + b.get(i), 0.01f));
     }
   }
 
@@ -386,7 +388,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) + b.get(i)));
     }
   }
 
@@ -425,7 +427,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) + b.get(i)));
     }
   }
 
@@ -456,7 +458,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) + b.get(i)));
     }
   }
 
@@ -487,7 +489,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) + b.get(i)));
     }
   }
 
@@ -518,7 +520,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals('f', c.get(i));
+      assertThat(c.get(i), equalTo('f'));
     }
   }
 
@@ -549,7 +551,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(21, c.get(i));
+      assertThat(c.get(i), equalTo(21));
     }
   }
 
@@ -569,7 +571,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(100.0f, c.get(i).getFloat32(), 0.01f);
+      assertThat((double) c.get(i).getFloat32(), closeTo(100.0f, 0.01f));
     }
   }
 
@@ -594,7 +596,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(8.0f, c.get(i).getFloat32(), 0.01f);
+      assertThat((double) c.get(i).getFloat32(), closeTo(8.0f, 0.01f));
     }
   }
 
@@ -618,7 +620,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(4.0f, c.get(i).getFloat32(), 0.01f);
+      assertThat((double) c.get(i).getFloat32(), closeTo(4.0f, 0.01f));
     }
   }
 
@@ -643,7 +645,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(12.0f, c.get(i).getFloat32(), 0.01f);
+      assertThat((double) c.get(i).getFloat32(), closeTo(12.0f, 0.01f));
     }
   }
 
@@ -668,7 +670,7 @@ public class TestArrays extends TornadoTestBase {
     }
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(3.0f, c.get(i).getFloat32(), 0.01f);
+      assertThat((double) c.get(i).getFloat32(), closeTo(3.0f, 0.01f));
     }
   }
 
@@ -728,12 +730,12 @@ public class TestArrays extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals('w', a.get(0));
-    assertEquals('o', a.get(1));
-    assertEquals('r', a.get(2));
-    assertEquals('l', a.get(3));
-    assertEquals('d', a.get(4));
-    assertEquals('!', a.get(5));
+    assertThat(a.get(0), equalTo('w'));
+    assertThat(a.get(1), equalTo('o'));
+    assertThat(a.get(2), equalTo('r'));
+    assertThat(a.get(3), equalTo('l'));
+    assertThat(a.get(4), equalTo('d'));
+    assertThat(a.get(5), equalTo('!'));
   }
   // CHECKSTYLE:ON
 
