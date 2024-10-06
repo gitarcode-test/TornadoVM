@@ -16,8 +16,9 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.fails;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -54,8 +55,9 @@ public class RuntimeFail extends TornadoTestBase {
    *     tornado-test -V -pk --debug uk.ac.manchester.tornado.unittests.fails.RuntimeFail#test01
    * </code>
    */
-  @Test(expected = TornadoTaskRuntimeException.class)
+  @Test
   public void test01() {
+ assertThrows(TornadoTaskRuntimeException.class, () -> {
     FloatArray x = new FloatArray(8192);
     FloatArray y = new FloatArray(8192);
     FloatArray z = new FloatArray(8192);
@@ -73,5 +75,6 @@ public class RuntimeFail extends TornadoTestBase {
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     TornadoExecutionPlan executionPlanPlan = new TornadoExecutionPlan(immutableTaskGraph);
     executionPlanPlan.execute();
-  }
+  }); 
+}
 }
