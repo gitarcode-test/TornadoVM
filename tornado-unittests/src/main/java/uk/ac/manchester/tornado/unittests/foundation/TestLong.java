@@ -16,10 +16,10 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.foundation;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -56,7 +56,7 @@ public class TestLong extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expected.get(i), a.get(i));
+      assertThat(a.get(i), equalTo(expected.get(i)));
     }
   }
 
@@ -87,7 +87,7 @@ public class TestLong extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expected.get(i), a.get(i));
+      assertThat(a.get(i), equalTo(expected.get(i)));
     }
   }
 }
