@@ -17,13 +17,15 @@
  */
 
 package uk.ac.manchester.tornado.unittests.batches;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -195,7 +197,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 0.1f);
+      assertThat((double) arrayB.get(i), closeTo(arrayA.get(i) + 100, 0.1f));
     }
   }
 
@@ -232,7 +234,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 0.1f);
+      assertThat((double) arrayB.get(i), closeTo(arrayA.get(i) + 100, 0.1f));
     }
   }
 
@@ -266,7 +268,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 0.1f);
+      assertThat((double) arrayB.get(i), closeTo(arrayA.get(i) + 100, 0.1f));
     }
   }
 
@@ -302,7 +304,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 0.1f);
+      assertThat((double) arrayB.get(i), closeTo(arrayA.get(i) + 100, 0.1f));
     }
   }
 
@@ -339,7 +341,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 1.0f);
+      assertThat((double) arrayB.get(i), closeTo(arrayA.get(i) + 100, 1.0f));
     }
   }
 
@@ -378,7 +380,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayB.getSize(); i++) {
-      assertEquals(arrayA.get(i) + 100, arrayB.get(i), 1.0f);
+      assertThat((double) arrayB.get(i), closeTo(arrayA.get(i) + 100, 1.0f));
     }
   }
 
@@ -411,7 +413,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(i, arrayA.get(i), 0.1f);
+      assertThat((double) arrayA.get(i), closeTo(i, 0.1f));
     }
   }
 
@@ -446,7 +448,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(i, arrayA.get(i), 0.1f);
+      assertThat((double) arrayA.get(i), closeTo(i, 0.1f));
     }
   }
 
@@ -487,7 +489,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(arrayA.get(i) + arrayB.get(i), arrayC.get(i), 0.1f);
+      assertThat((double) arrayC.get(i), closeTo(arrayA.get(i) + arrayB.get(i), 0.1f));
     }
   }
 
@@ -528,7 +530,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals((arrayA.get(i) + arrayB.get(i)), arrayC.get(i));
+      assertThat(arrayC.get(i), equalTo((arrayA.get(i) + arrayB.get(i))));
     }
   }
 
@@ -570,7 +572,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(arrayA.get(i) + arrayB.get(i), arrayC.get(i));
+      assertThat(arrayC.get(i), equalTo(arrayA.get(i) + arrayB.get(i)));
     }
   }
 
@@ -610,7 +612,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(arrayA.get(i) + arrayB.get(i), arrayC.get(i), 0.01);
+      assertThat((double) arrayC.get(i), closeTo(arrayA.get(i) + arrayB.get(i), 0.01));
     }
   }
 
@@ -651,7 +653,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < arrayA.getSize(); i++) {
-      assertEquals(arrayA.get(i) + arrayB.get(i), arrayC.get(i));
+      assertThat(arrayC.get(i), equalTo(arrayA.get(i) + arrayB.get(i)));
     }
   }
 
@@ -669,7 +671,7 @@ public class TestBatches extends TornadoTestBase {
             .transferToHost(DataTransferMode.EVERY_EXECUTION, a1);
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-      Assert.assertThrows(
+      assertThrows(
           TornadoBailoutRuntimeException.class, () -> executionPlan.withBatch("1MB").execute());
     }
   }
@@ -688,7 +690,7 @@ public class TestBatches extends TornadoTestBase {
             .transferToHost(DataTransferMode.EVERY_EXECUTION, a1);
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-      Assert.assertThrows(
+      assertThrows(
           TornadoBailoutRuntimeException.class, () -> executionPlan.withBatch("1MB").execute());
     }
   }
@@ -707,7 +709,7 @@ public class TestBatches extends TornadoTestBase {
             .transferToHost(DataTransferMode.EVERY_EXECUTION, a1);
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-      Assert.assertThrows(
+      assertThrows(
           TornadoBailoutRuntimeException.class, () -> executionPlan.withBatch("1MB").execute());
     }
   }
@@ -726,7 +728,7 @@ public class TestBatches extends TornadoTestBase {
             .transferToHost(DataTransferMode.EVERY_EXECUTION, a1);
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     try (TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph)) {
-      Assert.assertThrows(
+      assertThrows(
           TornadoBailoutRuntimeException.class, () -> executionPlan.withBatch("1MB").execute());
     }
   }
@@ -750,7 +752,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.getSize(); i++) {
-      assertEquals(a0.get(i), a1.get(i), 1e-20);
+      assertThat((double) a1.get(i), closeTo(a0.get(i), 1e-20));
     }
   }
 
@@ -773,7 +775,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.length; i++) {
-      assertEquals(a0[i], a1[i], 1e-20);
+      assertThat((double) a1[i], closeTo(a0[i], 1e-20));
     }
   }
 
@@ -796,7 +798,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.getSize(); i++) {
-      assertEquals(a0[i], a1.get(i), 1e-20);
+      assertThat((double) a1.get(i), closeTo(a0[i], 1e-20));
     }
   }
 
@@ -819,7 +821,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.length; i++) {
-      assertEquals(a0.get(i), a1[i], 1e-20);
+      assertThat((double) a1[i], closeTo(a0.get(i), 1e-20));
     }
   }
 
@@ -842,7 +844,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.getSize(); i++) {
-      assertEquals(a0[i], a1.get(i));
+      assertThat(a1.get(i), equalTo(a0[i]));
     }
   }
 
@@ -865,7 +867,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < a1.length; i++) {
-      assertEquals(a0.get(i), a1[i]);
+      assertThat(a1[i], equalTo(a0.get(i)));
     }
   }
 
@@ -906,7 +908,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(arraySeq.get(i) * 2, array.get(i), 0.01f);
+      assertThat((double) array.get(i), closeTo(arraySeq.get(i) * 2, 0.01f));
     }
   }
 
@@ -934,7 +936,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(array2.get(i) * 4, array.get(i), 0.01f);
+      assertThat((double) array.get(i), closeTo(array2.get(i) * 4, 0.01f));
     }
   }
 
@@ -964,7 +966,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(array2.get(i) * 4, array.get(i), 0.01f);
+      assertThat((double) array.get(i), closeTo(array2.get(i) * 4, 0.01f));
     }
   }
 
@@ -993,7 +995,7 @@ public class TestBatches extends TornadoTestBase {
     }
 
     for (int i = 0; i < array.getSize(); i++) {
-      assertEquals(arraySeq.get(i), array.get(i), 0.01f);
+      assertThat((double) array.get(i), closeTo(arraySeq.get(i), 0.01f));
     }
   }
 
