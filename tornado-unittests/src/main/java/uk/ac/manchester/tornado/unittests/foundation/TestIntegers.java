@@ -16,10 +16,10 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.foundation;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -50,7 +50,7 @@ public class TestIntegers extends TornadoTestBase {
       executionPlan.execute();
     }
 
-    assertEquals(50, a.get(0));
+    assertThat(a.get(0), equalTo(50));
   }
 
   @Test
@@ -73,7 +73,7 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(a.get(i), equalTo(expectedResult.get(i)));
     }
   }
 
@@ -97,7 +97,7 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(a.get(i), b.get(i));
+      assertThat(b.get(i), equalTo(a.get(i)));
     }
   }
 
@@ -124,7 +124,7 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResult.get(i), a.get(i));
+      assertThat(a.get(i), equalTo(expectedResult.get(i)));
     }
   }
 
@@ -150,8 +150,8 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResultA.get(i), a.get(i));
-      assertEquals(expectedResultB.get(i), b.get(i));
+      assertThat(a.get(i), equalTo(expectedResultA.get(i)));
+      assertThat(b.get(i), equalTo(expectedResultB.get(i)));
     }
   }
 
@@ -177,8 +177,8 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResultA.get(i), a.get(i));
-      assertEquals(expectedResultB.get(i), b.get(i));
+      assertThat(a.get(i), equalTo(expectedResultA.get(i)));
+      assertThat(b.get(i), equalTo(expectedResultB.get(i)));
     }
   }
 
@@ -205,8 +205,8 @@ public class TestIntegers extends TornadoTestBase {
     }
 
     for (int i = 0; i < numElements; i++) {
-      assertEquals(expectedResultA.get(i), a.get(i));
-      assertEquals(expectedResultB.get(i), b.get(i));
+      assertThat(a.get(i), equalTo(expectedResultA.get(i)));
+      assertThat(b.get(i), equalTo(expectedResultB.get(i)));
     }
   }
 }
