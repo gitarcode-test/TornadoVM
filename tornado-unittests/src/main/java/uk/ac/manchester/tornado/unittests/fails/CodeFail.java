@@ -16,10 +16,11 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.fails;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -127,8 +128,9 @@ public class CodeFail extends TornadoTestBase {
     }
   }
 
-  @Test(expected = TornadoBailoutRuntimeException.class)
+  @Test
   public void codeFail03() {
+ assertThrows(TornadoBailoutRuntimeException.class, () -> {
     final int size = 128;
     IntArray input = new IntArray(size);
     IntArray result1 = new IntArray(1);
@@ -152,5 +154,6 @@ public class CodeFail extends TornadoTestBase {
     ImmutableTaskGraph immutableTaskGraph = taskGraph.snapshot();
     TornadoExecutionPlan executionPlan = new TornadoExecutionPlan(immutableTaskGraph);
     executionPlan.execute();
-  }
+  }); 
+}
 }
