@@ -16,8 +16,9 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.api;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -26,7 +27,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.types.arrays.ByteArray;
 import uk.ac.manchester.tornado.api.types.arrays.CharArray;
 import uk.ac.manchester.tornado.api.types.arrays.DoubleArray;
@@ -55,7 +56,7 @@ public class TestBuildFromByteBuffers extends TornadoTestBase {
     FloatArray floatArray = FloatArray.fromFloatBuffer(buffer);
 
     for (int i = 0; i < SIZE; i++) {
-      assertEquals(buffer.get(i), floatArray.get(i), 0.0f);
+      assertThat((double) floatArray.get(i), closeTo(buffer.get(i), 0.0f));
     }
   }
 
@@ -68,7 +69,7 @@ public class TestBuildFromByteBuffers extends TornadoTestBase {
     DoubleArray doubleArray = DoubleArray.fromDoubleBuffer(buffer);
 
     for (int i = 0; i < SIZE; i++) {
-      assertEquals(buffer.get(i), doubleArray.get(i), 0.0);
+      assertThat((double) doubleArray.get(i), closeTo(buffer.get(i), 0.0));
     }
   }
 
@@ -81,7 +82,7 @@ public class TestBuildFromByteBuffers extends TornadoTestBase {
     IntArray intArray = IntArray.fromIntBuffer(buffer);
 
     for (int i = 0; i < SIZE; i++) {
-      assertEquals(buffer.get(i), intArray.get(i));
+      assertThat(intArray.get(i), equalTo(buffer.get(i)));
     }
   }
 
@@ -94,7 +95,7 @@ public class TestBuildFromByteBuffers extends TornadoTestBase {
     LongArray longArray = LongArray.fromLongBuffer(buffer);
 
     for (int i = 0; i < SIZE; i++) {
-      assertEquals(buffer.get(i), longArray.get(i));
+      assertThat(longArray.get(i), equalTo(buffer.get(i)));
     }
   }
 
@@ -107,7 +108,7 @@ public class TestBuildFromByteBuffers extends TornadoTestBase {
     ShortArray shortArray = ShortArray.fromShortBuffer(buffer);
 
     for (int i = 0; i < SIZE; i++) {
-      assertEquals(buffer.get(i), shortArray.get(i));
+      assertThat(shortArray.get(i), equalTo(buffer.get(i)));
     }
   }
 
@@ -120,7 +121,7 @@ public class TestBuildFromByteBuffers extends TornadoTestBase {
     CharArray charArray = CharArray.fromCharBuffer(buffer);
 
     for (int i = 0; i < SIZE; i++) {
-      assertEquals(buffer.get(i), charArray.get(i));
+      assertThat(charArray.get(i), equalTo(buffer.get(i)));
     }
   }
 
@@ -133,7 +134,7 @@ public class TestBuildFromByteBuffers extends TornadoTestBase {
     ByteArray byteArray = ByteArray.fromByteBuffer(buffer);
 
     for (int i = 0; i < SIZE; i++) {
-      assertEquals(buffer.get(i), byteArray.get(i));
+      assertThat(byteArray.get(i), equalTo(buffer.get(i)));
     }
   }
 }

@@ -16,10 +16,10 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.kernelcontext.api;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.GridScheduler;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.KernelContext;
@@ -98,7 +98,7 @@ public class TestVectorAdditionKernelContext extends TornadoTestBase {
     vectorAddJava(a, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cTornado.get(i), equalTo(cJava.get(i)));
     }
   }
 
@@ -134,7 +134,7 @@ public class TestVectorAdditionKernelContext extends TornadoTestBase {
     vectorAddJava(a, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cTornado.get(i), equalTo(cJava.get(i)));
     }
   }
 
@@ -170,7 +170,7 @@ public class TestVectorAdditionKernelContext extends TornadoTestBase {
     vectorAddJava(a, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cTornado.get(i), equalTo(cJava.get(i)));
     }
   }
 
@@ -206,7 +206,7 @@ public class TestVectorAdditionKernelContext extends TornadoTestBase {
     vectorAddJava(a, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cTornado.get(i), equalTo(cJava.get(i)));
     }
   }
 
@@ -246,7 +246,7 @@ public class TestVectorAdditionKernelContext extends TornadoTestBase {
     vectorAddJava(a, b, cJava);
 
     for (int i = 0; i < size; i++) {
-      assertEquals(cJava.get(i), cTornado.get(i));
+      assertThat(cTornado.get(i), equalTo(cJava.get(i)));
     }
   }
 }
