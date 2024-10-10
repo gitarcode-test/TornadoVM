@@ -16,12 +16,12 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.codegen;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.stream.IntStream;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -151,7 +151,7 @@ public class CodeGenTest extends TornadoTestBase {
   }
 
   @Test
-  @Ignore
+  @Disabled
   public void test03() throws TornadoExecutionPlanException {
     if (isRunningOnCPU()) {
       return;
@@ -205,7 +205,7 @@ public class CodeGenTest extends TornadoTestBase {
     }
 
     for (int i = 0; i < size; i++) {
-      assertEquals(serial.get(i), a.get(i));
+      assertThat(a.get(i), equalTo(serial.get(i)));
     }
   }
 }
