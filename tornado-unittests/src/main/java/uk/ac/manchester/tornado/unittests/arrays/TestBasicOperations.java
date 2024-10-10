@@ -16,12 +16,13 @@
  *
  */
 package uk.ac.manchester.tornado.unittests.arrays;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -213,7 +214,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.01);
+      assertThat((double) c.get(i), closeTo(a.get(i) + b.get(i), 0.01));
     }
   }
 
@@ -243,7 +244,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) - b.get(i), c.get(i), 0.01);
+      assertThat((double) c.get(i), closeTo(a.get(i) - b.get(i), 0.01));
     }
   }
 
@@ -273,7 +274,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) * b.get(i), c.get(i), 0.01);
+      assertThat((double) c.get(i), closeTo(a.get(i) * b.get(i), 0.01));
     }
   }
 
@@ -303,7 +304,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) / b.get(i), c.get(i), 0.01);
+      assertThat((double) c.get(i), closeTo(a.get(i) / b.get(i), 0.01));
     }
   }
 
@@ -333,7 +334,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i), 0.01f);
+      assertThat((double) c.get(i), closeTo(a.get(i) + b.get(i), 0.01f));
     }
   }
 
@@ -363,7 +364,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) - b.get(i), c.get(i), 0.01f);
+      assertThat((double) c.get(i), closeTo(a.get(i) - b.get(i), 0.01f));
     }
   }
 
@@ -393,7 +394,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) * b.get(i), c.get(i), 0.01f);
+      assertThat((double) c.get(i), closeTo(a.get(i) * b.get(i), 0.01f));
     }
   }
 
@@ -423,7 +424,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) / b.get(i), c.get(i), 0.01f);
+      assertThat((double) c.get(i), closeTo(a.get(i) / b.get(i), 0.01f));
     }
   }
 
@@ -454,7 +455,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) + b.get(i)));
     }
   }
 
@@ -485,7 +486,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) - b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) - b.get(i)));
     }
   }
 
@@ -516,7 +517,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) * b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) * b.get(i)));
     }
   }
 
@@ -546,7 +547,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) / b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) / b.get(i)));
     }
   }
 
@@ -577,7 +578,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) + b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) + b.get(i)));
     }
   }
 
@@ -608,7 +609,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) - b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) - b.get(i)));
     }
   }
 
@@ -639,7 +640,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) * b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) * b.get(i)));
     }
   }
 
@@ -670,7 +671,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals(a.get(i) / b.get(i), c.get(i));
+      assertThat(c.get(i), equalTo(a.get(i) / b.get(i)));
     }
   }
 
@@ -699,7 +700,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals((short) (a.get(i) + b.get(i)), c.get(i));
+      assertThat(c.get(i), equalTo((short) (a.get(i) + b.get(i))));
     }
   }
 
@@ -728,7 +729,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals((short) (a.get(i) - b.get(i)), c.get(i));
+      assertThat(c.get(i), equalTo((short) (a.get(i) - b.get(i))));
     }
   }
 
@@ -758,7 +759,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals((short) (a.get(i) * b.get(i)), c.get(i));
+      assertThat(c.get(i), equalTo((short) (a.get(i) * b.get(i))));
     }
   }
 
@@ -788,7 +789,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.getSize(); i++) {
-      assertEquals((short) (a.get(i) / b.get(i)), c.get(i));
+      assertThat(c.get(i), equalTo((short) (a.get(i) / b.get(i))));
     }
   }
 
@@ -818,7 +819,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.length; i++) {
-      assertEquals((char) (a[i] + b[i]), c[i]);
+      assertThat(c[i], equalTo((char) (a[i] + b[i])));
     }
   }
 
@@ -848,7 +849,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.length; i++) {
-      assertEquals((char) (a[i] - b[i]), c[i]);
+      assertThat(c[i], equalTo((char) (a[i] - b[i])));
     }
   }
 
@@ -878,7 +879,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.length; i++) {
-      assertEquals((char) (a[i] * b[i]), c[i]);
+      assertThat(c[i], equalTo((char) (a[i] * b[i])));
     }
   }
 
@@ -908,7 +909,7 @@ public class TestBasicOperations extends TornadoTestBase {
     executionPlan.execute();
 
     for (int i = 0; i < c.length; i++) {
-      assertEquals((char) (a[i] / b[i]), c[i]);
+      assertThat(c[i], equalTo((char) (a[i] / b[i])));
     }
   }
 }
