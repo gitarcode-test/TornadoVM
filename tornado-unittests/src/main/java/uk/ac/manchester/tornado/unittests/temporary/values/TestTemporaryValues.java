@@ -17,12 +17,12 @@
  */
 
 package uk.ac.manchester.tornado.unittests.temporary.values;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 import java.util.Random;
 import java.util.stream.IntStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import uk.ac.manchester.tornado.api.ImmutableTaskGraph;
 import uk.ac.manchester.tornado.api.TaskGraph;
 import uk.ac.manchester.tornado.api.TornadoExecutionPlan;
@@ -88,9 +88,9 @@ public class TestTemporaryValues extends TornadoTestBase {
     computeWithTemporaryValues(aJava, bJava, cJava);
 
     for (int i = 0; i < aJava.getSize(); i++) {
-      assertEquals(aJava.get(i), aTornado.get(i), 0.001f);
-      assertEquals(bJava.get(i), bTornado.get(i), 0.001f);
-      assertEquals(cJava.get(i), cTornado.get(i), 0.001f);
+      assertThat((double) aTornado.get(i), closeTo(aJava.get(i), 0.001f));
+      assertThat((double) bTornado.get(i), closeTo(bJava.get(i), 0.001f));
+      assertThat((double) cTornado.get(i), closeTo(cJava.get(i), 0.001f));
     }
   }
 }
